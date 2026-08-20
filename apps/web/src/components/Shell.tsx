@@ -91,7 +91,7 @@ export function Shell({ state, screen, menuOpen, onScreen, onMenu, children }: P
         </div>
       </aside>
 
-      <div className="game-stage">
+      <div className={`game-stage game-stage-${screen}`}>
         <header className="game-header">
           <button className="desktop-menu-button" onClick={() => onMenu(true)} aria-label={t('shell.openNavigation')}>☰</button>
           <div className="header-context header-context-screen">
@@ -107,7 +107,7 @@ export function Shell({ state, screen, menuOpen, onScreen, onMenu, children }: P
           <div className="header-status header-status-online"><GameIcon name="wifi" size={14} /><span><small>{t('shell.shard')}</small><b>Dorado One</b></span></div>
         </header>
 
-        <Hud state={state.hud} location={state.location} />
+        <Hud state={state.hud} location={state.location} worldMode={screen === 'world'} />
         <main className="game-content">{children}</main>
       </div>
     </div>
