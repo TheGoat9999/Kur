@@ -8,7 +8,7 @@ import {
   isStreetActionWithinReach
 } from '@sol-dorado/contracts/world-position';
 import type { AppServices } from '../types.js';
-import { applyWorldAction, getActionAvailability, STREET_SEGMENTS } from '../domain/actions.js';
+import { applyWorldAction, getActionAvailability, STREET_SEGMENTS, TRAVEL_DESTINATIONS } from '../domain/actions.js';
 import { getBootstrapState } from '../services/player-state.js';
 import {
   addStreetReward,
@@ -84,6 +84,24 @@ export function worldActionRoutes(services: AppServices) {
       const progress = await lockStreetProgress(client, playerId);
       if (!isStreetActionWithinReach(progress.currentSegmentId, progress.position, input.actionId)) {
         throw new WorldActionCommandError('world_action_too_far', 409);
+      }
+
+      const travelDestination = TRAVEL_DESTINATIONS[input.actionId];
+      if (travelDestination) {
+        const connection = await client.query({
+          text: `
+            SELECT 1
+            FROM world_street_connections
+            WHERE 'walk' = ANY(modes)
+              AND (
+                (from_segment_id = $1 AND to_segment_id = $2)
+                OR (bidirectional = true AND from_segment_id = $2 AND to_segment_id = $1)
+              )
+            LIMIT 1
+          `,
+          values: [progress.currentSegmentId, travelDestination]
+        });
+        if (!connection.rows[0]) throw new WorldActionCommandError('world_action_route_unavailable', 409);
       }
 
       const cooldownKey = worldCooldownKey(playerId, input.actionId);
