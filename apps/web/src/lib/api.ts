@@ -25,6 +25,12 @@ import {
   type StreetPosition,
   type StreetPositionResult
 } from '@sol-dorado/contracts/world-position';
+import {
+  WorldMapStateSchema,
+  WorldMapTravelResultSchema,
+  type WorldMapState,
+  type WorldMapTravelResult
+} from '@sol-dorado/contracts/world-map';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 const TOKEN_KEY = 'sd_session_token_v1';
@@ -64,6 +70,21 @@ export async function getStreetState(): Promise<StreetState> {
   const response = await authenticatedFetch('/v1/world');
   if (!response.ok) throw new ApiCommandError(await responseErrorCode(response, 'world_load_failed'));
   return StreetStateSchema.parse(await response.json());
+}
+
+export async function getWorldMap(): Promise<WorldMapState> {
+  const response = await authenticatedFetch('/v1/world/map');
+  if (!response.ok) throw new ApiCommandError(await responseErrorCode(response, 'world_map_load_failed'));
+  return WorldMapStateSchema.parse(await response.json());
+}
+
+export async function travelWorldMap(segmentId: string): Promise<WorldMapTravelResult> {
+  const response = await authenticatedFetch('/v1/world/map/travel', {
+    method: 'POST',
+    body: JSON.stringify({ segmentId })
+  });
+  if (!response.ok) throw new ApiCommandError(await responseErrorCode(response, `world_map_travel_failed_${response.status}`));
+  return WorldMapTravelResultSchema.parse(await response.json());
 }
 
 export async function getStreetPosition(): Promise<StreetPositionResult> {
