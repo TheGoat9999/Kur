@@ -40,7 +40,7 @@ interface Props {
 }
 
 export function Shell({ state, screen, menuOpen, onScreen, onMenu, children }: Props) {
-  const { locale, setLocale, t, money, runtime } = useI18n();
+  const { locale, setLocale, t, runtime } = useI18n();
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem('sd_sidebar_collapsed') === 'true');
   const active = groups.flatMap(group => group.items).find(item => item.id === screen)!;
   const serverTime = new Date(state.serverTime);
@@ -94,10 +94,9 @@ export function Shell({ state, screen, menuOpen, onScreen, onMenu, children }: P
       <div className="game-stage">
         <header className="game-header">
           <button className="desktop-menu-button" onClick={() => onMenu(true)} aria-label={t('shell.openNavigation')}>☰</button>
-          <div className="header-context">
-            <span>{t(active.label)}</span>
-            <b>{state.location.district}</b>
-            <small><GameIcon name="map-pin" size={12} /> {state.location.streetSegment}</small>
+          <div className="header-context header-context-screen">
+            <span>SOL DORADO</span>
+            <b>{t(active.label)}</b>
           </div>
           <div className="header-spacer" />
           <div className="language-toggle" role="group" aria-label={t('common.language')}>
@@ -106,10 +105,9 @@ export function Shell({ state, screen, menuOpen, onScreen, onMenu, children }: P
           </div>
           <div className="header-status"><GameIcon name="clock" size={14} /><span><small>{t('shell.serverTime')}</small><b>{serverTime.toLocaleTimeString(locale === 'bg' ? 'bg-BG' : 'en-US', { hour: '2-digit', minute: '2-digit' })}</b></span></div>
           <div className="header-status header-status-online"><GameIcon name="wifi" size={14} /><span><small>{t('shell.shard')}</small><b>Dorado One</b></span></div>
-          <div className="cash-balance"><GameIcon name="coins" size={17} /><span><small>{t('shell.cash')}</small><b>{money(state.hud.cashCents)}</b></span></div>
         </header>
 
-        <div className="hud-wrap"><Hud state={state.hud} /></div>
+        <Hud state={state.hud} location={state.location} />
         <main className="game-content">{children}</main>
       </div>
     </div>
