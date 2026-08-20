@@ -215,6 +215,87 @@ export async function moveInventoryItem(
   }
 }
 
+export async function splitInventoryItem(
+  db: Database,
+  playerId: string,
+  itemId: string,
+  quantity: number,
+  requestedSlot?: number
+): Promise<InventoryState> {
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+    const sourceResult = await client.query({
+      text: `
+        SELECT i.*, c.container_key, c.slot_count
+        FROM inventory_items i
+        JOIN inventory_containers c ON c.id = i.container_id
+        WHERE i.id = $1 AND i.player_id = $2
+        FOR UPDATE OF i, c
+      `,
+      values: [itemId, playerId]
+    });
+    const source = sourceResult.rows[0];
+    if (!source) throw new InventoryCommandError('inventory_item_not_found', 404);
+    assertAccessible(source.container_key);
+    if (!source.stackable || source.quantity <= 1) throw new InventoryCommandError('inventory_item_not_splittable', 409);
+    if (!Number.isInteger(quantity) || quantity <= 0 || quantity >= source.quantity) {
+      throw new InventoryCommandError('inventory_split_quantity_invalid', 400);
+    }
+
+    let targetSlot = requestedSlot;
+    if (targetSlot === undefined) {
+      const occupiedResult = await client.query(
+        'SELECT slot_index FROM inventory_items WHERE container_id = $1 ORDER BY slot_index',
+        [source.container_id]
+      );
+      const occupied = new Set<number>(occupiedResult.rows.map(row => row.slot_index));
+      targetSlot = Array.from({ length: source.slot_count }, (_, index) => index).find(index => !occupied.has(index));
+    }
+    if (targetSlot === undefined || targetSlot < 0 || targetSlot >= source.slot_count) {
+      throw new InventoryCommandError('inventory_container_full', 409);
+    }
+
+    const occupiedTarget = await client.query(
+      'SELECT id FROM inventory_items WHERE container_id = $1 AND slot_index = $2 FOR UPDATE',
+      [source.container_id, targetSlot]
+    );
+    if (occupiedTarget.rows[0]) throw new InventoryCommandError('inventory_slot_occupied', 409);
+
+    await client.query(
+      'UPDATE inventory_items SET quantity = quantity - $2, updated_at = now() WHERE id = $1',
+      [source.id, quantity]
+    );
+    await client.query({
+      text: `
+        INSERT INTO inventory_items
+          (player_id, container_id, item_key, display_name, category, symbol, quantity, unit_weight_grams, stackable, slot_index, metadata)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      `,
+      values: [
+        playerId,
+        source.container_id,
+        source.item_key,
+        source.display_name,
+        source.category,
+        source.symbol,
+        quantity,
+        source.unit_weight_grams,
+        source.stackable,
+        targetSlot,
+        source.metadata
+      ]
+    });
+    await client.query('COMMIT');
+    return getInventoryState(db, playerId);
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 export async function useInventoryItem(db: Database, playerId: string, itemId: string): Promise<void> {
   const client = await db.connect();
   try {
