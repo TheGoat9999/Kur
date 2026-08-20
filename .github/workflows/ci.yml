@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, codex/mvp-foundation]
+    branches: [main, "codex/**"]
   pull_request:
 
 jobs:

@@ -1,32 +1,34 @@
 import type { HudState } from '@sol-dorado/contracts';
+import { GameIcon, type GameIconName } from './GameIcon';
 
-const bars: ReadonlyArray<{ key: keyof HudState; label: string; color: string }> = [
-  { key: 'health', label: 'Health', color: 'bg-emerald-400' },
-  { key: 'energy', label: 'Energy', color: 'bg-amber-300' },
-  { key: 'satiety', label: 'Satiety', color: 'bg-orange-300' },
-  { key: 'hydration', label: 'Hydration', color: 'bg-cyan-300' },
-  { key: 'stress', label: 'Stress', color: 'bg-violet-400' }
+const bars: ReadonlyArray<{
+  key: 'health' | 'energy' | 'satiety' | 'hydration' | 'stress';
+  label: string;
+  icon: GameIconName;
+  tone: string;
+}> = [
+  { key: 'health', label: 'Health', icon: 'heart', tone: 'emerald' },
+  { key: 'energy', label: 'Energy', icon: 'zap', tone: 'amber' },
+  { key: 'satiety', label: 'Satiety', icon: 'drumstick', tone: 'orange' },
+  { key: 'hydration', label: 'Hydration', icon: 'droplet', tone: 'cyan' },
+  { key: 'stress', label: 'Stress', icon: 'brain', tone: 'violet' }
 ];
 
 export function Hud({ state }: { state: HudState }) {
   return (
-    <div className="hud-grid">
+    <div className="hud-strip">
       {bars.map(item => (
-        <div className="hud-stat" key={item.key}>
-          <div className="flex items-center justify-between gap-2 text-[10px] uppercase tracking-[0.16em] text-slate-400">
-            <span>{item.label}</span><strong className="text-slate-100">{state[item.key]}</strong>
-          </div>
-          <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/8">
-            <div className={`h-full rounded-full ${item.color}`} style={{ width: `${state[item.key]}%` }} />
-          </div>
+        <div className={`hud-meter hud-meter-${item.tone}`} key={item.key}>
+          <span className="hud-meter-icon"><GameIcon name={item.icon} size={15} /></span>
+          <span className="hud-meter-copy"><small>{item.label}</small><i><b style={{ width: `${state[item.key]}%` }} /></i></span>
+          <strong>{state[item.key]}</strong>
         </div>
       ))}
       {state.policeHeat > 0 && (
-        <div className="hud-stat border-red-400/30 bg-red-400/8">
-          <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.16em] text-red-200">
-            <span>Police heat</span><strong>{state.policeHeat}</strong>
-          </div>
-          <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/8"><div className="h-full rounded-full bg-red-400" style={{ width: `${state.policeHeat}%` }} /></div>
+        <div className="hud-meter hud-meter-red">
+          <span className="hud-meter-icon"><GameIcon name="flame" size={15} /></span>
+          <span className="hud-meter-copy"><small>Police heat</small><i><b style={{ width: `${state.policeHeat}%` }} /></i></span>
+          <strong>{state.policeHeat}</strong>
         </div>
       )}
     </div>

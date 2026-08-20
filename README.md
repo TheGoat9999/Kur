@@ -46,5 +46,7 @@ The web client runs at `http://localhost:5173`; the API runs at `http://localhos
 - Server-authoritative walking, legal shift and petty-crime actions
 - Idempotent action requests and persistent action log
 - Bootstrap endpoint returning one authoritative player snapshot
+- PostgreSQL-backed physical inventory containers and item instances
+- Desktop slot inventory with weight, capacity, drag/drop, move and consumable actions
 
-The next merge step is inventory + finance, because the first world actions already produce money, items and police heat.
+The active merge step is inventory world-access integration, followed by finance, because world actions and later careers, vehicles and businesses need shared item and ledger foundations.

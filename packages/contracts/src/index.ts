@@ -66,12 +66,63 @@ export const DevSessionSchema = z.object({
   expiresInSeconds: z.number().int().positive()
 });
 
+export const InventoryContainerKeySchema = z.enum(['player', 'ground', 'home', 'vehicle_trunk']);
+
+export const InventoryItemSchema = z.object({
+  id: z.uuid(),
+  itemKey: z.string().min(1),
+  displayName: z.string().min(1),
+  category: z.string().min(1),
+  symbol: z.string().min(1).max(8),
+  quantity: z.number().int().positive(),
+  unitWeightGrams: z.number().int().nonnegative(),
+  stackable: z.boolean(),
+  slotIndex: z.number().int().nonnegative(),
+  containerKey: InventoryContainerKeySchema,
+  metadata: z.record(z.string(), z.unknown())
+});
+
+export const InventoryContainerSchema = z.object({
+  key: InventoryContainerKeySchema,
+  label: z.string().min(1),
+  capacityGrams: z.number().int().positive(),
+  weightGrams: z.number().int().nonnegative(),
+  slotCount: z.number().int().positive(),
+  accessible: z.boolean(),
+  accessReason: z.string(),
+  items: z.array(InventoryItemSchema)
+});
+
+export const InventoryStateSchema = z.object({
+  containers: z.array(InventoryContainerSchema),
+  selectedExternalKey: InventoryContainerKeySchema
+});
+
+export const InventoryMoveRequestSchema = z.object({
+  itemId: z.uuid(),
+  toContainerKey: InventoryContainerKeySchema,
+  toSlotIndex: z.number().int().nonnegative().optional()
+});
+
+export const InventoryUseRequestSchema = z.object({ itemId: z.uuid() });
+
+export const InventoryMutationResultSchema = z.object({
+  inventory: InventoryStateSchema,
+  state: BootstrapStateSchema
+});
+
 export type HudState = z.infer<typeof HudStateSchema>;
 export type CharacterRecipe = z.infer<typeof CharacterRecipeSchema>;
 export type BootstrapState = z.infer<typeof BootstrapStateSchema>;
 export type WorldActionId = z.infer<typeof WorldActionIdSchema>;
 export type WorldActionRequest = z.infer<typeof WorldActionRequestSchema>;
 export type WorldActionResult = z.infer<typeof WorldActionResultSchema>;
+export type InventoryContainerKey = z.infer<typeof InventoryContainerKeySchema>;
+export type InventoryItem = z.infer<typeof InventoryItemSchema>;
+export type InventoryContainer = z.infer<typeof InventoryContainerSchema>;
+export type InventoryState = z.infer<typeof InventoryStateSchema>;
+export type InventoryMoveRequest = z.infer<typeof InventoryMoveRequestSchema>;
+export type InventoryMutationResult = z.infer<typeof InventoryMutationResultSchema>;
 
 export const WORLD_ACTIONS: ReadonlyArray<{
   id: WorldActionId;

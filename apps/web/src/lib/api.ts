@@ -1,8 +1,13 @@
 import {
   BootstrapStateSchema,
   DevSessionSchema,
+  InventoryMutationResultSchema,
+  InventoryStateSchema,
   WorldActionResultSchema,
   type BootstrapState,
+  type InventoryContainerKey,
+  type InventoryMutationResult,
+  type InventoryState,
   type WorldActionId,
   type WorldActionResult
 } from '@sol-dorado/contracts';
@@ -49,4 +54,38 @@ export async function runWorldAction(actionId: WorldActionId, expectedVersion: n
   if (response.status === 409) throw new Error('Your state changed in another session. Refreshing is required.');
   if (!response.ok) throw new Error(`Action failed (${response.status})`);
   return WorldActionResultSchema.parse(await response.json());
+}
+
+export async function getInventory(): Promise<InventoryState> {
+  const response = await authenticatedFetch('/v1/inventory');
+  if (!response.ok) throw new Error(`Inventory failed (${response.status})`);
+  return InventoryStateSchema.parse(await response.json());
+}
+
+export async function moveInventoryItem(
+  itemId: string,
+  toContainerKey: InventoryContainerKey,
+  toSlotIndex?: number
+): Promise<InventoryState> {
+  const response = await authenticatedFetch('/v1/inventory/move', {
+    method: 'POST',
+    body: JSON.stringify({ itemId, toContainerKey, toSlotIndex })
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null) as { error?: string } | null;
+    throw new Error(payload?.error ?? `Inventory move failed (${response.status})`);
+  }
+  return InventoryStateSchema.parse(await response.json());
+}
+
+export async function useInventoryItem(itemId: string): Promise<InventoryMutationResult> {
+  const response = await authenticatedFetch('/v1/inventory/use', {
+    method: 'POST',
+    body: JSON.stringify({ itemId })
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null) as { error?: string } | null;
+    throw new Error(payload?.error ?? `Inventory use failed (${response.status})`);
+  }
+  return InventoryMutationResultSchema.parse(await response.json());
 }

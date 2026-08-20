@@ -4,6 +4,7 @@ import { Shell, type Screen } from './components/Shell';
 import { CharacterView } from './features/character/CharacterView';
 import { IntegrationView } from './features/integration/IntegrationView';
 import { WorldView } from './features/world/WorldView';
+import { InventoryView } from './features/inventory/InventoryView';
 import { getBootstrap, runWorldAction } from './lib/api';
 
 export function App() {
@@ -35,7 +36,8 @@ export function App() {
       {error && <div className="mb-4 rounded-xl border border-red-400/20 bg-red-400/8 p-3 text-sm text-red-100">{error}</div>}
       {screen === 'world' && <WorldView state={state} busy={busy} feedback={feedback} onAction={act} />}
       {screen === 'character' && <CharacterView state={state} />}
-      {screen !== 'world' && screen !== 'character' && <IntegrationView feature={screen} />}
+      {screen === 'inventory' && <InventoryView onStateChange={setState} />}
+      {!['world', 'character', 'inventory'].includes(screen) && <IntegrationView feature={screen as 'finance' | 'vehicles' | 'property' | 'jobs' | 'hospitality' | 'police'} />}
     </Shell>
   );
 }
