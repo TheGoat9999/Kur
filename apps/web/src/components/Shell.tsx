@@ -52,6 +52,11 @@ export function Shell({ state, screen, menuOpen, onScreen, onMenu, children }: P
     });
   }
 
+  function navigate(next: Screen) {
+    onScreen(next);
+    onMenu(false);
+  }
+
   return (
     <div className={`game-shell ${collapsed ? 'game-shell-collapsed' : ''}`}>
       <button aria-label={t('shell.closeNavigation')} className={`nav-scrim ${menuOpen ? 'nav-scrim-open' : ''}`} onClick={() => onMenu(false)} />
@@ -73,7 +78,7 @@ export function Shell({ state, screen, menuOpen, onScreen, onMenu, children }: P
                   key={item.id}
                   className={`game-nav-item ${screen === item.id ? 'game-nav-item-active' : ''}`}
                   title={collapsed ? t(item.label) : undefined}
-                  onClick={() => { onScreen(item.id); onMenu(false); }}
+                  onClick={() => navigate(item.id)}
                 >
                   <span className="nav-icon"><GameIcon name={item.icon} size={18} /></span>
                   <span className="nav-copy"><b>{t(item.label)}</b><small>{stageLabel(item.stage, t)}</small></span>
@@ -110,6 +115,26 @@ export function Shell({ state, screen, menuOpen, onScreen, onMenu, children }: P
         <Hud state={state.hud} location={state.location} worldMode={screen === 'world'} />
         <main className="game-content">{children}</main>
       </div>
+
+      <nav className="right-nav-rail" aria-label={t('shell.navigation')}>
+        {groups.map(group => (
+          <div className="right-nav-group" key={group.label}>
+            {group.items.map(item => (
+              <button
+                key={item.id}
+                className={`right-nav-item ${screen === item.id ? 'right-nav-item-active' : ''}`}
+                onClick={() => navigate(item.id)}
+                aria-label={t(item.label)}
+                title={t(item.label)}
+              >
+                <GameIcon name={item.icon} size={19} />
+                <span className={`right-nav-stage right-nav-stage-${item.stage}`} />
+                <span className="right-nav-tooltip">{t(item.label)}</span>
+              </button>
+            ))}
+          </div>
+        ))}
+      </nav>
     </div>
   );
 }
