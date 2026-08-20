@@ -1,0 +1,118 @@
+/* Density/polish layer for World v0.3. Kept separate so the atlas conventions stay reviewable. */
+
+/* Zone and district boundaries are geography, not glowing UI cards. */
+.world-map-area-zone polygon,
+.world-map-area-district polygon {
+  vector-effect: non-scaling-stroke;
+}
+.world-map-area-zone polygon { stroke-width: .18; }
+.world-map-area-district polygon { stroke-width: .19; }
+.world-map-area-zone:hover polygon,
+.world-map-area-district:hover polygon { stroke-width: .28; }
+.world-map-area-zone.world-map-current polygon,
+.world-map-area-district.world-map-current polygon { stroke-width: .32; }
+
+/* More specific land-use identity at district zoom. */
+.world-map-area-district.world-map-kind-residential polygon { fill: rgb(71 96 86 / .44); }
+.world-map-area-district.world-map-kind-commercial polygon { fill: rgb(76 91 91 / .55); }
+.world-map-area-district.world-map-kind-mixed_use polygon { fill: rgb(72 95 89 / .52); }
+.world-map-area-district.world-map-kind-civic polygon { fill: rgb(82 91 99 / .54); }
+.world-map-area-district.world-map-kind-nightlife polygon { fill: rgb(82 77 94 / .48); }
+.world-map-area-district.world-map-kind-industrial polygon { fill: rgb(83 83 74 / .52); }
+.world-map-area-district.world-map-kind-transit polygon { fill: rgb(79 91 94 / .52); }
+
+/* Many districts need labels that read like map labels, not oversized POI captions. */
+.world-map-area-zone text { font-size: 1.38px; stroke-width: .31px; }
+.world-map-area-district text { font-size: 1.28px; stroke-width: .3px; }
+.world-map-area-zone circle { r: .62px; }
+.world-map-area-district circle { r: .5px; }
+
+/* Add fine urban grain without turning the SVG into hundreds of decorative React nodes. */
+.world-map-level-settlement::after,
+.world-map-level-zone::after,
+.world-map-level-district::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .16;
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgb(214 224 218 / .09) 31px 32px),
+    repeating-linear-gradient(90deg, transparent 0 42px, rgb(214 224 218 / .07) 42px 43px);
+  mix-blend-mode: soft-light;
+}
+.world-map-level-zone::after { opacity: .1; }
+.world-map-level-settlement::after { opacity: .055; }
+
+/* The old six giant placeholder blocks are now background texture, not the visual subject. */
+.atlas-building-blocks path {
+  opacity: .28;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(.72);
+  stroke-width: .16;
+}
+.atlas-service-ground { opacity: .38; }
+.atlas-minor-roads path { opacity: .22; stroke-width: .5; }
+
+/* Dense street network: hierarchy by road class is expressed primarily through width/contrast. */
+.world-map-street-casing { stroke: #142629; stroke-width: 1.48; }
+.world-map-street-surface { stroke: #6d7d80; stroke-width: .72; opacity: .92; }
+.world-map-street-current .world-map-street-casing { stroke-width: 1.72; }
+.world-map-street-current .world-map-street-surface { stroke: #c0a86f; stroke-width: .92; }
+
+/* With 8-12 streets per district permanent labels become clutter. Reveal names on focus/hover,
+   while the current street remains labelled. */
+.world-map-street text {
+  opacity: 0;
+  font-size: 1.06px;
+  transition: opacity .12s ease;
+}
+.world-map-street:hover text,
+.world-map-street-current text { opacity: 1; }
+.world-map-street:hover .world-map-street-surface { stroke: #a7b5b5; }
+
+/* Planned segments should read as network capacity rather than a forest of POI dots. */
+.world-map-segment-planned circle { opacity: .36; r: .48px; }
+.world-map-segment-live circle { r: .72px; }
+.world-map-segment.world-map-current circle { r: 1.05px; }
+.world-map-segment.world-map-selected circle { r: .92px; }
+.world-map-segment-planned .world-map-segment-focus { stroke-width: .42; stroke-dasharray: .7 .8; opacity: .55; }
+.world-map-segment-live:hover .world-map-segment-focus,
+.world-map-segment.world-map-selected .world-map-segment-focus { stroke-width: 1.15; }
+
+/* Parcels are secondary at district scale. Services remain stronger than ordinary property. */
+.world-map-parcel polygon,
+.world-map-parcel circle { opacity: .56; }
+.world-map-parcel-service polygon,
+.world-map-parcel-service circle { opacity: .9; }
+
+/* Region/settlement polish: make terrain read as terrain instead of flat overlay polygons. */
+.atlas-main-land { filter: url(#atlas-shadow); }
+.atlas-forest { filter: saturate(.9); }
+.atlas-fields { opacity: .68; }
+.atlas-contours path { stroke-linecap: round; }
+.atlas-highways path { stroke-linecap: round; }
+.atlas-city-arterials path { stroke-width: .42; opacity: .38; }
+.atlas-city-park { opacity: .72; }
+.atlas-hills { opacity: .62; }
+
+/* Give the canvas an inset map-frame rather than a bare edge. */
+.world-map-canvas { box-shadow: inset 0 0 0 1px rgb(255 255 255 / .035); }
+.world-map-canvas::before {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  inset: 9px;
+  border: 1px solid rgb(219 228 222 / .055);
+  border-radius: 10px;
+  pointer-events: none;
+}
+.world-map-compass,
+.world-map-scale { z-index: 4; }
+
+@media (max-width: 760px) {
+  .world-map-area-zone text { font-size: 1.7px; }
+  .world-map-area-district text { font-size: 1.55px; }
+  .world-map-level-district::after { opacity: .1; }
+}
