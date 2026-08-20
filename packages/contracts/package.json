@@ -9,6 +9,7 @@
     ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
     "./world-position": { "types": "./dist/world-position.d.ts", "import": "./dist/world-position.js" },
     "./world-map": { "types": "./dist/world-map.d.ts", "import": "./dist/world-map.js" },
+    "./navigation": { "types": "./dist/navigation.d.ts", "import": "./dist/navigation.js" },
     "./items": { "types": "./dist/items.d.ts", "import": "./dist/items.js" }
   },
   "scripts": {
