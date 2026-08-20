@@ -39,11 +39,13 @@ Deliverables:
 - Route calculation between player position and destination anchors.
 - Obstacle-aware movement rather than straight-line movement through props/buildings/cars.
 - Improved movement cursor with walkable/unwalkable states, destination pulse and temporary route preview.
+- Every visible canonical street/segment in district navigation view remains hoverable/focusable on desktop and tappable on touch devices; street hit areas must be generous while decorative terrain, parcels, labels and detail layers must never intercept street pointer events.
+- Street hover/focus must clearly identify the street without permanently cluttering the map with labels.
 - Persistent player position remains server-authoritative at meaningful sync points.
 - Street exits connect to canonical `world_street_connections`.
 - Foundation interfaces for road and transit graphs are defined here, but vehicles are not implemented yet.
 
-Exit criteria: all walking and proximity interactions use one navigation abstraction, not ad-hoc screen coordinates.
+Exit criteria: all walking and proximity interactions use one navigation abstraction, not ad-hoc screen coordinates, and all rendered street segments remain reliably discoverable/interactable regardless of decorative map detail.
 
 ## Phase 3 — World Visual v0.4
 
