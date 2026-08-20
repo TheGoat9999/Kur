@@ -7,8 +7,8 @@
   "scripts": {
     "dev": "npm run build --workspace=@sol-dorado/contracts && concurrently -n api,web -c yellow,cyan \"npm run dev --workspace=@sol-dorado/api\" \"npm run dev --workspace=@sol-dorado/web\"",
     "build": "npm run build --workspace=@sol-dorado/contracts && npm run build --workspace=@sol-dorado/api && npm run build --workspace=@sol-dorado/web",
-    "test": "npm run test --workspace=@sol-dorado/api && npm run build",
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run build --workspace=@sol-dorado/contracts && npm run test --workspace=@sol-dorado/api && npm run build",
+    "typecheck": "npm run build --workspace=@sol-dorado/contracts && npm run typecheck --workspaces --if-present",
     "db:migrate": "npm run db:migrate --workspace=@sol-dorado/api",
     "db:seed": "npm run db:seed --workspace=@sol-dorado/api"
   },

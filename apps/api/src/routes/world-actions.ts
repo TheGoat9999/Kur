@@ -1,10 +1,18 @@
 import { Router } from 'express';
 import { WorldActionRequestSchema, WorldActionResultSchema } from '@sol-dorado/contracts';
+import {
+  StreetMoveRequestSchema,
+  StreetPositionResultSchema,
+  getStreetSpawnPosition,
+  isStreetActionWithinReach,
+  isStreetPositionWalkable
+} from '@sol-dorado/contracts/world-position';
 import type { AppServices } from '../types.js';
 import { applyWorldAction, getActionAvailability, STREET_SEGMENTS } from '../domain/actions.js';
 import { getBootstrapState } from '../services/player-state.js';
 import {
   addStreetReward,
+  getStreetPosition,
   getStreetState,
   lockStreetProgress,
   WorldActionCommandError,
@@ -16,6 +24,36 @@ export function worldActionRoutes(services: AppServices) {
 
   router.get('/v1/world', async (request, response) => {
     response.json(await getStreetState(services.db, services.redis, request.playerId!));
+  });
+
+  router.get('/v1/world/position', async (request, response) => {
+    response.json(await getStreetPosition(services.db, request.playerId!));
+  });
+
+  router.post('/v1/world/move', async (request, response) => {
+    const parsed = StreetMoveRequestSchema.safeParse(request.body);
+    if (!parsed.success) return response.status(400).json({ error: 'invalid_position', issues: parsed.error.issues });
+    const playerId = request.playerId!;
+    const client = await services.db.connect();
+    try {
+      await client.query('BEGIN');
+      const progress = await lockStreetProgress(client, playerId);
+      if (!isStreetPositionWalkable(progress.currentSegmentId, parsed.data)) {
+        throw new WorldActionCommandError('world_position_blocked', 409);
+      }
+      await client.query(
+        'UPDATE player_street_state SET position_x = $2, position_y = $3, updated_at = now() WHERE player_id = $1',
+        [playerId, parsed.data.x, parsed.data.y]
+      );
+      await client.query('COMMIT');
+      response.json(StreetPositionResultSchema.parse({ segmentId: progress.currentSegmentId, position: parsed.data }));
+    } catch (error) {
+      await client.query('ROLLBACK');
+      if (error instanceof WorldActionCommandError) return response.status(error.status).json({ error: error.code, ...error.details });
+      throw error;
+    } finally {
+      client.release();
+    }
   });
 
   router.post('/v1/world/actions', async (request, response) => {
@@ -45,6 +83,10 @@ export function worldActionRoutes(services: AppServices) {
       }
 
       const progress = await lockStreetProgress(client, playerId);
+      if (!isStreetActionWithinReach(progress.currentSegmentId, progress.position, input.actionId)) {
+        throw new WorldActionCommandError('world_action_too_far', 409);
+      }
+
       const cooldownKey = worldCooldownKey(playerId, input.actionId);
       const remainingCooldownMs = await services.redis.pttl(cooldownKey);
       const cooldownEndsAt = remainingCooldownMs > 0 ? Date.now() + remainingCooldownMs : null;
@@ -95,12 +137,17 @@ export function worldActionRoutes(services: AppServices) {
           STREET_SEGMENTS[outcome.next.currentSegmentId].displayName
         ]
       });
+      const nextPosition = outcome.next.currentSegmentId === progress.currentSegmentId
+        ? progress.position
+        : getStreetSpawnPosition(outcome.next.currentSegmentId);
       await client.query({
         text: `
           UPDATE player_street_state
           SET current_segment_id = $2,
               visited_segment_ids = $3,
               flags = $4,
+              position_x = $5,
+              position_y = $6,
               updated_at = now()
           WHERE player_id = $1
         `,
@@ -108,7 +155,9 @@ export function worldActionRoutes(services: AppServices) {
           playerId,
           outcome.next.currentSegmentId,
           outcome.next.visitedSegmentIds,
-          outcome.next.flags
+          outcome.next.flags,
+          nextPosition.x,
+          nextPosition.y
         ]
       });
 
