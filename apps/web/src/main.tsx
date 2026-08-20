@@ -6,6 +6,7 @@ import { NotificationProvider } from './components/Notifications';
 import './styles.css';
 import './features/world/world-map-density.css';
 import './features/world/street-navigation.css';
+import './features/world/world-visual.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
