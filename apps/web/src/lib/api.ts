@@ -142,6 +142,22 @@ export async function moveInventoryItem(
   return InventoryStateSchema.parse(await response.json());
 }
 
+export async function splitInventoryItem(
+  itemId: string,
+  quantity: number,
+  toSlotIndex?: number
+): Promise<InventoryState> {
+  const response = await authenticatedFetch('/v1/inventory/split', {
+    method: 'POST',
+    body: JSON.stringify({ itemId, quantity, toSlotIndex })
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null) as { error?: string } | null;
+    throw new Error(payload?.error ?? `Inventory split failed (${response.status})`);
+  }
+  return InventoryStateSchema.parse(await response.json());
+}
+
 export async function useInventoryItem(itemId: string): Promise<InventoryMutationResult> {
   const response = await authenticatedFetch('/v1/inventory/use', {
     method: 'POST',
