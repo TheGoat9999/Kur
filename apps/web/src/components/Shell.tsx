@@ -16,7 +16,7 @@ const groups: ReadonlyArray<{
     { id: 'inventory', icon: 'package', label: 'Inventory', stage: 'live' }
   ] },
   { label: 'Progression', items: [
-    { id: 'finance', icon: 'landmark', label: 'Finance', stage: 'migration' },
+    { id: 'finance', icon: 'landmark', label: 'Finance', stage: 'live' },
     { id: 'jobs', icon: 'briefcase', label: 'Jobs & Careers', stage: 'migration' }
   ] },
   { label: 'Assets', items: [

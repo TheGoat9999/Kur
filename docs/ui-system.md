@@ -19,3 +19,4 @@ Libraries are introduced incrementally when the first production component needs
 - Avoid emoji navigation, generic SaaS cards, giant empty rectangles and repeated status summaries.
 - Animation confirms hierarchy, state change and feedback; it is not decorative noise.
 - Each migrated feature must have loading, empty, error and disabled-access states.
+- Every actionable control exposes a pointer cursor plus visible hover, pressed and keyboard-focus feedback. Disabled controls use a blocked cursor and do not mimic interactivity.

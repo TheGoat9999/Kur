@@ -45,5 +45,23 @@ try {
       ('00000000-0000-4000-8000-000000000308', $1, '00000000-0000-4000-8000-000000000204', 'crowbar', 'Crowbar', 'Tool', 'BAR', 1, 2200, false, 0, '{}')
     ON CONFLICT (id) DO NOTHING
   `, [playerId]);
+  await db.query(`
+    INSERT INTO finance_accounts (player_id, access_mode, checking_cents, savings_cents, exchange_cash_cents, credit_score)
+    VALUES ($1, 'branch', 1280000, 350000, 0, 684)
+    ON CONFLICT (player_id) DO NOTHING
+  `, [playerId]);
+  await db.query(`
+    INSERT INTO finance_assets (symbol, name, price_cents, previous_price_cents, volatility)
+    VALUES
+      ('DRC', 'Dorado Coin', 1840, 1840, 0.08),
+      ('VTA', 'Vanta', 475, 475, 0.14),
+      ('MSA', 'Mesa', 6320, 6320, 0.05)
+    ON CONFLICT (symbol) DO NOTHING
+  `);
+  await db.query(`
+    INSERT INTO finance_holdings (player_id, symbol, quantity)
+    VALUES ($1, 'DRC', 0), ($1, 'VTA', 0), ($1, 'MSA', 0)
+    ON CONFLICT (player_id, symbol) DO NOTHING
+  `, [playerId]);
   console.log(`Seeded development player ${playerId}`);
 } finally { await db.end(); }

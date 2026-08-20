@@ -5,6 +5,7 @@ import { CharacterView } from './features/character/CharacterView';
 import { IntegrationView } from './features/integration/IntegrationView';
 import { WorldView } from './features/world/WorldView';
 import { InventoryView } from './features/inventory/InventoryView';
+import { FinanceView } from './features/finance/FinanceView';
 import { getBootstrap, runWorldAction } from './lib/api';
 
 export function App() {
@@ -37,7 +38,8 @@ export function App() {
       {screen === 'world' && <WorldView state={state} busy={busy} feedback={feedback} onAction={act} />}
       {screen === 'character' && <CharacterView state={state} />}
       {screen === 'inventory' && <InventoryView onStateChange={setState} />}
-      {!['world', 'character', 'inventory'].includes(screen) && <IntegrationView feature={screen as 'finance' | 'vehicles' | 'property' | 'jobs' | 'hospitality' | 'police'} />}
+      {screen === 'finance' && <FinanceView onStateChange={setState} />}
+      {!['world', 'character', 'inventory', 'finance'].includes(screen) && <IntegrationView feature={screen as 'vehicles' | 'property' | 'jobs' | 'hospitality' | 'police'} />}
     </Shell>
   );
 }

@@ -4,7 +4,9 @@ export type GameIconName =
   | 'world' | 'user' | 'package' | 'landmark' | 'briefcase' | 'car' | 'building'
   | 'utensils' | 'shield' | 'heart' | 'zap' | 'drumstick' | 'droplet' | 'brain'
   | 'flame' | 'map-pin' | 'clock' | 'panel-left-close' | 'panel-left-open'
-  | 'arrow-left-right' | 'mouse-pointer' | 'lock' | 'wifi' | 'coins';
+  | 'arrow-left-right' | 'mouse-pointer' | 'lock' | 'wifi' | 'coins'
+  | 'wallet' | 'credit-card' | 'receipt' | 'chart' | 'smartphone' | 'banknote'
+  | 'send' | 'arrow-down-left' | 'arrow-up-right' | 'check' | 'x' | 'sparkles';
 
 const paths: Record<GameIconName, ReactNode> = {
   world: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" /></>,
@@ -30,7 +32,19 @@ const paths: Record<GameIconName, ReactNode> = {
   'mouse-pointer': <path d="m4 3 7 17 2-7 7-2L4 3Z" />,
   lock: <><rect x="5" y="10" width="14" height="11" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></>,
   wifi: <><path d="M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0" /><circle cx="12" cy="20" r="1" fill="currentColor" stroke="none" /></>,
-  coins: <><ellipse cx="9" cy="7" rx="6" ry="3" /><path d="M3 7v4c0 1.7 2.7 3 6 3s6-1.3 6-3V7M3 11v4c0 1.7 2.7 3 6 3 1.1 0 2-.1 3-.4" /><path d="M15 11c3.3 0 6 1.3 6 3s-2.7 3-6 3-6-1.3-6-3M9 14v4c0 1.7 2.7 3 6 3s6-1.3 6-3v-4" /></>
+  coins: <><ellipse cx="9" cy="7" rx="6" ry="3" /><path d="M3 7v4c0 1.7 2.7 3 6 3s6-1.3 6-3V7M3 11v4c0 1.7 2.7 3 6 3 1.1 0 2-.1 3-.4" /><path d="M15 11c3.3 0 6 1.3 6 3s-2.7 3-6 3-6-1.3-6-3M9 14v4c0 1.7 2.7 3 6 3s6-1.3 6-3v-4" /></>,
+  wallet: <><path d="M4 6h14a2 2 0 0 1 2 2v11H4a2 2 0 0 1-2-2V6a3 3 0 0 1 3-3h12" /><path d="M16 11h6v5h-6a2.5 2.5 0 0 1 0-5Z" /></>,
+  'credit-card': <><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20M6 15h4" /></>,
+  receipt: <><path d="M5 3v18l3-2 4 2 4-2 3 2V3l-3 2-4-2-4 2-3-2Z" /><path d="M9 9h6M9 13h6" /></>,
+  chart: <><path d="M4 19V5M4 19h16" /><path d="m7 15 4-5 3 3 5-7" /></>,
+  smartphone: <><rect x="6" y="2" width="12" height="20" rx="2" /><path d="M10 5h4M11 18h2" /></>,
+  banknote: <><rect x="2" y="6" width="20" height="12" rx="2" /><path d="M6 10a2 2 0 0 0 2-2h8a2 2 0 0 0 2 2v4a2 2 0 0 0-2 2H8a2 2 0 0 0-2-2v-4Z" /><circle cx="12" cy="12" r="2" /></>,
+  send: <><path d="m22 2-7 20-4-9-9-4 20-7Z" /><path d="M22 2 11 13" /></>,
+  'arrow-down-left': <><path d="M17 7 7 17M7 8v9h9" /></>,
+  'arrow-up-right': <><path d="M7 17 17 7M8 7h9v9" /></>,
+  check: <path d="m5 12 4 4L19 6" />,
+  x: <path d="m6 6 12 12M18 6 6 18" />,
+  sparkles: <><path d="m12 3 1.2 3.8L17 8l-3.8 1.2L12 13l-1.2-3.8L7 8l3.8-1.2L12 3ZM5 14l.7 2.3L8 17l-2.3.7L5 20l-.7-2.3L2 17l2.3-.7L5 14ZM19 13l.7 2.3 2.3.7-2.3.7L19 19l-.7-2.3L16 16l2.3-.7L19 13Z" /></>
 };
 
 export function GameIcon({ name, size = 18, className = '' }: { name: GameIconName; size?: number; className?: string }) {

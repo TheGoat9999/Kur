@@ -48,5 +48,8 @@ The web client runs at `http://localhost:5173`; the API runs at `http://localhos
 - Bootstrap endpoint returning one authoritative player snapshot
 - PostgreSQL-backed physical inventory containers and item instances
 - Desktop slot inventory with weight, capacity, drag/drop, move and consumable actions
+- PostgreSQL-backed finance accounts, loans, holdings and unified transaction ledger
+- Contextual branch, ATM and phone banking with transfers, credit and DoradoX trading
+- Modern desktop interaction states with pointer, hover, pressed, focus and disabled feedback
 
-The active merge step is inventory world-access integration, followed by finance, because world actions and later careers, vehicles and businesses need shared item and ledger foundations.
+The active merge step is browser validation of the inventory and finance foundations. Vehicles and physical travel/access follow because later careers, property and businesses consume both item and ledger systems.
