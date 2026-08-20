@@ -22,9 +22,10 @@ export function StreetPopulation({ segmentId, visibleObjectIds }: {
           '--vehicle-delay': `${vehicle.delaySeconds ?? 0}s`,
           '--vehicle-width': `${vehicle.widthPercent ?? 9.6}%`
         } as CSSProperties;
+        const serviceProps = vehicle.serviceLabel ? { serviceLabel: vehicle.serviceLabel } : {};
         return (
           <span key={vehicle.id} className={`street-vehicle-actor ${moving ? 'street-vehicle-actor-moving' : ''}`} style={style}>
-            <WorldVehicle type={vehicle.type} color={vehicle.color} heading={vehicle.heading} serviceLabel={vehicle.serviceLabel} />
+            <WorldVehicle type={vehicle.type} color={vehicle.color} heading={vehicle.heading} {...serviceProps} />
           </span>
         );
       })}
