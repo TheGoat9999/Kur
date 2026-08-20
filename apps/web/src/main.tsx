@@ -6,6 +6,7 @@ import { NotificationProvider } from './components/Notifications';
 import './styles.css';
 import './hud.css';
 import './hud-v2.css';
+import './hud-v3.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
