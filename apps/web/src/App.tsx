@@ -25,7 +25,7 @@ export function App() {
     <Shell state={state} screen={screen} menuOpen={menuOpen} onScreen={setScreen} onMenu={setMenuOpen}>
       {error && <div className="mb-4 rounded-xl border border-red-400/20 bg-red-400/8 p-3 text-sm text-red-100">{error}</div>}
       {screen === 'world' && <WorldView state={state} onStateChange={setState} />}
-      {screen === 'character' && <CharacterView state={state} />}
+      {screen === 'character' && <CharacterView state={state} onStateChange={setState} />}
       {screen === 'inventory' && <InventoryView onStateChange={setState} />}
       {screen === 'finance' && <FinanceView onStateChange={setState} />}
       {!['world', 'character', 'inventory', 'finance'].includes(screen) && <IntegrationView feature={screen as 'vehicles' | 'property' | 'jobs' | 'hospitality' | 'police'} />}
