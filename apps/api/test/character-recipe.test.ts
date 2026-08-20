@@ -12,20 +12,29 @@ const recipe = {
     eyeColor: 'green'
   },
   grooming: {
-    hairStyle: 'bald',
+    hairStyle: 'bob01',
     hairColor: 'dark-brown',
-    equipped: { torsoInner: 'shirt_0048', feet: 'sneakers_0098' }
+    equipped: {
+      torsoOuter: 'female_casualsuit01',
+      legs: 'female_casualsuit01',
+      feet: 'shoes01'
+    }
   },
   morphs: { shoulders: -10, waist: -16, hips: 12 },
   faceMorphs: { cheekbones: 18, noseWidth: -9, upperLip: 7 }
 };
 
 describe('CharacterRecipeSchema', () => {
-  it('accepts the production character recipe including clothing registry slots', () => {
+  it('accepts the production character recipe including live hair and clothing slots', () => {
     const parsed = CharacterRecipeSchema.parse(recipe);
     expect(parsed.body).toBe('female');
-    expect(parsed.appearance.skinTone).toBe('warm-medium');
-    expect(parsed.grooming.equipped).toEqual({ torsoInner: 'shirt_0048', feet: 'sneakers_0098' });
+    expect(parsed.appearance.eyeColor).toBe('green');
+    expect(parsed.grooming.hairStyle).toBe('bob01');
+    expect(parsed.grooming.equipped).toEqual({
+      torsoOuter: 'female_casualsuit01',
+      legs: 'female_casualsuit01',
+      feet: 'shoes01'
+    });
     expect(parsed.faceMorphs.cheekbones).toBe(18);
   });
 
