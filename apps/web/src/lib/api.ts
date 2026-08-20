@@ -1,8 +1,19 @@
 import {
   BootstrapStateSchema,
   DevSessionSchema,
+  FinanceMutationResultSchema,
+  FinanceStateSchema,
+  InventoryMutationResultSchema,
+  InventoryStateSchema,
   WorldActionResultSchema,
   type BootstrapState,
+  type FinanceAccessMode,
+  type FinanceAssetSymbol,
+  type FinanceMutationResult,
+  type FinanceState,
+  type InventoryContainerKey,
+  type InventoryMutationResult,
+  type InventoryState,
   type WorldActionId,
   type WorldActionResult
 } from '@sol-dorado/contracts';
@@ -49,4 +60,98 @@ export async function runWorldAction(actionId: WorldActionId, expectedVersion: n
   if (response.status === 409) throw new Error('Your state changed in another session. Refreshing is required.');
   if (!response.ok) throw new Error(`Action failed (${response.status})`);
   return WorldActionResultSchema.parse(await response.json());
+}
+
+export async function getInventory(): Promise<InventoryState> {
+  const response = await authenticatedFetch('/v1/inventory');
+  if (!response.ok) throw new Error(`Inventory failed (${response.status})`);
+  return InventoryStateSchema.parse(await response.json());
+}
+
+export async function moveInventoryItem(
+  itemId: string,
+  toContainerKey: InventoryContainerKey,
+  toSlotIndex?: number
+): Promise<InventoryState> {
+  const response = await authenticatedFetch('/v1/inventory/move', {
+    method: 'POST',
+    body: JSON.stringify({ itemId, toContainerKey, toSlotIndex })
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null) as { error?: string } | null;
+    throw new Error(payload?.error ?? `Inventory move failed (${response.status})`);
+  }
+  return InventoryStateSchema.parse(await response.json());
+}
+
+export async function useInventoryItem(itemId: string): Promise<InventoryMutationResult> {
+  const response = await authenticatedFetch('/v1/inventory/use', {
+    method: 'POST',
+    body: JSON.stringify({ itemId })
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null) as { error?: string } | null;
+    throw new Error(payload?.error ?? `Inventory use failed (${response.status})`);
+  }
+  return InventoryMutationResultSchema.parse(await response.json());
+}
+
+export async function getFinance(): Promise<FinanceState> {
+  const response = await authenticatedFetch('/v1/finance');
+  if (!response.ok) throw new Error(await apiError(response, 'Finance failed'));
+  return FinanceStateSchema.parse(await response.json());
+}
+
+export function setFinanceAccess(accessMode: FinanceAccessMode) {
+  return financeCommand('/v1/finance/access', { accessMode });
+}
+
+export function moveFinanceCash(direction: 'deposit' | 'withdraw', amountCents: number) {
+  return financeCommand('/v1/finance/cash', { direction, amountCents });
+}
+
+export function moveFinanceInternal(direction: 'checking_to_savings' | 'savings_to_checking', amountCents: number) {
+  return financeCommand('/v1/finance/internal-transfer', { direction, amountCents });
+}
+
+export function sendFinanceTransfer(recipientId: 'maya' | 'leo' | 'landlord', amountCents: number, reference: string) {
+  return financeCommand('/v1/finance/recipient-transfer', { recipientId, amountCents, reference });
+}
+
+export function applyFinanceLoan(kind: 'personal' | 'vehicle') {
+  return financeCommand('/v1/finance/loan/apply', { kind });
+}
+
+export function payFinanceLoan() {
+  return financeCommand('/v1/finance/loan/pay-next');
+}
+
+export function fundFinanceExchange(amountCents: number) {
+  return financeCommand('/v1/finance/exchange/fund', { amountCents });
+}
+
+export function withdrawFinanceExchange() {
+  return financeCommand('/v1/finance/exchange/withdraw');
+}
+
+export function tradeFinanceCrypto(side: 'buy' | 'sell', symbol: FinanceAssetSymbol, usdCents: number) {
+  return financeCommand('/v1/finance/crypto/trade', { side, symbol, usdCents });
+}
+
+export function advanceFinanceMarket() {
+  return financeCommand('/v1/finance/market/advance');
+}
+
+async function financeCommand(path: string, body?: unknown): Promise<FinanceMutationResult> {
+  const response = await authenticatedFetch(path, {
+    method: 'POST',
+    body: body === undefined ? undefined : JSON.stringify(body)
+  });
+  if (!response.ok) throw new Error(await apiError(response, 'Finance action failed'));
+  return FinanceMutationResultSchema.parse(await response.json());
+}
+
+async function apiError(response: Response, fallback: string) {
+  const payload = await response.json().catch(() => null) as { error?: string } | null;
+  return payload?.error ?? `${fallback} (${response.status})`;
 }

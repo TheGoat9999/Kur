@@ -1,15 +1,33 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { BootstrapState } from '@sol-dorado/contracts';
 import { Hud } from './Hud';
+import { GameIcon, type GameIconName } from './GameIcon';
+import { useI18n, type TranslationKey } from '../i18n';
 
-export type Screen = 'world' | 'character' | 'inventory' | 'finance' | 'vehicles' | 'property';
-const nav: ReadonlyArray<{ id: Screen; glyph: string; label: string }> = [
-  { id: 'world', glyph: '◎', label: 'World' },
-  { id: 'character', glyph: '◇', label: 'Character' },
-  { id: 'inventory', glyph: '▦', label: 'Inventory' },
-  { id: 'finance', glyph: '$', label: 'Finance' },
-  { id: 'vehicles', glyph: 'V', label: 'Vehicles' },
-  { id: 'property', glyph: '⌂', label: 'Property' }
+export type Screen = 'world' | 'character' | 'inventory' | 'finance' | 'vehicles' | 'property' | 'jobs' | 'hospitality' | 'police';
+type FeatureStage = 'live' | 'foundation' | 'migration';
+
+const groups: ReadonlyArray<{
+  label: TranslationKey;
+  items: ReadonlyArray<{ id: Screen; icon: GameIconName; label: TranslationKey; stage: FeatureStage }>;
+}> = [
+  { label: 'nav.city', items: [
+    { id: 'world', icon: 'world', label: 'nav.world', stage: 'live' },
+    { id: 'character', icon: 'user', label: 'nav.character', stage: 'foundation' },
+    { id: 'inventory', icon: 'package', label: 'nav.inventory', stage: 'live' }
+  ] },
+  { label: 'nav.progression', items: [
+    { id: 'finance', icon: 'landmark', label: 'nav.finance', stage: 'live' },
+    { id: 'jobs', icon: 'briefcase', label: 'nav.jobs', stage: 'migration' }
+  ] },
+  { label: 'nav.assets', items: [
+    { id: 'vehicles', icon: 'car', label: 'nav.vehicles', stage: 'migration' },
+    { id: 'property', icon: 'building', label: 'nav.property', stage: 'migration' }
+  ] },
+  { label: 'nav.institutions', items: [
+    { id: 'hospitality', icon: 'utensils', label: 'nav.hospitality', stage: 'migration' },
+    { id: 'police', icon: 'shield', label: 'nav.police', stage: 'migration' }
+  ] }
 ];
 
 interface Props {
@@ -22,38 +40,84 @@ interface Props {
 }
 
 export function Shell({ state, screen, menuOpen, onScreen, onMenu, children }: Props) {
+  const { locale, setLocale, t, money, runtime } = useI18n();
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem('sd_sidebar_collapsed') === 'true');
+  const active = groups.flatMap(group => group.items).find(item => item.id === screen)!;
+  const serverTime = new Date(state.serverTime);
+
+  function toggleCollapsed() {
+    setCollapsed(value => {
+      localStorage.setItem('sd_sidebar_collapsed', String(!value));
+      return !value;
+    });
+  }
+
   return (
-    <div className="min-h-dvh bg-[#091014] text-slate-100">
-      <button aria-label="Close navigation" className={`fixed inset-0 z-30 bg-black/60 backdrop-blur-sm md:hidden ${menuOpen ? 'block' : 'hidden'}`} onClick={() => onMenu(false)} />
-      <aside className={`sidebar ${menuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
-        <div className="grid h-12 w-12 place-items-center rounded-2xl border border-amber-300/25 bg-amber-300/10 text-lg font-black text-amber-200">SD</div>
-        <nav className="mt-8 flex w-full flex-1 flex-col gap-2">
-          {nav.map(item => (
-            <button key={item.id} className={`nav-button ${screen === item.id ? 'nav-button-active' : ''}`} onClick={() => { onScreen(item.id); onMenu(false); }}>
-              <span className="text-base">{item.glyph}</span><small>{item.label}</small>
-            </button>
+    <div className={`game-shell ${collapsed ? 'game-shell-collapsed' : ''}`}>
+      <button aria-label={t('shell.closeNavigation')} className={`nav-scrim ${menuOpen ? 'nav-scrim-open' : ''}`} onClick={() => onMenu(false)} />
+      <aside className={`game-sidebar ${menuOpen ? 'game-sidebar-open' : ''}`}>
+        <div className="brand-lockup">
+          <div className="brand-mark"><span>SD</span><i /></div>
+          <div className="brand-copy"><b>SOL DORADO</b><small>{t('shell.persistentCity')}</small></div>
+          <button className="sidebar-collapse" aria-label={collapsed ? t('shell.expandSidebar') : t('shell.collapseSidebar')} onClick={toggleCollapsed}>
+            <GameIcon name={collapsed ? 'panel-left-open' : 'panel-left-close'} size={16} />
+          </button>
+        </div>
+
+        <nav className="game-nav" aria-label={t('shell.navigation')}>
+          {groups.map(group => (
+            <div className="nav-group" key={group.label}>
+              <div className="nav-group-label">{t(group.label)}</div>
+              {group.items.map(item => (
+                <button
+                  key={item.id}
+                  className={`game-nav-item ${screen === item.id ? 'game-nav-item-active' : ''}`}
+                  title={collapsed ? t(item.label) : undefined}
+                  onClick={() => { onScreen(item.id); onMenu(false); }}
+                >
+                  <span className="nav-icon"><GameIcon name={item.icon} size={18} /></span>
+                  <span className="nav-copy"><b>{t(item.label)}</b><small>{stageLabel(item.stage, t)}</small></span>
+                  <span className={`stage-dot stage-dot-${item.stage}`} />
+                </button>
+              ))}
+            </div>
           ))}
         </nav>
-        <div className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_14px_#34d399]" title="Online" />
+
+        <div className="sidebar-player">
+          <div className="player-avatar">{state.character?.displayName.slice(0, 2).toUpperCase() ?? 'MC'}</div>
+          <div className="sidebar-player-copy"><b>{state.character ? runtime(state.character.displayName) : t('shell.noCharacter')}</b><small><span /> {t('shell.sessionOnline')}</small></div>
+          <GameIcon name="wifi" size={15} />
+        </div>
       </aside>
 
-      <div className="md:pl-[78px]">
-        <header className="sticky top-0 z-20 border-b border-white/8 bg-[#091014]/88 px-4 py-3 backdrop-blur-xl sm:px-6">
-          <div className="mx-auto flex max-w-7xl items-center gap-3">
-            <button className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 md:hidden" onClick={() => onMenu(true)}>☰</button>
-            <div className="min-w-0 flex-1">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.28em] text-amber-200">Sol Dorado</div>
-              <div className="truncate text-xs text-slate-400">{state.location.district} · {state.location.streetSegment}</div>
-            </div>
-            <div className="rounded-xl border border-emerald-300/15 bg-emerald-300/8 px-3 py-2 text-right">
-              <small className="block text-[8px] uppercase tracking-[0.18em] text-slate-500">Cash</small>
-              <strong className="text-sm text-emerald-200">${(state.hud.cashCents / 100).toLocaleString(undefined, { minimumFractionDigits: 0 })}</strong>
-            </div>
+      <div className="game-stage">
+        <header className="game-header">
+          <button className="desktop-menu-button" onClick={() => onMenu(true)} aria-label={t('shell.openNavigation')}>☰</button>
+          <div className="header-context">
+            <span>{t(active.label)}</span>
+            <b>{state.location.district}</b>
+            <small><GameIcon name="map-pin" size={12} /> {state.location.streetSegment}</small>
           </div>
+          <div className="header-spacer" />
+          <div className="language-toggle" role="group" aria-label={t('common.language')}>
+            <GameIcon name="languages" size={15} />
+            {(['bg', 'en'] as const).map(value => <button key={value} className={locale === value ? 'language-option language-option-active' : 'language-option'} onClick={() => setLocale(value)}>{value.toUpperCase()}</button>)}
+          </div>
+          <div className="header-status"><GameIcon name="clock" size={14} /><span><small>{t('shell.serverTime')}</small><b>{serverTime.toLocaleTimeString(locale === 'bg' ? 'bg-BG' : 'en-US', { hour: '2-digit', minute: '2-digit' })}</b></span></div>
+          <div className="header-status header-status-online"><GameIcon name="wifi" size={14} /><span><small>{t('shell.shard')}</small><b>Dorado One</b></span></div>
+          <div className="cash-balance"><GameIcon name="coins" size={17} /><span><small>{t('shell.cash')}</small><b>{money(state.hud.cashCents)}</b></span></div>
         </header>
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6"><Hud state={state.hud} /></div>
-        <main className="mx-auto max-w-7xl px-4 pb-12 sm:px-6">{children}</main>
+
+        <div className="hud-wrap"><Hud state={state.hud} /></div>
+        <main className="game-content">{children}</main>
       </div>
     </div>
   );
+}
+
+function stageLabel(stage: FeatureStage, t: (key: TranslationKey) => string) {
+  if (stage === 'live') return t('stage.live');
+  if (stage === 'foundation') return t('stage.foundation');
+  return t('stage.migration');
 }
