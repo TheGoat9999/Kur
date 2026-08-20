@@ -43,11 +43,9 @@ function MarketScene({ alerted }: { alerted: boolean }) {
     <Building x={292} y={528} w={260} h={148} sign="DORADO OFFICES" tone="cool" entranceX={420} side="south" />
     <ParkingLot x={575} y={540} w={210} />
     <Building x={812} y={528} w={350} h={148} sign="PALMAS MARKET" tone="cool" entranceX={950} side="south" />
-    <Car x={330} y={306} /><Car x={720} y={411} flip /><Car x={875} y={309} /><Car x={120} y={411} flip />
     <Tree x={330} y={244} /><Tree x={716} y={244} /><Tree x={1118} y={244} /><Tree x={286} y={503} /><Tree x={803} y={503} />
     <Lamp x={377} y={271} /><Lamp x={761} y={271} /><Lamp x={1100} y={515} /><Bench x={1010} y={508} />
     <Hydrant x={132} y={273} /><Mailbox x={998} y={273} /><Bicycle x={736} y={506} />
-    <Person x={430} y={500} /><Person x={1040} y={260} /><Person x={170} y={261} />
     <StreetSign x={690} y={272} top="MARKET ST" bottom="BLOCK 3" />
     <ServiceGate x={1060} y={535} />
   </>;
@@ -65,8 +63,6 @@ function CornerScene() {
     <Building x={866} y={528} w={305} h={148} sign="PALMAS OFFICES" tone="cool" entranceX={1015} side="south" />
     <BusShelter x={598} y={504} /><Bench x={504} y={506} /><Bench x={705} y={506} />
     <Tree x={425} y={95} /><Tree x={515} y={120} /><Tree x={620} y={86} /><Tree x={675} y={160} /><Tree x={365} y={503} /><Tree x={1080} y={503} />
-    <Car x={190} y={311} /><Car x={485} y={409} flip /><Car x={910} y={307} /><Car x={1005} y={410} flip />
-    <Person x={744} y={504} accent /><Person x={450} y={258} /><Person x={1100} y={258} />
     <Lamp x={375} y={272} /><Lamp x={780} y={272} /><Hydrant x={315} y={273} /><Mailbox x={1040} y={273} />
     <StreetSign x={770} y={272} top="CYPRESS AVE" bottom="MARKET" />
   </>;
@@ -84,9 +80,7 @@ function AlleyScene() {
     <ParkingLot x={630} y={540} w={255} />
     <Building x={910} y={528} w={265} h={148} sign="WAREHOUSE B" tone="warm" entranceX={1040} side="south" />
     <Dumpster x={278} y={486} /><Pallets x={410} y={500} /><UtilityBox x={654} y={246} /><TrashBags x={870} y={502} />
-    <DeliveryVan x={462} y={304} /><Car x={770} y={409} flip /><Car x={104} y={309} />
     <Lamp x={335} y={271} /><Lamp x={865} y={271} /><Lamp x={610} y={516} />
-    <Person x={700} y={505} /><Person x={385} y={260} />
     <StreetSign x={770} y={272} top="MIRA" bottom="SERVICE" />
   </>;
 }
@@ -108,12 +102,9 @@ function Building({ x, y, w, h, sign, tone, entranceX, side = 'north', shop, ale
 
 function Park({x,y,w,h}:{x:number;y:number;w:number;h:number}) { return <g><rect x={x} y={y} width={w} height={h} rx="16" fill="#294b41" /><path d={`M${x+25} ${y+h-25}C${x+90} ${y+45} ${x+210} ${y+135} ${x+w-24} ${y+28}`} fill="none" stroke="#b9ad8e" strokeWidth="18" opacity=".65" /><Tree x={x+75} y={y+52} /><Tree x={x+178} y={y+72} /><Tree x={x+270} y={y+48} /><Bench x={x+120} y={y+h-35} /></g>; }
 function Crosswalk({x,y,width,height}:{x:number;y:number;width:number;height:number}) { return <g opacity=".82">{Array.from({length:7},(_,i)=><rect key={i} x={x+i*(width/7)} y={y} width={width/12} height={height} fill="#dedbd2" />)}</g>; }
-function Car({x,y,flip=false}:{x:number;y:number;flip?:boolean}) { return <g transform={`translate(${x} ${y}) rotate(${flip?180:0})`} filter="url(#sd-drop-v2)"><rect width="112" height="46" rx="15" fill="#53676d" /><rect x="25" y="7" width="58" height="32" rx="8" fill="#20353b" /><rect x="8" y="9" width="14" height="28" rx="5" fill="#293a40" /><rect x="90" y="9" width="14" height="28" rx="5" fill="#293a40" /></g>; }
-function DeliveryVan({x,y}:{x:number;y:number}) { return <g transform={`translate(${x} ${y})`} filter="url(#sd-drop-v2)"><rect width="132" height="60" rx="12" fill="#697579" /><rect x="78" y="8" width="42" height="27" rx="4" fill="#21363d" /><rect x="13" y="13" width="50" height="35" rx="3" fill="#d9caa9" opacity=".3" /><circle cx="28" cy="60" r="10" fill="#111c20" /><circle cx="102" cy="60" r="10" fill="#111c20" /></g>; }
 function Tree({x,y}:{x:number;y:number}) { return <g><rect x={x-4} y={y+15} width="8" height="28" fill="#5a4234" /><circle cx={x} cy={y} r="23" fill="#315b4e" /><circle cx={x-13} cy={y+3} r="14" fill="#3c6b59" /><circle cx={x+14} cy={y-5} r="14" fill="#294f44" /></g>; }
 function Lamp({x,y}:{x:number;y:number}) { return <g><path d={`M${x} ${y}v-42`} stroke="#182a2e" strokeWidth="6" /><circle cx={x} cy={y-46} r="7" fill="#f0d181" /></g>; }
 function Bench({x,y}:{x:number;y:number}) { return <g><rect x={x} y={y} width="64" height="10" rx="3" fill="#35484c" /><path d={`M${x+9} ${y+10}v17M${x+55} ${y+10}v17M${x+10} ${y-10}v10M${x+32} ${y-10}v10M${x+54} ${y-10}v10`} stroke="#1b2c30" strokeWidth="4" /></g>; }
-function Person({x,y,accent=false}:{x:number;y:number;accent?:boolean}) { return <g><circle cx={x} cy={y-18} r="6" fill="#d2a177" /><rect x={x-5} y={y-11} width="10" height="18" rx="4" fill={accent?'#75608e':'#4f6670'} /><path d={`M${x-3} ${y+7}l-2 13M${x+3} ${y+7}l2 13`} stroke="#23363d" strokeWidth="4" /></g>; }
 function StreetSign({x,y,top,bottom}:{x:number;y:number;top:string;bottom:string}) { return <g><path d={`M${x} ${y}v-53`} stroke="#182b30" strokeWidth="6" /><rect x={x-50} y={y-75} width="100" height="19" rx="4" fill="#28514b" /><rect x={x-39} y={y-52} width="78" height="17" rx="4" fill="#35635b" /><text x={x} y={y-62} textAnchor="middle" fill="#e8efec" fontSize="8" fontWeight="800">{top}</text><text x={x} y={y-40} textAnchor="middle" fill="#e8efec" fontSize="7" fontWeight="800">{bottom}</text></g>; }
 function ParkingLot({x,y,w}:{x:number;y:number;w:number}) { return <g><rect x={x} y={y} width={w} height="126" rx="6" fill="#26363b" /><path d={`M${x+20} ${y+8}v108M${x+w/2} ${y+8}v108M${x+w-20} ${y+8}v108`} stroke="#e6e1d7" strokeWidth="3" opacity=".36" /></g>; }
 function LoadingYard({x,y,w}:{x:number;y:number;w:number}) { return <g><rect x={x} y={y} width={w} height="126" rx="6" fill="#29393e" /><path d={`M${x+20} ${y+35}h${w-40}M${x+20} ${y+70}h${w-40}`} stroke="#75868a" strokeWidth="5" opacity=".35" /><Pallets x={x+45} y={y+90} /></g>; }
