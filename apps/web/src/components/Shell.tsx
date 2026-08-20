@@ -33,13 +33,14 @@ const groups: ReadonlyArray<{
 interface Props {
   state: BootstrapState;
   screen: Screen;
+  inventoryOpen: boolean;
   menuOpen: boolean;
   onScreen: (screen: Screen) => void;
   onMenu: (open: boolean) => void;
   children: ReactNode;
 }
 
-export function Shell({ state, screen, menuOpen, onScreen, onMenu, children }: Props) {
+export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu, children }: Props) {
   const { locale, setLocale, t, money, runtime } = useI18n();
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem('sd_sidebar_collapsed') === 'true');
   const active = groups.flatMap(group => group.items).find(item => item.id === screen)!;
@@ -68,18 +69,21 @@ export function Shell({ state, screen, menuOpen, onScreen, onMenu, children }: P
           {groups.map(group => (
             <div className="nav-group" key={group.label}>
               <div className="nav-group-label">{t(group.label)}</div>
-              {group.items.map(item => (
-                <button
-                  key={item.id}
-                  className={`game-nav-item ${screen === item.id ? 'game-nav-item-active' : ''}`}
-                  title={collapsed ? t(item.label) : undefined}
-                  onClick={() => { onScreen(item.id); onMenu(false); }}
-                >
-                  <span className="nav-icon"><GameIcon name={item.icon} size={18} /></span>
-                  <span className="nav-copy"><b>{t(item.label)}</b><small>{stageLabel(item.stage, t)}</small></span>
-                  <span className={`stage-dot stage-dot-${item.stage}`} />
-                </button>
-              ))}
+              {group.items.map(item => {
+                const itemActive = item.id === 'inventory' ? inventoryOpen : screen === item.id && !inventoryOpen;
+                return (
+                  <button
+                    key={item.id}
+                    className={`game-nav-item ${itemActive ? 'game-nav-item-active' : ''}`}
+                    title={item.id === 'inventory' ? `${t(item.label)} · I` : collapsed ? t(item.label) : undefined}
+                    onClick={() => { onScreen(item.id); onMenu(false); }}
+                  >
+                    <span className="nav-icon"><GameIcon name={item.icon} size={18} /></span>
+                    <span className="nav-copy"><b>{t(item.label)}</b><small>{item.id === 'inventory' ? `${stageLabel(item.stage, t)} · I` : stageLabel(item.stage, t)}</small></span>
+                    <span className={`stage-dot stage-dot-${item.stage}`} />
+                  </button>
+                );
+              })}
             </div>
           ))}
         </nav>
