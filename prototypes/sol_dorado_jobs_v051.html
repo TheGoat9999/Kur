@@ -1,0 +1,726 @@
+<!doctype html><html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sol Dorado Jobs v0.1</title>
+<style>
+:root{--bg:#090d11;--p:#111820;--p2:#0d141a;--line:#2a3540;--txt:#edf2f5;--muted:#8f9ca6;--gold:#e0a34a;--green:#64cb8e;--red:#e96f6f;--blue:#65a9e8}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:14px system-ui,-apple-system,sans-serif}.top{height:62px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);position:sticky;top:0;background:#0b1015;z-index:30}.brand{font-weight:900;letter-spacing:.15em}.brand small{display:block;color:var(--gold);font-size:9px}.shell{display:grid;grid-template-columns:205px 1fr;min-height:calc(100vh - 62px)}aside{padding:12px 8px;border-right:1px solid var(--line);background:#0b1015}.nav{display:block;width:100%;padding:11px;border:0;border-radius:9px;background:transparent;color:#aeb8c0;text-align:left}.nav.on{background:#18222a;color:white;box-shadow:inset 3px 0 var(--gold)}main{padding:14px;max-width:1300px;width:100%;margin:auto}.hud{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:13px}.hud>div,.card,.row{background:var(--p);border:1px solid var(--line);border-radius:12px;padding:10px}.hud small{display:block;color:var(--muted);font-size:8px}.page{display:none}.page.on{display:block}.ey{color:var(--gold);font-size:9px;font-weight:900;letter-spacing:.16em}.muted{color:var(--muted)}.grid{display:grid;grid-template-columns:1.35fr .65fr;gap:12px}.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.opp{background:var(--p2);border:1px solid var(--line);border-radius:12px;padding:12px}.opp.lock{opacity:.58}.opp h3{margin:5px 0}.chip{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:3px 7px;font-size:9px;margin:2px}.green{color:#82e2a9;border-color:#64cb8e66}.gold{color:#f1bc6d;border-color:#e0a34a66}.red{color:#ff9999;border-color:#e96f6f66}.btn{padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#18222a;color:white}.btn.primary{background:#c88a31;border-color:var(--gold);color:#111;font-weight:800}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.skill{display:grid;grid-template-columns:135px 1fr 35px;gap:8px;align-items:center;margin:8px 0}.bar{height:7px;background:#080d11;border-radius:8px;overflow:hidden}.bar i{display:block;height:100%;background:var(--blue)}.detail{display:grid;grid-template-columns:135px 1fr;padding:7px 0;border-bottom:1px solid #ffffff0d}.detail span{color:var(--muted)}.tester{border-style:dashed;border-color:#e0a34a66}.notice{position:fixed;right:14px;bottom:14px;background:#121a20;border:1px solid var(--line);border-left:3px solid var(--gold);padding:11px;border-radius:10px;display:none;z-index:80;max-width:350px}.notice.on{display:block}.modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:14px;z-index:70}.modal.on{display:flex}.modalCard{width:min(650px,100%);background:#111820;border:1px solid var(--line);border-radius:16px;padding:17px;max-height:88vh;overflow:auto}.sideToggle{display:none;position:absolute;left:12px;top:14px;width:36px;height:36px;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:9px;background:#151e25;color:white;font-size:19px}.scrim{display:none}.shiftStep{border-left:3px solid var(--gold)}.shiftHero{padding:14px;background:linear-gradient(135deg,#17232b,#0d141a);border:1px solid var(--line);border-radius:12px;margin-bottom:10px}.timer{font-size:28px;font-weight:900;color:var(--gold)}.task{padding:12px;background:#0b1116;border:1px solid var(--line);border-radius:10px;margin:8px 0}.task.done{opacity:.5}.progress{height:8px;background:#070b0e;border-radius:10px;overflow:hidden;margin:8px 0}.progress i{display:block;height:100%;background:var(--gold);transition:.2s}.event{padding:13px;background:#101920;border:1px solid #394650;border-radius:11px;margin:9px 0}.event.opportunity{border-left:3px solid var(--gold)}.event.problem{border-left:3px solid var(--red)}.event.skill{border-left:3px solid var(--blue)}.event h3{margin:5px 0}.shiftStats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:9px 0}.shiftStats>div{background:#0a1015;border:1px solid var(--line);border-radius:9px;padding:8px}.shiftStats small{display:block;color:var(--muted);font-size:8px}.lockedChoice{opacity:.45}.summary{display:grid;grid-template-columns:1fr auto;gap:7px;padding:6px 0;border-bottom:1px solid #ffffff0d}.careerMap{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.careerNode{padding:10px;background:#0d141a;border:1px solid var(--line);border-radius:10px}.careerNode.open{border-color:#64cb8e66}.careerNode.lock{opacity:.45}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.cards,.careerMap{grid-template-columns:1fr}}
+@media(max-width:800px){.top{padding-left:58px}.shell{display:block}.sideToggle{display:flex}aside{position:fixed;left:0;top:62px;bottom:0;width:245px;z-index:50;transform:translateX(-105%);transition:.2s;background:#0b1015}aside.open{transform:none}main{padding:10px}.hud{grid-template-columns:repeat(4,1fr)}.scrim{display:block;position:fixed;inset:62px 0 0;background:#0009;z-index:45;opacity:0;pointer-events:none}.scrim.on{opacity:1;pointer-events:auto}.cards{grid-template-columns:1fr}}
+
+/* v0.1.4 mobile shift UI */
+.modalCard{width:min(720px,100%);padding:14px}
+.modalCard>.actions:last-child{margin-top:12px}
+.event h3{font-size:18px;line-height:1.25}
+.event p{line-height:1.45}
+.event .actions{display:grid;grid-template-columns:1fr;gap:8px}
+.event .btn{width:100%;min-height:52px;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:10px;line-height:1.25}
+.event .btn small{display:block!important;white-space:nowrap;font-size:11px;opacity:.8}
+.event .btn.primary{color:#111}
+.eventHeader{display:flex;align-items:flex-start;gap:10px}
+.eventHeader .ey{padding-top:5px;flex:0 0 auto}
+.eventHeaderText{min-width:0;flex:1}
+.eventHeaderText h3{margin:0 0 5px}
+.shiftFooter{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
+.shiftFooter .btn{width:100%}
+@media(max-width:800px){
+ .modal{padding:0;align-items:flex-end}
+ .modalCard{width:100%;max-height:calc(100dvh - 72px);border-radius:18px 18px 0 0;padding:12px;overflow-x:hidden}
+ .shiftHero{padding:11px;margin-bottom:8px}
+ .shiftHero h2{font-size:20px;margin:5px 0}
+ .shiftStats{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .shiftStats>div{padding:7px;min-width:0}
+ .timer{font-size:21px}
+ .task{padding:10px;font-size:13px}
+ .event{padding:11px;margin:8px 0;overflow:hidden}
+ .eventHeader{display:block}
+ .eventHeader .ey{padding:0 0 5px}
+ .event h3{font-size:18px;margin:2px 0 6px;overflow-wrap:anywhere}
+ .event p{font-size:14px;margin:0 0 10px;overflow-wrap:anywhere}
+ .event .actions{display:grid!important;grid-template-columns:1fr!important;margin-top:8px}
+ .event .btn{display:block!important;width:100%;min-height:54px;text-align:left;padding:10px 12px;white-space:normal;overflow-wrap:anywhere}
+ .event .btn small{margin-top:4px;white-space:normal}
+ .modalCard>.actions:last-child{position:sticky;bottom:-12px;background:#111820;padding:9px 0 12px;margin-bottom:-12px}
+ .modalCard>.actions:last-child .btn{width:100%}
+}
+@media(max-width:380px){
+ .shiftStats{grid-template-columns:1fr 1fr 1fr}
+ .shiftStats small{font-size:7px}
+ .event h3{font-size:17px}
+}
+
+.unlockBanner{grid-column:1/-1;border:1px solid #e0a34a88;background:#18150f;border-radius:12px;padding:12px}
+.unlockBanner h3{margin:4px 0}.why{font-size:12px;color:var(--muted);margin-top:6px}
+.almost{border-style:dashed}.reqLine{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid #ffffff0b}
+.pathHint{padding:9px;border-left:3px solid var(--blue);background:#0d141a;border-radius:8px;margin-top:8px}
+
+/* v0.2.2 — immersive Work Scene V2 */
+.workScene{position:relative;overflow:hidden;border:1px solid #33414b;border-radius:16px;background:
+radial-gradient(circle at 85% 10%,rgba(224,163,74,.14),transparent 30%),
+linear-gradient(145deg,#17232b 0%,#0a1015 72%);box-shadow:0 18px 45px rgba(0,0,0,.28)}
+.workScene:before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 0 62%,rgba(255,255,255,.025) 62% 63%,transparent 63%);pointer-events:none}
+.sceneTop{position:relative;padding:15px 15px 10px}
+.sceneIdentity{display:flex;gap:12px;align-items:center}
+.sceneIcon{width:48px;height:48px;border-radius:13px;display:grid;place-items:center;font-size:27px;background:#0a1015;border:1px solid #44525c;box-shadow:inset 0 0 20px rgba(255,255,255,.025)}
+.sceneIdentity h2{margin:1px 0 2px;font-size:21px}.sceneIdentity p{margin:0;color:var(--muted);font-size:12px}
+.sceneTelemetry{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:7px;margin-top:13px}
+.telemetry{padding:9px 10px;border:1px solid #34414a;background:rgba(6,10,13,.58);border-radius:10px}
+.telemetry small{display:block;color:#82919c;font-size:8px;letter-spacing:.09em}.telemetry strong{display:block;margin-top:2px;font-size:17px}
+.timeline{height:5px;background:#06090b;border-radius:10px;overflow:hidden;margin-top:11px}.timeline i{display:block;height:100%;background:linear-gradient(90deg,#d8a34c,#f0c878);transition:.25s}
+.sceneBody{position:relative;padding:0 15px 15px}
+.currentActivity{display:flex;gap:10px;align-items:flex-start;padding:11px;border-radius:11px;background:rgba(6,10,13,.58);border:1px solid #29353d;margin-top:2px}
+.activityPulse{width:9px;height:9px;margin-top:5px;border-radius:50%;background:#d8a34c;box-shadow:0 0 0 0 rgba(216,163,76,.5);animation:sdPulse 1.5s infinite}
+@keyframes sdPulse{70%{box-shadow:0 0 0 7px rgba(216,163,76,0)}100%{box-shadow:0 0 0 0 rgba(216,163,76,0)}}
+.currentActivity b{display:block}.currentActivity span{display:block;color:var(--muted);font-size:12px;margin-top:3px;line-height:1.35}
+.sceneEvent{margin-top:10px;border-radius:13px;overflow:hidden;border:1px solid #46545e;background:#111a20;box-shadow:0 10px 30px rgba(0,0,0,.22)}
+.sceneEventHead{padding:12px 13px;border-bottom:1px solid #2d3941;background:linear-gradient(90deg,rgba(224,163,74,.09),transparent)}
+.sceneEventHead .ey{margin-bottom:5px}.sceneEventHead h3{font-size:19px;margin:0 0 4px}.sceneEventHead p{margin:0;color:#a9b5bd;line-height:1.4}
+.choiceDeck{display:grid;gap:8px;padding:10px}
+.choiceCard{position:relative;width:100%;border:1px solid #394750;background:#172229;color:#e9eef1;border-radius:11px;padding:11px 12px;text-align:left;cursor:pointer;transition:.15s}
+.choiceCard:hover{transform:translateY(-1px);border-color:#687985;background:#1b2931}.choiceCard:active{transform:scale(.99)}
+.choiceCard.primaryChoice{border-color:#9a753a;background:linear-gradient(90deg,#292113,#1b211f)}
+.choiceCard strong{display:block;font-size:14px}.choiceCard span{display:block;color:#8fa0aa;font-size:11px;margin-top:4px}
+.choiceCard:disabled{opacity:.42;cursor:not-allowed}
+.sceneNotice{margin-top:10px;padding:10px 12px;border-radius:10px;background:#0b1217;border:1px solid #293740}
+.sceneNotice.good{border-left:3px solid #55b982}.sceneNotice.bad{border-left:3px solid #d46b63}.sceneNotice.neutral{border-left:3px solid #6c8798}
+.sceneNotice b{display:block}.sceneNotice span{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.sceneControls{display:flex;justify-content:flex-end;margin-top:10px}.sceneControls .btn{font-size:11px}
+.resultHero{text-align:center;padding:17px 10px}.resultGrade{font-size:32px;font-weight:900;margin:5px 0}.resultMoney{font-size:25px;color:var(--gold);font-weight:900}
+.revealRow{display:grid;grid-template-columns:1fr auto;gap:8px;padding:8px 0;border-bottom:1px solid #ffffff0c}.revealRow span{color:var(--muted)}
+@media(max-width:800px){
+ .modalCard{background:#0b1116}.workScene{border-radius:14px}.sceneTop,.sceneBody{padding-left:11px;padding-right:11px}
+ .sceneTelemetry{grid-template-columns:1.15fr 1fr 1fr}.telemetry{padding:8px}.telemetry strong{font-size:15px}
+ .sceneEventHead{padding:11px}.sceneEventHead h3{font-size:18px}.choiceDeck{padding:8px}.choiceCard{min-height:58px;padding:11px}
+}
+
+/* v0.3 — Gameplay Archetypes */
+.archetypeBadge{display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border:1px solid #40505b;border-radius:999px;font-size:9px;color:#9fb0ba;background:#0b1217;margin-top:5px}
+.playSurface{margin-top:10px;border:1px solid #33414b;border-radius:13px;background:#0a1015;overflow:hidden}
+.surfaceHead{display:flex;justify-content:space-between;align-items:center;padding:9px 11px;border-bottom:1px solid #29353d}.surfaceHead small{color:var(--muted)}
+.routeMap{position:relative;height:150px;background:
+linear-gradient(35deg,transparent 46%,#28343b 47% 50%,transparent 51%),
+linear-gradient(145deg,transparent 46%,#222e35 47% 50%,transparent 51%),#0d151a;background-size:95px 70px}
+.routeNode{position:absolute;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#162229;border:2px solid #52636e;font-size:15px;box-shadow:0 5px 14px #0008}
+.routeNode.done{border-color:#55b982}.routeNode.active{border-color:#d8a34c;box-shadow:0 0 0 5px rgba(216,163,76,.12)}
+.routeLabel{position:absolute;transform:translate(-40%,-100%);font-size:9px;color:#aab7bf;white-space:nowrap}
+.workflowBoard{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:9px}
+.workItem{min-height:78px;padding:9px;border:1px solid #34424b;border-radius:10px;background:#121c22}.workItem b{font-size:12px}.workItem small{display:block;color:var(--muted);margin-top:5px}.workItem.hot{border-color:#9b7135;background:#201a11}
+.customerStage{padding:12px}.npcCard{display:flex;gap:11px;align-items:center}.npcAvatar{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-size:25px;background:#17232a;border:1px solid #46555e}.mood{font-size:10px;color:#d2ad6a;margin-top:3px}
+.siteGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;padding:9px}.siteObjective{padding:9px;border:1px solid #34424b;border-radius:10px;background:#111a20}.siteObjective.done{opacity:.55;border-color:#47715d}
+.stateChips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}.stateChip{font-size:9px;padding:4px 7px;border-radius:999px;background:#18242b;border:1px solid #3a4a54;color:#9fb0ba}
+@media(max-width:500px){.workflowBoard{grid-template-columns:1fr 1fr}.routeMap{height:135px}.siteGrid{grid-template-columns:1fr 1fr}}
+
+/* v0.3.2 — Interactive Job Workspaces */
+.workItem,.routeNode,.siteObjective,.npcCard{cursor:pointer;transition:.15s}
+.workItem:hover,.siteObjective:hover,.npcCard:hover{border-color:#71838e;transform:translateY(-1px)}
+.workItem:active,.siteObjective:active,.npcCard:active,.routeNode:active{transform:scale(.98)}
+.workItem.completed,.siteObjective.completed{opacity:.48;border-color:#47715d}
+.workItem.selected,.siteObjective.selected{border-color:#d8a34c;background:#251d11}
+.workspaceHint{padding:8px 10px;color:#91a1ab;font-size:11px;border-top:1px solid #27343c}
+.workspaceAction{margin-top:8px;padding:10px;border:1px solid #394850;border-radius:10px;background:#10191f}
+.workspaceAction h4{margin:0 0 4px}.workspaceAction p{margin:0;color:var(--muted);font-size:12px;line-height:1.4}
+.workspaceChoices{display:grid;gap:7px;margin-top:9px}.workspaceChoices .choiceCard{min-height:50px}
+.routeNode{border-style:solid}.routeNode.available{border-color:#6d8491}.routeNode.completed{border-color:#55b982;background:#11231b}
+.routeNode.locked{opacity:.35;cursor:default}
+.customerQueue{display:grid;gap:7px;padding:10px}.customerRow{display:flex;align-items:center;gap:9px;padding:9px;border:1px solid #34424b;border-radius:10px;background:#111a20;cursor:pointer}
+.customerRow.active{border-color:#d8a34c}.customerRow.done{opacity:.45}
+.miniProgress{height:4px;background:#080c0f;border-radius:5px;margin-top:7px;overflow:hidden}.miniProgress i{display:block;height:100%;background:#d8a34c}
+@media(max-width:500px){.workItem,.siteObjective{min-height:72px}.workspaceAction{padding:9px}}
+
+/* v0.3.3 — Work UX rebuild */
+.workItem,.siteObjective,.customerRow,.routeNode{color:var(--txt);font:inherit}
+.workItem b,.siteObjective b,.customerRow b{color:var(--txt)}
+.workItem small,.siteObjective small,.customerRow small{color:#9aa8b2}
+.workItem,.siteObjective{appearance:none;-webkit-appearance:none;text-align:left}
+.workScene{overflow:visible}
+.workspaceHint{font-size:12px;line-height:1.4;background:#0d151a}
+.workspaceStepTitle{padding:11px 12px 4px;font-size:12px;color:#aebbc3}
+.workspaceStepTitle b{color:var(--txt)}
+.workspaceAction{margin:10px;border-color:#53636d;background:#121c22}
+.workspaceAction .choiceCard{color:var(--txt);background:#18242b;border-color:#40515c}
+.workspaceAction .choiceCard strong{color:var(--txt)}
+.workspaceAction .choiceCard span{color:#9dacb5}
+.workItem,.siteObjective{position:relative}
+.workItem:not(.completed):after,.siteObjective:not(.completed):after{content:"›";position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:22px;color:#71838d}
+.workItem.selected,.siteObjective.selected{box-shadow:0 0 0 2px rgba(224,163,74,.18)}
+.taskStatus{display:inline-flex;margin-top:7px;padding:3px 6px;border-radius:999px;font-size:9px;border:1px solid #40515b;color:#9dacb5}
+.taskStatus.done{color:#7fd9a3;border-color:#47715d}
+.shiftInstruction{padding:10px 12px;margin-top:10px;border-radius:10px;background:#151e24;border:1px solid #36454f;font-size:12px;line-height:1.45}
+.shiftInstruction b{color:var(--gold)}
+.actionBusy{pointer-events:none;opacity:.65}
+.actionProgress{height:5px;background:#080d10;border-radius:9px;overflow:hidden;margin-top:10px}
+.actionProgress i{display:block;height:100%;width:0;background:var(--gold);animation:workAction 1.35s linear forwards}
+@keyframes workAction{to{width:100%}}
+.sceneTelemetry{grid-template-columns:1fr 1fr 1fr}
+@media(max-width:800px){
+ .modal{padding:0;align-items:flex-end}
+ .modalCard{width:100%;max-width:none;height:calc(100dvh - 56px);max-height:none;border-radius:20px 20px 0 0;padding:0;overflow-y:auto;overflow-x:hidden}
+ #modalBody{min-height:100%}
+ .workScene{border:0;border-radius:0;min-height:100%;box-shadow:none;background:linear-gradient(155deg,#162129 0,#091015 60%)}
+ .sceneTop{position:sticky;top:0;z-index:5;background:rgba(11,17,22,.96);backdrop-filter:blur(10px);padding:12px;border-bottom:1px solid #293740}
+ .sceneIdentity .sceneIcon{width:42px;height:42px;font-size:23px}.sceneIdentity h2{font-size:19px}
+ .sceneTelemetry{margin-top:10px}.telemetry strong{font-size:14px}
+ .sceneBody{padding:10px 10px 20px}
+ .currentActivity{display:none}
+ .playSurface{margin-top:0;border-radius:12px}
+ .workflowBoard,.siteGrid{grid-template-columns:1fr;gap:7px}
+ .workItem,.siteObjective{min-height:68px;padding:12px 42px 12px 12px}
+ .customerQueue{padding:8px}
+ .routeMap{height:190px}
+ .sceneControls{padding-bottom:12px}
+ #modalFooter{display:none!important}
+}
+
+/* v0.3.4 — contextual shift gameplay + modal repair */
+@media(max-width:800px){
+  .modal:not(.shiftMode){padding:12px;align-items:flex-end}
+  .modal:not(.shiftMode) .modalCard{height:auto;max-height:82dvh;width:100%;border-radius:18px;padding:15px;overflow:auto}
+  .modal.shiftMode{padding:0;align-items:flex-end}
+  .modal.shiftMode .modalCard{height:calc(100dvh - 56px);max-height:none;width:100%;border-radius:20px 20px 0 0;padding:0;overflow:auto}
+}
+.briefHero{display:flex;gap:11px;align-items:center;margin-bottom:12px}.briefHero .sceneIcon{flex:0 0 auto}
+.briefTasks{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.briefTask{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#0c1318;color:#aab6bd;font-size:11px}
+.routineGrid{display:grid;gap:7px;padding:9px}.routineTask{appearance:none;-webkit-appearance:none;width:100%;display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:9px;text-align:left;padding:11px;border:1px solid #35434c;border-radius:11px;background:#121c22;color:var(--txt);font:inherit}
+.routineTask .ri{width:38px;height:38px;border-radius:9px;display:grid;place-items:center;background:#0b1217;font-size:20px}.routineTask b{display:block;color:var(--txt)}.routineTask small{display:block;color:#8f9da6;margin-top:3px}.routineTask .go{font-size:20px;color:#71828c}.routineTask.done{opacity:.48}.routineTask.done .go{color:#62c88c}
+.eventOverlay{margin:9px;border:1px solid #4b5b65;border-radius:13px;background:#101920;overflow:hidden}.eventOverlay .sceneEventHead{background:linear-gradient(90deg,rgba(224,163,74,.1),transparent)}
+.eventContext{font-size:10px;color:#9aa9b2;margin-top:5px}.choiceDeck .choiceCard{color:var(--txt)}.choiceDeck .choiceCard strong{color:var(--txt)}
+.outcomeCard{margin:9px;padding:12px;border:1px solid #3a4952;border-radius:11px;background:#111a20}.outcomeCard.good{border-left:3px solid #55b982}.outcomeCard.bad{border-left:3px solid #d46b63}.outcomeCard.neutral{border-left:3px solid #6c8798}
+
+/* v0.4 — Career Progression v2 */
+.careerLevel{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:11px;border:1px solid #35434c;border-radius:12px;background:#10191f;margin:10px 0}
+.levelOrb{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--gold);font-weight:900;font-size:18px;background:#17150f}
+.xpTrack{height:6px;background:#080d10;border-radius:8px;overflow:hidden;margin-top:6px}.xpTrack i{display:block;height:100%;background:var(--gold)}
+.proficiency{font-size:9px;padding:4px 7px;border:1px solid #465660;border-radius:999px;color:#aebbc3;white-space:nowrap}
+.proficiency.skilled{border-color:#91713c;color:#e2b665}.proficiency.specialist{border-color:#55a97b;color:#7fd5a0}
+.progressGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.progressCard{padding:10px;border:1px solid #34424c;border-radius:10px;background:#10191f}.progressCard small{display:block;color:#8d9ba4}.progressCard strong{display:block;margin-top:3px}
+.unlockPath{margin-top:10px;padding:10px;border:1px solid #34434c;border-radius:11px;background:#0d151a}.unlockPath h4{margin:0 0 7px}.pathRow{display:flex;gap:7px;align-items:center;padding:7px 0;border-top:1px solid #26333b}.pathRow:first-of-type{border-top:0}.pathIcon{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:#172229}.pathRow.locked{opacity:.58}.pathRow.ready{color:#dcb05e}
+.skillXpRow{display:grid;grid-template-columns:1fr auto;gap:5px;align-items:center;margin-top:7px}.skillXpRow small{color:#92a1aa}.skillXpRow .xpTrack{grid-column:1/-1;margin-top:0;height:4px}
+.shiftGrowth{margin-top:8px;display:grid;gap:5px}.growthLine{display:flex;justify-content:space-between;padding:6px 8px;border-radius:8px;background:#111a20;font-size:11px}.growthLine b{color:#78cf9a}
+@media(max-width:500px){.progressGrid{grid-template-columns:1fr}.careerLevel{grid-template-columns:auto 1fr}.careerLevel>.proficiency{grid-column:1/-1;width:max-content}}
+
+/* v0.4.1 — mobile briefing UI repair */
+.jobBrief{display:grid;gap:12px}
+.jobBriefTop{display:grid;grid-template-columns:58px minmax(0,1fr);gap:12px;align-items:center}
+.jobBriefTop .sceneIcon{width:58px;height:58px;font-size:30px}
+.jobBriefTitle{min-width:0}.jobBriefTitle h2{font-size:24px;line-height:1.08;margin:2px 0 6px;overflow-wrap:anywhere}
+.jobBriefDesc{margin:0;color:#c7d0d5;line-height:1.45}
+.jobProgress{display:grid;gap:9px;padding:12px;border:1px solid #35434c;border-radius:12px;background:#10191f}
+.jobProgressHead{display:grid;grid-template-columns:48px minmax(0,1fr);gap:10px;align-items:center}
+.jobProgress .levelOrb{width:48px;height:48px;font-size:18px}
+.jobProgressCopy{min-width:0}.jobProgressCopy b{display:block}.jobProgressCopy small{display:block;margin-top:2px;white-space:normal}
+.jobProgressMeta{display:flex;gap:6px;flex-wrap:wrap}
+.briefStats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.briefStat{padding:10px;border:1px solid #34424b;border-radius:10px;background:#0d151a}.briefStat small{display:block;color:#8f9ca6;font-size:10px}.briefStat strong{display:block;margin-top:4px;font-size:14px}
+.briefSection h3{font-size:12px;margin:0 0 7px;color:#aeb9c0;text-transform:uppercase;letter-spacing:.08em}
+.briefTasksV2{display:grid;gap:6px}.briefTaskV2{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid #303e47;border-radius:9px;background:#0e161b;color:#c8d1d6;font-size:12px}.briefTaskV2 i{font-style:normal;color:#dca54e}
+.briefActions{display:grid;gap:8px}.briefActions .btn{width:100%;min-height:48px;font-size:15px}
+.briefFoot{font-size:11px;line-height:1.45;color:#8998a1}
+@media(max-width:800px){
+ .modal:not(.shiftMode){padding:10px;align-items:flex-end}
+ .modal:not(.shiftMode) .modalCard{height:auto!important;max-height:86dvh!important;min-height:0;width:100%;max-width:680px;border-radius:18px;padding:0!important;overflow:hidden!important}
+ .modal:not(.shiftMode) #modalBody{padding:15px;max-height:calc(86dvh - 52px);overflow-y:auto;overscroll-behavior:contain}
+ .modal:not(.shiftMode) #modalFooter{display:flex!important;position:static!important;margin:0!important;padding:8px 15px 12px!important;background:#0b1116;border-top:1px solid #26333b}
+ .modal:not(.shiftMode) #modalFooter .btn{width:100%}
+}
+@media(max-width:500px){
+ .jobBrief{gap:10px}.jobBriefTop{grid-template-columns:50px minmax(0,1fr);gap:10px}.jobBriefTop .sceneIcon{width:50px;height:50px;font-size:26px}
+ .jobBriefTitle h2{font-size:21px}.briefStats{grid-template-columns:1fr 1fr}
+ .jobProgress{padding:10px}.jobProgressHead{grid-template-columns:44px minmax(0,1fr)}.jobProgress .levelOrb{width:44px;height:44px}
+}
+
+/* v0.4.2 runtime + opportunity page repair */
+#oppList:empty::before{content:"Loading opportunities…";display:block;padding:14px;color:var(--muted);border:1px solid var(--line);border-radius:12px}
+@media(max-width:700px){
+ #opps .grid{grid-template-columns:1fr}
+ #oppList.cards{grid-template-columns:1fr}
+ #profile{display:none}
+ .tester{margin-top:12px!important}
+}
+
+/* v0.5 — Career Depth & Employer Trust */
+.trustStrip{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid #34434c;border-radius:10px;background:#0d151a}
+.trustStrip strong{margin-left:auto}.responsibilityTag{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;border:1px solid #485963;font-size:10px;color:#b6c2c9}
+.responsibilityTag.hot{border-color:#9a7438;color:#e5b760}.nextTrust{padding:10px;border-left:3px solid #d99e42;background:#11191e;border-radius:8px;font-size:11px;line-height:1.45}
+.taskTier{font-size:9px;color:#d7a64e;text-transform:uppercase;letter-spacing:.07em;margin-top:3px}
+.supervisorCall{margin:9px;padding:12px;border:1px solid #9b773d;border-radius:12px;background:linear-gradient(135deg,#17170f,#10191f)}
+.supervisorCall .ey{margin-bottom:4px}.supervisorCall h3{margin:0 0 5px;font-size:16px}.supervisorCall p{margin:0;color:#aeb9bf;line-height:1.4}
+
+/* v0.5.1 — skill counter repair */
+.skill>span{min-width:0}.skillXpText{display:block;margin-top:3px;color:#82919a;font-size:9px;font-weight:500}
+.skill>b{min-width:38px;text-align:right;white-space:nowrap}
+#skillList .bar{min-width:80px}
+</style></head><body>
+<header class="top"><button class="sideToggle" id="toggle">☰</button><div class="brand">SOL DORADO<small>JOBS v0.5.1 · CAREER DEPTH</small></div><div style="display:flex;align-items:center;gap:8px"><button class="btn" id="langBtn" onclick="toggleLang()">EN</button><div><b id="clock">--:--</b><small id="globalTime" style="display:block;color:#8f9ca6">GLOBAL TIME</small></div></div></header><div class="scrim" id="scrim"></div><div class="shell"><aside id="nav"></aside><main>
+<div class="hud"><div><small>❤️ ЗДРАВЕ</small><b>94%</b></div><div><small>⚡ ЕНЕРГИЯ</small><b>82%</b></div><div><small>🍽️ СИТОСТ</small><b>71%</b></div><div><small>💧 ХИДРАТАЦИЯ</small><b>88%</b></div><div><small>🧠 СТРЕС</small><b>8%</b></div><div><small>🚔 HEAT</small><b>0%</b></div><div><small>💵 ПАРИ</small><b id="money">$1,250</b></div></div>
+
+<section class="page on" id="opps"><div class="grid"><div><div class="ey">WORK OPPORTUNITIES</div><h2>Работа в Sol Dorado</h2><p class="muted">Не избираш permanent job от City Hall. Градът ти показва малко релевантни възможности според skills, qualifications и work history.</p><div id="oppList" class="cards"></div></div><div><div class="card" id="profile"></div><div class="card tester" style="margin-top:10px"><div class="ey">PROTOTYPE TEST MODE</div><h3>Career state</h3><div class="actions"><button class="btn" type="button" onclick="preset('fresh')">Fresh</button><button class="btn" type="button" onclick="preset('some')">Some Experience</button><button class="btn" type="button" onclick="preset('experienced')">Experienced</button><button class="btn" type="button" onclick="simulate()">+ 5 good shifts</button></div><p class="muted">Development controls, не final-game mechanic.</p></div></div></div></section>
+
+<section class="page" id="skills"><div class="ey">CHARACTER DEVELOPMENT</div><h2>Skills & Qualifications</h2><div class="grid"><div class="card"><h3>Skills</h3><div id="skillList"></div></div><div class="card"><h3>Qualifications</h3><div id="quals"></div></div></div></section>
+<section class="page" id="career"><div class="ey">CAREER ECOSYSTEM</div><h2>Възможни направления</h2><p class="muted">Това е prototype visualization. В normal gameplay player вижда Opportunities, не огромен unlock tree.</p><div id="careerMap" class="careerMap"></div></section>
+<section class="page" id="history"><div class="ey">EMPLOYMENT HISTORY</div><h2>Work record</h2><div id="historyList"></div></section>
+<section class="page" id="log"><div class="ey">ACTIVITY</div><h2>Дневник</h2><div id="logs"></div></section>
+</main></div><div class="modal" id="modal"><div class="modalCard" id="modalCard"><div id="modalBody"></div><div class="actions" id="modalFooter"><button class="btn" onclick="closeM()" id="closeBtn">Затвори</button></div></div></div><div class="notice" id="notice"><b id="nt"></b><div class="muted" id="nx"></div></div>
+
+<script>
+const $=x=>document.getElementById(x);
+const SK=['Manual Work','Logistics','Driving','Navigation','Safety','Machinery','Construction','Mechanical','Electrical','Technical','Customer Service','Commerce','Communication','Leadership','Agriculture','Fishing','Seamanship','Mining','Forestry','Cooking','Hospitality'];
+const SKBG={'Manual Work':'Физически труд','Logistics':'Логистика','Driving':'Шофиране','Navigation':'Навигация','Safety':'Безопасност','Machinery':'Машини','Construction':'Строителство','Mechanical':'Механика','Electrical':'Електротехника','Technical':'Технически умения','Customer Service':'Обслужване на клиенти','Commerce':'Търговия','Communication':'Комуникация','Leadership':'Лидерство','Agriculture':'Земеделие','Fishing':'Риболов','Seamanship':'Морски умения','Mining':'Минно дело','Forestry':'Горско стопанство','Cooking':'Готвене','Hospitality':'Хотелиерство'};
+const T={bg:{op:'Възможности',skills:'Умения',paths:'Кариери',hist:'История',log:'Дневник',title:'Работа в Sol Dorado',intro:'Не избираш постоянна професия от меню. Получаваш малко подходящи предложения според опита, уменията и квалификациите си.',profile:'РАБОТЕН ПРОФИЛ',newc:'Нов в Sol Dorado',dev:'Развиващ се работник',shifts:'Завършени смени',rel:'Надеждност',rep:'Репутация пред работодатели',view:'Виж работата',locked:'Все още не отговаряш',noexp:'Не се изисква опит',actions:'Какво ще правиш',duration:'Формат на смяната',start:'Започни смяна',working:'Работиш...',complete:'Смяната приключи',qual:'Квалификации',test:'ТЕСТОВ РЕЖИМ',fresh:'Нов герой',some:'Малко опит',experienced:'Опитен работник'},en:{op:'Opportunities',skills:'Skills',paths:'Career Paths',hist:'History',log:'Activity',title:'Work in Sol Dorado',intro:'You do not select a permanent profession from a menu. You receive a small set of relevant opportunities based on experience, skills and qualifications.',profile:'WORK PROFILE',newc:'New to Sol Dorado',dev:'Developing worker',shifts:'Completed shifts',rel:'Reliability',rep:'Employer reputation',view:'View job',locked:'Not qualified yet',noexp:'No experience required',actions:'What you will do',duration:'Shift format',start:'Start shift',working:'Working...',complete:'Shift complete',qual:'Qualifications',test:'PROTOTYPE TEST MODE',fresh:'Fresh character',some:'Some experience',experienced:'Experienced worker'}};
+const JOBS=[
+{id:'warehouse',i:'📦',bg:'Складов помощник',en:'Warehouse Helper',obg:'QuickDrop Logistics',oen:'QuickDrop Logistics',dbg:'Приемаш и подреждаш доставки в градски склад. Работата развива логистика и физически труд.',den:'Receive and organize incoming freight in a city warehouse. Builds logistics and manual-work skills.',abg:['Провери входящата пратка','Подреди палетите безопасно','Подготви стоката за експедиция'],aen:['Check incoming freight','Organize pallets safely','Prepare goods for dispatch'],req:{},gain:['Logistics','Manual Work'],play:1},
+{id:'grounds',i:'🌿',bg:'Работник по поддръжка',en:'Grounds Worker',obg:'Общински услуги Sol Dorado',oen:'Sol Dorado Municipal Services',dbg:'Поддържаш паркове и обществени пространства. Работиш с инструменти и следиш зоната да е безопасна.',den:'Maintain parks and public spaces. Use basic equipment and keep work areas safe.',abg:['Обезопаси работната зона','Поддържай зелените площи','Провери оборудването'],aen:['Secure the work area','Maintain green areas','Check equipment'],req:{},gain:['Manual Work','Safety'],play:1},
+{id:'sanitation',i:'🗑️',bg:'Служител по чистота',en:'Sanitation Worker',obg:'Dorado Waste Services',oen:'Dorado Waste Services',dbg:'Работиш по маршрут за събиране на отпадъци. Трябва да реагираш на блокирани точки и опасни материали.',den:'Work a waste-collection route and react to blocked stops and hazardous materials.',abg:['Събери отпадъците по маршрута','Обработи рисковите торби безопасно','Докладвай проблемните точки'],aen:['Collect waste on the route','Handle risky bags safely','Report problematic stops'],req:{'Manual Work':1},gain:['Manual Work','Safety','Logistics'],play:1},
+{id:'delivery',i:'🚐',bg:'Помощник доставки',en:'Delivery Assistant',obg:'QuickDrop Logistics',oen:'QuickDrop Logistics',dbg:'Подготвяш и разнасяш градски доставки.',den:'Prepare and deliver local shipments.',abg:['Подготви пратките', 'Избери ред на доставките', 'Предай пратките'],aen:['Prepare parcels', 'Choose delivery order', 'Hand over parcels'],play:1,req:{Logistics:1},gain:['Logistics','Navigation']},
+{id:'courier',i:'📬',bg:'Куриер',en:'Courier Driver',obg:'Dorado Express',oen:'Dorado Express',dbg:'Самостоятелни доставки с автомобил и планиране на маршрут.',den:'Independent vehicle deliveries and route planning.',req:{Logistics:2,Driving:1},qual:'Driver License',gain:['Driving','Navigation','Customer Service']},
+{id:'forklift',i:'🏗️',bg:'Мотокарист',en:'Forklift Operator',obg:'Harbor Freight',oen:'Harbor Freight',dbg:'Товаро-разтоварна дейност с мотокар.',den:'Load and unload freight using a forklift.',req:{Logistics:2,Machinery:1},qual:'Forklift Certificate',gain:['Machinery','Logistics','Safety']},
+{id:'construction',i:'🧱',bg:'Строителен работник',en:'Construction Laborer',obg:'Dorado BuildCo',oen:'Dorado BuildCo',dbg:'Физическа работа по строителни обекти.',den:'Manual work on construction sites.',abg:['Обезопаси зоната', 'Подготви материалите', 'Изпълни задачата на обекта'],aen:['Secure the area', 'Prepare materials', 'Complete the site task'],play:1,req:{'Manual Work':2},gain:['Construction','Safety','Manual Work']},
+{id:'landscape',i:'🌳',bg:'Озеленител',en:'Landscaping Crew',obg:'Verde Works',oen:'Verde Works',dbg:'Поддръжка и изграждане на зелени площи.',den:'Maintain and build landscaped areas.',req:{'Manual Work':1},gain:['Manual Work','Machinery','Safety']},
+{id:'retail',i:'🏪',bg:'Служител в магазин',en:'Retail Assistant',obg:'Mercado Dorado',oen:'Mercado Dorado',dbg:'Зареждане, клиенти и ежедневни задачи в магазин.',den:'Stocking, customers and everyday retail tasks.',abg:['Обслужи клиентите', 'Следи наличностите', 'Поддържай магазина'],aen:['Serve customers', 'Monitor stock', 'Maintain the store'],play:1,req:{'Customer Service':1},gain:['Customer Service','Commerce']},
+{id:'kitchen',i:'🍳',bg:'Помощник кухня',en:'Kitchen Hand',obg:'El Sol Kitchen',oen:'El Sol Kitchen',dbg:'Подготовка на продукти и помощ в кухнята.',den:'Food preparation and kitchen support.',abg:['Подготви продуктите', 'Подреди поръчките', 'Почисти станцията'],aen:['Prepare ingredients', 'Prioritize orders', 'Clean the station'],play:1,req:{'Manual Work':1,Safety:1},gain:['Cooking','Safety']},
+{id:'server',i:'☕',bg:'Сервитьор / бариста',en:'Server / Barista',obg:'Café Oro',oen:'Café Oro',dbg:'Обслужване на клиенти в заведение.',den:'Serve customers in a café.',req:{'Customer Service':1},gain:['Customer Service','Hospitality']},
+{id:'cleaning',i:'🧹',bg:'Почистващ екип',en:'Cleaning Crew',obg:'Dorado Facilities',oen:'Dorado Facilities',dbg:'Почистване и поддръжка на обекти.',den:'Clean and maintain facilities.',req:{},gain:['Manual Work','Safety']},
+{id:'dock',i:'⚓',bg:'Пристанищен работник',en:'Dock Worker',obg:'Пристанище Sol Dorado',oen:'Port of Sol Dorado',dbg:'Товарна работа в пристанището.',den:'Freight handling at the port.',abg:['Провери товара', 'Определи приоритет', 'Подготви товаренето'],aen:['Check cargo', 'Set priority', 'Prepare loading'],play:1,req:{'Manual Work':2,Logistics:1},gain:['Logistics','Manual Work','Safety']},
+{id:'trucking',i:'🚛',bg:'Шофьор на товарен камион',en:'Local Freight Driver',obg:'Harbor Freight',oen:'Harbor Freight',dbg:'Превозваш товари между градски и индустриални точки.',den:'Move freight between city and industrial locations.',req:{Driving:3,Logistics:2},qual:'Commercial License',gain:['Driving','Logistics','Navigation']},
+{id:'bus',i:'🚌',bg:'Автобусен шофьор',en:'Bus Driver',obg:'Dorado Transit',oen:'Dorado Transit',dbg:'Обслужваш линия на градския транспорт.',den:'Operate a city public-transport route.',req:{Driving:2,'Customer Service':1},qual:'Commercial License',gain:['Driving','Safety','Customer Service']},
+{id:'taxi',i:'🚕',bg:'Таксиметров шофьор',en:'Taxi Driver',obg:'Oro Cab',oen:'Oro Cab',dbg:'Превозваш пътници и избираш ефективни маршрути.',den:'Transport passengers and choose efficient routes.',req:{Driving:1,'Customer Service':1},qual:'Driver License',gain:['Driving','Navigation','Customer Service']},
+{id:'farm',i:'🌾',bg:'Фермерски работник',en:'Farm Hand',obg:'San Aurelio Farms',oen:'San Aurelio Farms',dbg:'Работа по земеделски задачи и техника.',den:'Agricultural work and basic machinery.',req:{'Manual Work':1},gain:['Agriculture','Machinery','Manual Work']},
+{id:'fishing',i:'🎣',bg:'Помощник рибар',en:'Fishing Deckhand',obg:'Harbor Fisheries',oen:'Harbor Fisheries',dbg:'Работа на риболовен екип в пристанището.',den:'Work with a commercial fishing crew.',req:{'Manual Work':1},gain:['Fishing','Seamanship','Safety']},
+{id:'mining',i:'⛏️',bg:'Миньорски работник',en:'Mine Laborer',obg:'Dorado Minerals',oen:'Dorado Minerals',dbg:'Физическа и машинна работа в минна зона.',den:'Manual and machinery work in a mining area.',req:{'Manual Work':2,Safety:1},gain:['Mining','Machinery','Safety']},
+{id:'forestry',i:'🪵',bg:'Горски работник',en:'Forestry Ground Crew',obg:'Sierra Timber',oen:'Sierra Timber',dbg:'Работа по добив и поддръжка в горски райони.',den:'Forestry harvesting and ground maintenance.',req:{'Manual Work':2,Safety:1},gain:['Forestry','Machinery','Safety']},
+{id:'moving',i:'📦',bg:'Хамалин / преместване',en:'Moving Crew',obg:'MoveSD',oen:'MoveSD',dbg:'Преместваш имущество между адреси.',den:'Move property between addresses.',req:{'Manual Work':1},gain:['Manual Work','Logistics','Customer Service']},
+{id:'manufacturing',i:'🏭',bg:'Производствен работник',en:'Production Worker',obg:'Dorado Manufacturing',oen:'Dorado Manufacturing',dbg:'Работа по производствена линия и оборудване.',den:'Work with production-line processes and equipment.',req:{Safety:1},gain:['Technical','Machinery','Safety']},
+{id:'shopassist',i:'🔧',bg:'Помощник в сервиз',en:'Workshop Assistant',obg:'Westside Auto',oen:'Westside Auto',dbg:'Начална работа в автосервиз. Това е вход към бъдещата отделна mechanic profession система.',den:'Entry-level workshop work and a pathway into the future mechanic profession system.',req:{'Manual Work':1},gain:['Mechanical','Technical','Safety']},
+{id:'electassist',i:'⚡',bg:'Помощник електротехник',en:'Electrical Helper',obg:'Dorado Power Contractors',oen:'Dorado Power Contractors',dbg:'Помагаш по базови електротехнически задачи под надзор.',den:'Assist with basic electrical work under supervision.',req:{Safety:1,Technical:1},gain:['Electrical','Technical','Safety']}
+];
+const fresh=()=>({lang:'bg',money:1250,skills:Object.fromEntries(SK.map(x=>[x,0])),quals:[],rep:50,reliability:50,shifts:0,history:[],logs:[]});
+
+/* v0.4.2 — restored Career Progression engine */
+const CAREER_XP=[0,80,190,340,540,800,1120,1510,1970,2500];
+const JOB_XP=[0,45,120,230,390,610,900,1260,1700];
+const SKILL_XP=[0,35,95,180,300,460,670,930];
+function lvlFromXp(x,table){x=Number(x)||0;let l=0;for(let i=1;i<table.length;i++)if(x>=table[i])l=i;return l}
+function pctXp(x,table){x=Number(x)||0;let l=lvlFromXp(x,table),lo=table[l]||0,hi=table[Math.min(l+1,table.length-1)];return hi===lo?100:Math.max(0,Math.min(100,(x-lo)/(hi-lo)*100))}
+function ensureProgress(){
+ if(!s||typeof s!=='object')return;
+ s.skills=(s.skills&&typeof s.skills==='object')?s.skills:{};
+ s.quals=Array.isArray(s.quals)?s.quals:[];
+ s.discovered=Array.isArray(s.discovered)?s.discovered:['warehouse','grounds'];
+ s.pendingUnlocks=Array.isArray(s.pendingUnlocks)?s.pendingUnlocks:[];
+ s.history=Array.isArray(s.history)?s.history:[];
+ s.logs=Array.isArray(s.logs)?s.logs:[];
+ s.careerXp=Number(s.careerXp)||0;s.jobXp=(s.jobXp&&typeof s.jobXp==='object')?s.jobXp:{};
+ s.skillXp=(s.skillXp&&typeof s.skillXp==='object')?s.skillXp:{};
+ s.employerRep=(s.employerRep&&typeof s.employerRep==='object')?s.employerRep:{};
+ s.qualProgress=(s.qualProgress&&typeof s.qualProgress==='object')?s.qualProgress:{};
+ for(let j of JOBS)s.jobXp[j.id]=Number(s.jobXp[j.id])||0;
+ for(let k of SK){s.skillXp[k]=Number(s.skillXp[k])||0;s.skills[k]=lvlFromXp(s.skillXp[k],SKILL_XP)}
+}
+function careerLevel(){ensureProgress();return lvlFromXp(s.careerXp,CAREER_XP)+1}
+function jobLevel(id){ensureProgress();return lvlFromXp(s.jobXp[id]||0,JOB_XP)+1}
+function prof(id){let l=jobLevel(id);return l<=2?(s.lang==='bg'?'Начинаещ':'Beginner'):l<=4?(s.lang==='bg'?'Опитен':'Experienced'):l<=6?(s.lang==='bg'?'Умел':'Skilled'):(s.lang==='bg'?'Специалист':'Specialist')}
+function skillLevel(k){ensureProgress();return lvlFromXp(s.skillXp[k]||0,SKILL_XP)}
+function addSkillXp(k,n){ensureProgress();s.skillXp[k]=(s.skillXp[k]||0)+n;s.skills[k]=lvlFromXp(s.skillXp[k],SKILL_XP)}
+function addJobXp(id,n){ensureProgress();s.jobXp[id]=(s.jobXp[id]||0)+n}
+function addCareerXp(n){ensureProgress();s.careerXp=(s.careerXp||0)+n}
+function addEmployerRep(org,n){ensureProgress();s.employerRep[org]=Math.max(0,Math.min(100,(s.employerRep[org]||0)+n))}
+
+function employerKey(j){return j.id||j.oen||j.obg}
+function employerRepFor(j){ensureProgress();return Math.round(s.employerRep[employerKey(j)]||0)}
+function repBand(v){
+ if(v>=75)return s.lang==='bg'?'Доверен':'Trusted';
+ if(v>=45)return s.lang==='bg'?'Надежден':'Reliable';
+ if(v>=20)return s.lang==='bg'?'Познат':'Known';
+ return s.lang==='bg'?'Нов':'New';
+}
+function shiftRepDelta(a){
+ let completed=(a.workDone||[]).length,total=workspaceData(a).length||1,delta=0;
+ if(completed>=total)delta+=1;
+ else if(completed/total<.67)delta-=1;
+ delta+=(a.good||0);delta-=(a.bad||0);
+ let serious=['unsafe','incident','damage','complaint','abandoned'];
+ if(a.flags&&serious.some(k=>a.flags[k]))delta-=1;
+ return Math.max(-3,Math.min(3,delta))
+}
+
+function responsibilityTier(j){
+ let jl=jobLevel(j.id),rep=employerRepFor(j);
+ if(jl>=7&&rep>=75)return 4;
+ if(jl>=5&&rep>=45)return 3;
+ if(jl>=3&&rep>=20)return 2;
+ return 1
+}
+function responsibilityName(j){
+ let t=responsibilityTier(j);
+ return s.lang==='bg'?['','Под наблюдение','Самостоятелна работа','Повишено доверие','Отговорна роля'][t]:['','Supervised','Independent','High trust','Responsible role'][t]
+}
+function nextTrustText(j){
+ let t=responsibilityTier(j),jl=jobLevel(j.id),rep=employerRepFor(j);
+ if(t===1)return s.lang==='bg'?`Следваща стъпка: самостоятелна работа. Нужно е Job Lv 3 и репутация 20. В момента: Lv ${jl}, ${rep}/100.`:`Next: independent work. Requires Job Lv 3 and reputation 20. Current: Lv ${jl}, ${rep}/100.`;
+ if(t===2)return s.lang==='bg'?`Работодателят вече ти поверява самостоятелни задачи. Следва: по-сложни отговорности при Job Lv 5 и репутация 45.`:`Your employer now trusts you with independent tasks. Next: complex responsibility at Job Lv 5 and reputation 45.`;
+ if(t===3)return s.lang==='bg'?`Вече получаваш сложни задачи и приоритетни ситуации. Следва: отговорна роля при Job Lv 7 и репутация 75.`:`You now receive complex tasks and priority situations. Next: responsible role at Job Lv 7 and reputation 75.`;
+ return s.lang==='bg'?'Работодателят ти има високо доверие. Могат да възникват ситуации, в които отговаряш за резултата на цялата смяна.':'Your employer has high trust in you. Situations can now place responsibility for the whole shift on you.'
+}
+function jobTier(id){let l=jobLevel(id);return l>=7?4:l>=5?3:l>=3?2:1}
+function complexityLabel(id){let t=jobTier(id);return s.lang==='bg'?['','Рутинна работа','Самостоятелна работа','Сложни задачи','Отговорна работа'][t]:['','Routine work','Independent work','Complex tasks','High-responsibility work'][t]}
+function careerSummaryHTML(j){
+ ensureProgress();let cx=s.careerXp||0,jx=s.jobXp[j.id]||0,jl=jobLevel(j.id),cl=careerLevel(),pc=prof(j.id);
+ return `<div class="jobProgress"><div class="jobProgressHead"><div class="levelOrb">${jl}</div><div class="jobProgressCopy"><b>${s.lang==='bg'?'Професионален опит':'Job proficiency'}</b><small class="muted">${jx} XP · ${pc}</small><div class="xpTrack"><i style="width:${pctXp(jx,JOB_XP)}%"></i></div></div></div><div class="jobProgressMeta"><span class="proficiency">${s.lang==='bg'?'Ниво':'Level'} ${jl}</span><span class="proficiency">${complexityLabel(j.id)}</span></div></div><div class="briefStats"><div class="briefStat"><small>Career level</small><strong>${cl}</strong><div class="xpTrack"><i style="width:${pctXp(cx,CAREER_XP)}%"></i></div></div><div class="briefStat"><small>${s.lang==='bg'?'Репутация при работодателя':'Employer reputation'}</small><strong>${employerRepFor(j)}/100 · ${repBand(employerRepFor(j))}</strong></div></div>`
+}
+const CERTS=[
+ {id:'forklift',nameBg:'Сертификат за мотокар',nameEn:'Forklift Certificate',skill:'Machinery',skillLv:2,job:'warehouse',jobLv:3},
+ {id:'commercial',nameBg:'Търговски шофьорски лиценз',nameEn:'Commercial License',skill:'Driving',skillLv:3,job:'delivery',jobLv:3},
+ {id:'portSafety',nameBg:'Сертификат за пристанищна безопасност',nameEn:'Port Safety Certificate',skill:'Safety',skillLv:3,job:'dock',jobLv:4}
+];
+function certName(c){return s.lang==='bg'?c.nameBg:c.nameEn}
+function certReady(c){return skillLevel(c.skill)>=c.skillLv&&jobLevel(c.job)>=c.jobLv}
+function progressionPathsHTML(){
+ ensureProgress();
+ return `<div class="unlockPath"><h4>${s.lang==='bg'?'Квалификации':'Qualifications'}</h4>${CERTS.map(c=>{let owned=s.quals.includes(c.nameBg)||s.quals.includes(c.nameEn),ready=certReady(c);return `<div class="pathRow ${owned?'':ready?'ready':'locked'}"><div class="pathIcon">${owned?'✓':ready?'!':'🔒'}</div><div><b>${certName(c)}</b><small class="muted">${owned?(s.lang==='bg'?'Придобит':'Earned'):`${sk(c.skill)} ${c.skillLv} · Job Lv ${c.jobLv}`}</small></div>${ready&&!owned?`<button class="btn small" onclick="earnCert('${c.id}')">${s.lang==='bg'?'Тест':'Test'}</button>`:''}</div>`}).join('')}</div>`
+}
+function earnCert(id){let c=CERTS.find(x=>x.id===id);if(!c||!certReady(c))return;let n=certName(c);if(!s.quals.includes(n))s.quals.push(n);save();render()}
+let s;try{s=JSON.parse(localStorage.getItem('sd_jobs_v011'))||fresh()}catch(e){s=fresh()}if(!s.lang)s.lang='bg';
+if(!s.discovered)s.discovered=['warehouse','grounds'];
+if(!s.pendingUnlocks)s.pendingUnlocks=[];
+if(!s.employerRep)s.employerRep={};
+const save=()=>localStorage.setItem('sd_jobs_v011',JSON.stringify(s));const tr=k=>T[s.lang][k];const jn=j=>s.lang==='bg'?j.bg:j.en;const jo=j=>s.lang==='bg'?j.obg:j.oen;const jd=j=>s.lang==='bg'?j.dbg:j.den;const sk=k=>s.lang==='bg'?(SKBG[k]||k):k;
+function nav(){let q=[['💼',tr('op'),'opps'],['📈',tr('skills'),'skills'],['🧭',tr('paths'),'career'],['📄',tr('hist'),'history'],['📋',tr('log'),'log']];$('nav').innerHTML=q.map(x=>`<button class="nav ${document.querySelector('.page.on')?.id===x[2]?'on':''}" onclick="show('${x[2]}')">${x[0]} ${x[1]}</button>`).join('')}
+function show(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('on',x.id===id));$('nav').classList.remove('open');$('scrim').classList.remove('on');nav();render()}function eligible(j){return Object.entries(j.req).every(([k,v])=>(s.skills[k]||0)>=v)&&(!j.qual||s.quals.includes(j.qual))}
+function score(j){let r=Object.entries(j.req);return r.length?r.reduce((n,[k,v])=>n+Math.min(1,(s.skills[k]||0)/v),0)/r.length:1}
+function discover(){
+ let n=[];
+ JOBS.forEach(j=>{if(eligible(j)&&!s.discovered.includes(j.id)){s.discovered.push(j.id);s.pendingUnlocks.push(j.id);n.push(j.id)}});
+ if(n.length)save();return n
+}
+function missing(j){
+ let m=[];Object.entries(j.req).forEach(([k,v])=>{let c=s.skills[k]||0;if(c<v)m.push({name:sk(k),cur:c,need:v})});
+ if(j.qual&&!s.quals.includes(j.qual))m.push({name:j.qual,qual:true});return m
+}
+function visible(){
+ discover();
+ const playable=JOBS.filter(j=>j.play);
+ // Fresh character intentionally starts with only two choices.
+ if(s.shifts<2)return playable.filter(j=>['warehouse','grounds'].includes(j.id));
+ // Every unlocked playable job remains visible. Add up to 4 near-future jobs.
+ let open=playable.filter(j=>eligible(j));
+ let near=playable.filter(j=>!eligible(j)).sort((a,b)=>score(b)-score(a)).slice(0,4);
+ return [...open,...near]
+}
+function reqs(j){
+ let x=Object.entries(j.req).map(([k,v])=>`<span class="chip ${(s.skills[k]||0)>=v?'green':'red'}">${sk(k)} ${s.skills[k]||0}/${v}</span>`);
+ if(j.qual)x.push(`<span class="chip ${s.quals.includes(j.qual)?'green':'red'}">${j.qual}</span>`);
+ return x.join('')||`<span class="chip green">${tr('noexp')}</span>`
+}
+function dismissUnlock(id){s.pendingUnlocks=s.pendingUnlocks.filter(x=>x!==id);save();render()}
+function ackUnlock(id){dismissUnlock(id);openJob(id)}
+function render(){ensureProgress();
+ nav();discover();
+ document.querySelector('.tester .ey').textContent=tr('test');document.querySelector('.tester h3').textContent=s.lang==='bg'?'Състояние на кариерата':'Career state';
+ let cv=$('careerV2');if(cv)cv.innerHTML=`<div class="progressGrid"><div class="progressCard"><small>Career XP</small><strong>${s.careerXp||0} · Lv ${careerLevel()}</strong><div class="xpTrack"><i style="width:${pctXp(s.careerXp||0,CAREER_XP)}%"></i></div></div><div class="progressCard"><small>${s.lang==='bg'?'Модел':'Model'}</small><strong>${s.lang==='bg'?'Дългосрочно развитие':'Long-term progression'}</strong></div></div>${progressionPathsHTML()}`;
+ let tb=document.querySelectorAll('.tester button');if(tb.length>=4){tb[0].textContent=tr('fresh');tb[1].textContent=tr('some');tb[2].textContent=tr('experienced');tb[3].textContent=s.lang==='bg'?'+ 5 добри смени':'+ 5 good shifts'}
+ $('langBtn').textContent=s.lang==='bg'?'EN':'BG';$('globalTime').textContent=s.lang==='bg'?'ГЛОБАЛНО ВРЕМЕ':'GLOBAL TIME';
+ document.querySelector('#opps h2').textContent=tr('title');document.querySelector('#opps>div>div>p').textContent=tr('intro');
+ let v=visible(),banner='';
+ if(s.pendingUnlocks.length){let j=JOBS.find(x=>x.id===s.pendingUnlocks[0]);if(j)banner=`<div class="unlockBanner"><div class="ey">${s.lang==='bg'?'НОВА ВЪЗМОЖНОСТ':'NEW OPPORTUNITY'}</div><h3>${j.i} ${jn(j)}</h3><p>${jd(j)}</p><div class="why">${s.lang==='bg'?'Отключена е заради развитието на уменията ти.':'Unlocked because of your skill progression.'}</div><div class="actions"><button class="btn primary" onclick="ackUnlock('${j.id}')">${s.lang==='bg'?'Разгледай':'View'}</button><button class="btn" onclick="dismissUnlock('${j.id}')">${s.lang==='bg'?'По-късно':'Later'}</button></div></div>`}
+ $('oppList').innerHTML=banner+v.map(j=>{let ok=eligible(j),m=missing(j);return `<div class="opp ${ok?'':'lock almost'}"><div class="ey">${ok?jo(j):(s.lang==='bg'?'ПОЧТИ ДОСТЪПНА':'ALMOST QUALIFIED')}</div><h3>${j.i} ${jn(j)}</h3><p class="muted">${jd(j)}</p><div>${reqs(j)}</div>${!ok?`<div class="pathHint"><b>${s.lang==='bg'?'Какво ти липсва':'What you need'}</b>${m.map(x=>`<div class="reqLine"><span>${x.name}</span><b>${x.qual?(s.lang==='bg'?'Липсва':'Missing'):`${x.cur}/${x.need}`}</b></div>`).join('')}</div>`:''}<div class="actions">${ok?`<button class="btn primary" onclick="openJob('${j.id}')">${tr('view')}</button>`:`<button class="btn" disabled>${tr('locked')}</button>`}</div></div>`}).join('');
+ $('profile').innerHTML=`<div class="ey">${tr('profile')}</div><h3>${s.shifts?tr('dev'):tr('newc')}</h3><div class="detail"><span>${tr('shifts')}</span><b>${s.shifts}</b></div><div class="detail"><span>${tr('rel')}</span><b>${s.reliability}%</b></div><div class="detail"><span>${tr('rep')}</span><b>${s.rep}%</b></div><div class="detail"><span>${s.lang==='bg'?'Открити възможности':'Discovered opportunities'}</span><b>${s.discovered.length}/${JOBS.length}</b></div>`;
+ $('skillList').innerHTML=SK.map(k=>{
+ let xp=s.skillXp[k]||0,lv=skillLevel(k),max=SKILL_XP.length-1,next=lv>=max?null:SKILL_XP[lv+1];
+ return `<div class="skill"><span>${sk(k)}<small class="skillXpText">${next?`${xp}/${next} XP`:`${xp} XP · MAX`}</small></span><div class="bar"><i style="width:${pctXp(xp,SKILL_XP)}%"></i></div><b>Lv ${lv}</b></div>`
+}).join('');
+ $('careerMap').innerHTML=JOBS.map(j=>`<div class="careerNode ${eligible(j)?'open':'lock'}"><b>${j.i} ${jn(j)}</b><div class="muted">${jd(j)}</div><div>${reqs(j)}</div></div>`).join('');
+ $('historyList').innerHTML=s.history.length?s.history.map(x=>`<div class="row"><b>${x.job}</b><div class="muted">${x.result}</div></div>`).join(''):`<div class="row muted">${s.lang==='bg'?'Все още нямаш трудова история.':'No employment history yet.'}</div>`;
+ $('logs').innerHTML=s.logs.length?s.logs.map(x=>`<div class="row">${x}</div>`).join(''):`<div class="row muted">${s.lang==='bg'?'Няма активност.':'No activity.'}</div>`;
+ $('money').textContent='$'+s.money.toLocaleString()
+}
+function openJob(id){
+ let j=JOBS.find(x=>x.id===id),acts=(s.lang==='bg'?j.abg:j.aen)||[];
+ $('modal').classList.remove('shiftMode');
+ $('modalBody').innerHTML=`<div class="jobBrief">
+   <div class="jobBriefTop"><div class="sceneIcon">${j.i}</div><div class="jobBriefTitle"><div class="ey">${jo(j)}</div><h2>${jn(j)}</h2><div class="archetypeBadge">◈ ${ARCHNAME[s.lang][archetype(j)]}</div></div></div>
+   <p class="jobBriefDesc">${jd(j)}</p>
+   ${careerSummaryHTML(j)}
+   <div class="trustStrip"><span>${s.lang==='bg'?'Доверие':'Trust'}</span><span class="responsibilityTag ${responsibilityTier(j)>=3?'hot':''}">${responsibilityName(j)}</span><strong>${employerRepFor(j)}/100</strong></div>
+   <div class="nextTrust">${nextTrustText(j)}</div>
+   <div class="briefFoot">${s.lang==='bg'?'Репутацията при този работодател може да се покачва, да остане без промяна или да пада според изпълнението и последствията от решенията ти. Самото приключване на смяна не гарантира ръст.':'Reputation with this employer can rise, stay unchanged, or fall based on performance and the consequences of your decisions. Simply finishing a shift does not guarantee a gain.'}</div><div class="briefSection"><h3>${s.lang==='bg'?'Какво ще правиш':'What you will do'}</h3><div class="briefTasksV2">${acts.map(x=>`<div class="briefTaskV2"><i>•</i><span>${x}</span></div>`).join('')}</div></div>
+   ${j.play?`<div class="briefActions"><button type="button" class="btn primary" onclick="beginShift('${id}')">${tr('start')}</button></div>
+   <div class="briefFoot">${s.lang==='bg'?'По време на смяната избираш конкретни задачи. Непредвидими ситуации могат да се появят според работата и опита ти.':'During the shift you choose concrete tasks. Unpredictable situations can emerge based on the work and your experience.'}</div>`:''}
+  </div>`;
+ $('modal').classList.add('on')
+}
+const ARCH={
+warehouse:'workflow',grounds:'site',sanitation:'route',delivery:'route',retail:'customer',kitchen:'workflow',construction:'site',dock:'workflow'
+};
+const ARCHNAME={
+bg:{route:'Маршрут',workflow:'Работен поток',customer:'Клиенти',site:'Работна зона'},
+en:{route:'Route Work',workflow:'Workflow',customer:'Customer Work',site:'Work Site'}
+};
+function archetype(j){return ARCH[j.id]||'workflow'}
+function stateChipText(k){
+ const M={late:['Закъсняваш','Running late'],damaged:['Повредена пратка','Damaged parcel'],rush:['Натоварено','Rush period'],messy:['Неподредена станция','Messy station'],blocked:['Блокиран достъп','Blocked access'],priority:['Приоритетен товар','Priority cargo']};
+ return M[k]?(s.lang==='bg'?M[k][0]:M[k][1]):k
+}
+function workspaceData(a){
+ let ar=archetype(a.j);
+ if(ar==='route')return a.j.id==='delivery'?
+ [{i:'📦',bg:'Централен склад',en:'Central Depot'},{i:'🏠',bg:'Cypress Ave',en:'Cypress Ave'},{i:'🏪',bg:'Mercado Dorado',en:'Mercado Dorado'}]:
+ [{i:'🗑️',bg:'Southside',en:'Southside'},{i:'♻️',bg:'Cypress',en:'Cypress'},{i:'🗑️',bg:'Downtown',en:'Downtown'}];
+ if(ar==='workflow')return a.j.id==='kitchen'?
+ [{i:'🔥',bg:'Поръчки',en:'Orders'},{i:'🥕',bg:'Подготовка',en:'Prep'},{i:'🧽',bg:'Станция',en:'Station'}]:
+ a.j.id==='dock'?
+ [{i:'📋',bg:'Манифест',en:'Manifest'},{i:'📦',bg:'Товар',en:'Cargo'},{i:'🏗️',bg:'Товарене',en:'Loading'}]:
+ [{i:'📥',bg:'Приемане',en:'Receiving'},{i:'📦',bg:'Сортиране',en:'Sorting'},{i:'🚚',bg:'Експедиция',en:'Dispatch'}];
+ if(ar==='site')return a.j.id==='construction'?
+ [{i:'🦺',bg:'Обезопаси зоната',en:'Secure area'},{i:'🧱',bg:'Материали',en:'Materials'},{i:'🔨',bg:'Основна задача',en:'Main task'},{i:'✓',bg:'Проверка',en:'Inspection'}]:
+ [{i:'🦺',bg:'Обезопаси зоната',en:'Secure area'},{i:'🌿',bg:'Зелени площи',en:'Green areas'},{i:'💧',bg:'Напояване',en:'Irrigation'},{i:'✓',bg:'Проверка',en:'Inspection'}];
+ return [{i:'🧑',bg:'Клиент 1',en:'Customer 1'},{i:'🧓',bg:'Клиент 2',en:'Customer 2'},{i:'👩',bg:'Клиент 3',en:'Customer 3'}]
+}
+function surfaceHTML(a){
+ let items=workspaceData(a),done=a.workDone||[];
+ let body=`<div class="routineGrid">${items.map((x,i)=>`<button type="button" class="routineTask ${done.includes(i)?'done':''}" ${done.includes(i)?'disabled':''} onclick="doRoutineTask(${i})"><span class="ri">${done.includes(i)?'✓':x.i}</span><span><b>${s.lang==='bg'?x.bg:x.en}</b><small>${done.includes(i)?(s.lang==='bg'?'Завършено':'Completed'):(s.lang==='bg'?'Изпълни задачата':'Do task')}</small></span><span class="go">${done.includes(i)?'✓':'›'}</span></button>`).join('')}</div>`;
+ return `<div class="playSurface" id="workspace"><div class="surfaceHead"><div><b>${ARCHNAME[s.lang][archetype(a.j)]}</b><small style="display:block;margin-top:2px">${done.length}/${items.length} ${s.lang==='bg'?'завършени':'completed'}</small></div><small>${s.lang==='bg'?'СМЯНА':'SHIFT'}</small></div>${body}<div class="workspaceHint">${s.lang==='bg'?'Избирай какво да свършиш. Не всяка задача създава проблем; ситуациите възникват непредвидимо.':'Choose what to do. Not every task creates a problem; situations emerge unpredictably.'}</div></div>`
+}
+function doRoutineTask(i){
+ let a=window.activeShift;if(!a||a.finished||a.busy||a.workDone.includes(i))return;
+ a.busy=true;a.workSelected=i;
+ let items=workspaceData(a),x=items[i];
+ let ea=$('eventArea');
+ if(ea)ea.innerHTML=`<div class="outcomeCard neutral"><b>${x.i} ${s.lang==='bg'?x.bg:x.en}</b><div class="actionProgress"><i></i></div><span class="muted">${s.lang==='bg'?'Работиш...':'Working...'}</span></div>`;
+ setTimeout(()=>resolveRoutineTask(i),900)
+}
+function resolveRoutineTask(i){
+ let a=window.activeShift;if(!a)return;
+ a.workDone.push(i);a.workSelected=null;a.busy=false;
+ let gain=a.j.gain[Math.min(i,a.j.gain.length-1)]||a.j.gain[0];
+ a.skills[gain]=(a.skills[gain]||0)+1;a.skillXpEarned[gain]=(a.skillXpEarned[gain]||0)+6;addSkillXp(gain,6);
+ save();saveShiftProgress();
+ document.getElementById('workspace').outerHTML=surfaceHTML(a);
+ let ea=$('eventArea');
+ if(ea)ea.innerHTML=`<div class="outcomeCard neutral"><b>${s.lang==='bg'?'Задачата е изпълнена':'Task completed'}</b><span class="muted">${s.lang==='bg'?'Смяната продължава.':'The shift continues.'}</span></div>`;
+ updateShiftHeader();
+ // Contextual event chance grows as the shift progresses, but is never guaranteed.
+ let chance=a.workDone.length===1?.58:a.workDone.length===2?.68:.48;
+ if(a.workDone.length<workspaceData(a).length){
+   setTimeout(()=>{if(!maybeTrustedResponsibility()&&Math.random()<chance)spawnEvent();else if(!a.busy)maybeEnableFinish()},450)
+ }else{
+   if(!maybeTrustedResponsibility())maybeEnableFinish()
+ }
+}
+function updateShiftHeader(){
+ let a=window.activeShift;if(!a)return;let total=workspaceData(a).length;
+ if($('timer'))$('timer').textContent=`${a.workDone.length}/${total}`;
+ if($('eventCount'))$('eventCount').textContent=a.events;
+ if($('prog'))$('prog').style.width=(a.workDone.length/total*100)+'%';
+ if($('workStatus'))$('workStatus').textContent=a.busy?(s.lang==='bg'?'Ситуация':'Situation'):(s.lang==='bg'?'Работа':'Working')
+}
+function maybeEnableFinish(){
+ let a=window.activeShift;if(!a)return;
+ if(a.workDone.length>=2){
+   let c=document.querySelector('.sceneControls');
+   if(c)c.innerHTML=`<button type="button" class="btn primary" onclick="finishShift()">${s.lang==='bg'?'Приключи смяната':'Finish shift'}</button>${a.workDone.length<workspaceData(a).length?`<span class="muted">${s.lang==='bg'?'или продължи с останалите задачи':'or continue with the remaining tasks'}</span>`:''}`
+ }
+}
+const EVENTS={
+warehouse:[
+{type:'opportunity',bg:['📦 Приоритетна пратка','Началникът пита дали ще поемеш още една пратка преди края на смяната.'],en:['📦 Priority shipment','Your supervisor asks if you will take one more shipment before clocking out.'],choices:[
+{bg:'Поеми пратката',en:'Take the shipment',time:5,outcomes:[{w:72,pay:12,skill:'Logistics',quality:1,bg:'Пратката е обработена навреме.',en:'Shipment handled on time.'},{w:28,pay:6,skill:'Logistics',quality:0,bg:'Пратката се оказа по-трудна от очакваното.',en:'The shipment was harder than expected.'}]},
+{bg:'Остани по текущия план',en:'Stay with current plan',time:0,outcomes:[{w:100,pay:0,quality:0,bg:'Приключваш планираната работа.',en:'You finish the planned workload.'}]}]},
+{id:'unstable',type:'problem',bg:['⚠️ Нестабилен палет','Палетът изглежда зле подреден. Никой още не е докладвал проблем.'],en:['⚠️ Unstable pallet','The pallet looks poorly stacked. Nobody has reported an issue yet.'],choices:[
+{bg:'Пренареди палета',en:'Re-stack the pallet',time:3,outcomes:[{w:88,pay:2,skill:'Safety',quality:1,bg:'Оказа се, че няколко кашона наистина са били нестабилни.',en:'Several boxes really were unstable.'},{w:12,pay:0,quality:0,bg:'Палетът е бил стабилен, но проверката не вреди.',en:'The pallet was stable, but the check caused no harm.'}]},
+{bg:'Остави го както е',en:'Leave it as it is',time:0,outcomes:[{w:58,pay:0,quality:0,bg:'Нищо не се случва. Палетът остава стабилен.',en:'Nothing happens. The pallet remains stable.'},{w:30,pay:-5,quality:-1,bg:'При преместването няколко кашона падат.',en:'Several boxes fall during handling.'},{w:12,pay:3,quality:1,bg:'Колега забелязва проблема и го оправя преди товарене.',en:'A coworker catches the issue before loading.'}]}]},
+{tier:2,type:'skill',bg:['🚜 Свободен мотокар','Мотокарът е свободен. Може да промени начина, по който довършиш товаренето.'],en:['🚜 Forklift available','A forklift is free. It could change how you finish loading.'],choices:[
+{bg:'Използвай мотокара',en:'Use the forklift',time:-2,need:['Machinery',2],outcomes:[{w:90,pay:4,skill:'Machinery',quality:1,bg:'Товаренето приключва по-бързо.',en:'Loading finishes faster.'},{w:10,pay:0,quality:0,bg:'Маневрирането е по-бавно от очакваното.',en:'Maneuvering takes longer than expected.'}]},
+{bg:'Продължи ръчно',en:'Continue manually',time:2,outcomes:[{w:100,pay:0,skill:'Manual Work',quality:0,bg:'Работата продължава нормално.',en:'Work continues normally.'}]}]},
+{tier:3,type:'problem',bg:['🧾 Несъответствие в манифеста','Два кашона са с различни номера.'],en:['🧾 Manifest mismatch','Two boxes show inconsistent shipment numbers.'],choices:[
+{bg:'Провери документите',en:'Check the paperwork',time:2,outcomes:[{w:70,pay:3,skill:'Logistics',quality:1,bg:'Откриваш грешно въведен номер преди експедиция.',en:'You catch an incorrect number before dispatch.'},{w:30,pay:0,quality:0,bg:'Всичко е наред. Разликата е от вътрешно преномериране.',en:'Everything is fine; it was an internal renumbering.'}]},
+{bg:'Продължи без проверка',en:'Continue without checking',time:0,outcomes:[{w:62,pay:0,quality:0,bg:'Пратката заминава без проблем.',en:'The shipment leaves without issue.'},{w:38,pay:-5,quality:-1,bg:'Несъответствието по-късно блокира експедицията.',en:'The mismatch later blocks dispatch.'}]}]}
+],
+grounds:[
+{type:'opportunity',bg:['🌱 Допълнителен участък','До парка остава малка зона, която не е в днешния план.'],en:['🌱 Extra section','A small area beside the park is outside today’s plan.'],choices:[
+{bg:'Поеми участъка',en:'Take the extra section',time:5,outcomes:[{w:75,pay:10,skill:'Manual Work',quality:1,bg:'Участъкът е завършен и екипът приключва напред.',en:'The section is finished and the crew gets ahead.'},{w:25,pay:4,quality:0,bg:'Работата се оказва по-тежка и остава част за утре.',en:'The work is heavier and some remains for tomorrow.'}]},
+{bg:'Приключи по план',en:'Finish as planned',time:0,outcomes:[{w:100,pay:0,quality:0,bg:'Завършваш възложеното за деня.',en:'You finish the assigned work.'}]}]},
+{tier:2,type:'problem',bg:['🚶 Хора пресичат зоната','Няколко пешеходци минават близо до работната техника.'],en:['🚶 People crossing','Several pedestrians pass close to the work equipment.'],choices:[
+{bg:'Спри и обезопаси зоната',en:'Stop and secure the area',time:2,outcomes:[{w:100,pay:0,skill:'Safety',quality:1,bg:'Зоната е обезопасена и работата продължава.',en:'The area is secured and work resumes.'}]},
+{bg:'Продължи внимателно',en:'Keep working carefully',time:0,outcomes:[{w:68,pay:0,quality:0,bg:'Хората преминават и няма инцидент.',en:'They pass through and nothing happens.'},{w:32,pay:-4,quality:-1,bg:'Началникът вижда риска и прекъсва работата.',en:'The supervisor notices the risk and stops the work.'}]}]},
+{tier:3,type:'problem',bg:['💧 Вода по алеята','Напоителната система изпуска повече вода от обичайното.'],en:['💧 Water on the path','The irrigation system is releasing more water than usual.'],choices:[
+{bg:'Провери системата',en:'Check the system',time:3,outcomes:[{w:60,pay:3,skill:'Safety',quality:1,bg:'Намираш малък теч и го изолираш.',en:'You find and isolate a small leak.'},{w:40,pay:0,quality:0,bg:'Няма повреда. Цикълът просто е бил по-силен.',en:'No fault; the cycle was simply stronger.'}]},
+{bg:'Остави я да работи',en:'Leave it running',time:0,outcomes:[{w:65,pay:0,quality:0,bg:'Цикълът приключва нормално.',en:'The cycle ends normally.'},{w:35,pay:-4,quality:-1,bg:'Водата започва да пречи на посетителите.',en:'The water begins disrupting visitors.'}]}]}
+],
+sanitation:[
+{type:'opportunity',bg:['♻️ Допълнителна точка','Диспечерът съобщава за близък контейнер извън маршрута.'],en:['♻️ Extra stop','Dispatch reports a nearby container outside your route.'],choices:[
+{bg:'Добави точката',en:'Add the stop',time:5,outcomes:[{w:78,pay:11,skill:'Logistics',quality:1,bg:'Точката е обслужена без забавяне.',en:'The stop is serviced without trouble.'},{w:22,pay:5,quality:0,bg:'Достъпът е по-бавен от очакваното.',en:'Access is slower than expected.'}]},
+{bg:'Остани по маршрута',en:'Stay on route',time:0,outcomes:[{w:100,pay:0,quality:0,bg:'Продължаваш по планирания маршрут.',en:'You continue the planned route.'}]}]},
+{tier:2,type:'problem',bg:['🧪 Подозрителна торба','В торбата се вижда счупено стъкло и неизвестна течност.'],en:['🧪 Suspicious bag','Broken glass and an unknown liquid are visible.'],choices:[
+{bg:'Обработи я по защитна процедура',en:'Use the safety procedure',time:3,outcomes:[{w:82,pay:2,skill:'Safety',quality:1,bg:'Материалът е обработен безопасно.',en:'The material is handled safely.'},{w:18,pay:0,quality:0,bg:'Оказва се безобиден отпадък.',en:'It turns out to be harmless waste.'}]},
+{bg:'Вдигни я нормално',en:'Handle it normally',time:0,outcomes:[{w:55,pay:0,quality:0,bg:'Няма проблем и маршрутът продължава.',en:'Nothing happens and the route continues.'},{w:45,pay:-6,quality:-1,bg:'Торбата се къса и трябва да почистиш разсипаното.',en:'The bag tears and the spill must be cleaned.'}]}]},
+{tier:3,type:'problem',bg:['🚗 Блокиран контейнер','Паркирана кола затруднява достъпа.'],en:['🚗 Blocked container','A parked car makes access difficult.'],choices:[
+{bg:'Потърси друг достъп',en:'Find another approach',time:2,outcomes:[{w:76,pay:1,skill:'Navigation',quality:1,bg:'Намираш работещ подход от другата страна.',en:'You find a workable approach from the other side.'},{w:24,pay:0,quality:0,bg:'Другият достъп също е тесен и губиш време.',en:'The other approach is also tight and costs time.'}]},
+{bg:'Пропусни точката',en:'Skip the stop',time:0,outcomes:[{w:58,pay:0,quality:0,bg:'Диспечерът я прехвърля към следващ маршрут.',en:'Dispatch moves it to the next route.'},{w:42,pay:-3,quality:-1,bg:'По-късно постъпва оплакване за пропуснатия контейнер.',en:'A complaint later comes in about the missed container.'}]}]}],
+delivery:[
+{tier:3,type:'problem',bg:['📦 Опаковката е наранена','Един от кашоните има смачкан ъгъл. Съдържанието не се вижда.'],en:['📦 Package looks damaged','One parcel has a crushed corner. The contents are not visible.'],choices:[
+{bg:'Отбележи го преди доставка',en:'Flag it before delivery',time:2,outcomes:[{w:85,pay:1,skill:'Logistics',quality:1,bg:'Клиентът оценява, че си го предупредил.',en:'The customer appreciates the warning.'},{w:15,pay:0,quality:0,bg:'Пратката вътре е напълно здрава.',en:'The contents are completely fine.'}]},
+{bg:'Достави го нормално',en:'Deliver it normally',time:0,outcomes:[{w:62,pay:0,quality:0,bg:'Клиентът приема пратката без проблем.',en:'The customer accepts it without issue.'},{w:38,pay:-4,quality:-1,flag:'damaged',bg:'Клиентът забелязва повредата и оспорва доставката.',en:'The customer notices damage and disputes the delivery.'}]}]},
+{tier:3,type:'opportunity',bg:['🗺️ Две доставки са наблизо','Можеш да промениш реда на маршрута.'],en:['🗺️ Two stops are close','You can change the delivery order.'],choices:[
+{bg:'Промени маршрута',en:'Change the route',time:-1,outcomes:[{w:68,pay:3,skill:'Navigation',quality:1,bg:'Маршрутът се оказва по-бърз.',en:'The route is faster.'},{w:32,pay:0,quality:0,flag:'late',bg:'Странична улица е натоварена и губиш време.',en:'A side street is congested and costs time.'}]},
+{bg:'Следвай плана',en:'Follow the plan',time:1,outcomes:[{w:100,pay:0,quality:0,bg:'Продължаваш по стандартния маршрут.',en:'You continue on the standard route.'}]}]}
+],
+retail:[
+{type:'problem',bg:['🧾 Клиент оспорва цената','Етикетът на рафта изглежда различен от цената на касата.'],en:['🧾 Customer disputes price','The shelf label appears different from the checkout price.'],choices:[
+{bg:'Провери етикета',en:'Check the shelf label',time:2,outcomes:[{w:55,pay:1,skill:'Customer Service',quality:1,bg:'Клиентът е прав и коригираш цената.',en:'The customer is right and you correct the price.'},{w:45,pay:0,quality:0,bg:'Цената на касата е актуалната.',en:'The checkout price is current.'}]},
+{bg:'Обясни цената на касата',en:'Explain the checkout price',time:0,outcomes:[{w:65,pay:0,quality:0,bg:'Клиентът приема обяснението.',en:'The customer accepts the explanation.'},{w:35,pay:-3,quality:-1,bg:'Клиентът иска управител.',en:'The customer asks for a manager.'}]}]},
+{tier:2,type:'opportunity',bg:['🛒 Опашката расте','Другата каса е свободна, но трябва да прекъснеш зареждането.'],en:['🛒 Queue growing','Another checkout is free, but you would interrupt stocking.'],choices:[
+{bg:'Отвори втора каса',en:'Open second checkout',time:3,outcomes:[{w:80,pay:4,skill:'Customer Service',quality:1,bg:'Опашката бързо намалява.',en:'The queue clears quickly.'},{w:20,pay:1,quality:0,flag:'rush',bg:'Напливът продължава по-дълго от очакваното.',en:'The rush lasts longer than expected.'}]},
+{bg:'Довърши зареждането',en:'Finish stocking',time:0,outcomes:[{w:58,pay:0,quality:0,bg:'Опашката сама намалява.',en:'The queue clears on its own.'},{w:42,pay:-2,quality:-1,flag:'rush',bg:'Няколко клиенти стават нетърпеливи.',en:'Several customers become impatient.'}]}]}
+],
+kitchen:[
+{type:'problem',bg:['🔥 Три поръчки идват наведнъж','Една е бърза, една чака отдавна, а третата е голяма.'],en:['🔥 Three orders land together','One is quick, one has waited longest, and one is large.'],choices:[
+{bg:'Първо най-старата поръчка',en:'Oldest order first',time:2,outcomes:[{w:78,pay:3,skill:'Cooking',quality:1,bg:'Потокът се стабилизира.',en:'The workflow stabilizes.'},{w:22,pay:0,quality:0,flag:'rush',bg:'Голямата поръчка започва да изостава.',en:'The large order begins falling behind.'}]},
+{bg:'Първо най-бързата',en:'Quick order first',time:0,outcomes:[{w:55,pay:2,quality:1,bg:'Освобождаваш място и наваксваш.',en:'You clear space and catch up.'},{w:45,pay:-2,quality:-1,flag:'rush',bg:'Старата поръчка вече е прекалено забавена.',en:'The oldest order is now badly delayed.'}]}]},
+{tier:2,type:'problem',bg:['🧽 Работната станция се затрупва','Подготовката върви, но мястото става неудобно.'],en:['🧽 Station getting messy','Prep is moving, but the station is becoming cluttered.'],choices:[
+{bg:'Почисти сега',en:'Clean now',time:2,outcomes:[{w:100,pay:0,skill:'Safety',quality:1,bg:'Работиш по-подредено след това.',en:'The workflow is cleaner afterward.'}]},
+{bg:'Продължи до края на поръчките',en:'Keep going until orders clear',time:0,outcomes:[{w:67,pay:0,quality:0,bg:'Успяваш да приключиш без проблем.',en:'You finish without issue.'},{w:33,pay:-3,quality:-1,flag:'messy',bg:'Разливаш продукт и губиш част от подготовката.',en:'You spill an ingredient and lose some prep.'}]}]}
+],
+construction:[
+{type:'problem',bg:['🧱 Материалите са на грешното място','Част от доставката е оставена от другата страна на обекта.'],en:['🧱 Materials misplaced','Part of the delivery was left across the site.'],choices:[
+{bg:'Премести ги преди работа',en:'Move them before work',time:3,outcomes:[{w:88,pay:2,skill:'Construction',quality:1,bg:'След това задачата върви без прекъсване.',en:'The task then proceeds without interruption.'},{w:12,pay:0,quality:0,bg:'Оказва се, че са нужни само част от материалите.',en:'Only part of the materials were actually needed.'}]},
+{bg:'Започни с наличното',en:'Start with what is here',time:0,outcomes:[{w:60,pay:0,quality:0,bg:'Наличното стига за текущия етап.',en:'The available materials cover the current stage.'},{w:40,pay:-3,quality:-1,flag:'blocked',bg:'Работата спира по средата заради липсващ материал.',en:'Work stops midway for missing material.'}]}]}
+],
+dock:[
+{type:'problem',bg:['📋 Товарът не съвпада напълно','Един контейнер е пристигнал без очакваната маркировка.'],en:['📋 Cargo mismatch','One container arrived without the expected marking.'],choices:[
+{bg:'Задръж за проверка',en:'Hold for verification',time:3,outcomes:[{w:62,pay:4,skill:'Logistics',quality:1,bg:'Откриваш грешно насочен контейнер.',en:'You catch a misrouted container.'},{w:38,pay:0,quality:0,bg:'Документите потвърждават, че товарът е правилен.',en:'The documents confirm the cargo is correct.'}]},
+{bg:'Продължи товаренето',en:'Continue loading',time:0,outcomes:[{w:57,pay:0,quality:0,bg:'Контейнерът е правилният.',en:'The container is correct.'},{w:43,pay:-5,quality:-1,flag:'priority',bg:'По-късно товарът трябва да бъде изваден от композицията.',en:'The cargo later has to be removed from the load.'}]}]}
+]
+};
+
+function weightedOutcome(list){
+ let total=list.reduce((n,o)=>n+o.w,0),r=Math.random()*total;
+ for(let o of list){r-=o.w;if(r<=0)return o}return list[list.length-1]
+}
+function beginShift(id){
+ $('modal').classList.add('shiftMode');
+ if($('modalFooter'))$('modalFooter').style.display='none';
+ let j=JOBS.find(x=>x.id===id);
+ window.activeShift={j,sec:0,startTotal:0,elapsed:0,basePay:18,bonus:0,events:0,good:0,bad:0,skills:{},skillXpEarned:{},seen:[],busy:false,finished:false,reveals:[],flags:{},workDone:[],workSelected:null};
+ renderShift();saveShiftProgress();clearInterval(window.shiftTimer)
+}
+function renderShift(){
+ let a=window.activeShift;if(!a)return;
+ let tasks=((s.lang==='bg'?a.j.abg:a.j.aen)||[]);
+ $('modalBody').innerHTML=`<div class="workScene">
+ <div class="sceneTop"><div class="sceneIdentity"><div class="sceneIcon">${a.j.i}</div><div><div class="ey">${jo(a.j)}</div><h2>${jn(a.j)}</h2><p>${s.lang==='bg'?'АКТИВНА СМЯНА':'ACTIVE SHIFT'}</p></div></div>
+ <div class="sceneTelemetry"><div class="telemetry"><small>${s.lang==='bg'?'ПРОГРЕС':'PROGRESS'}</small><strong id="timer">${a.workDone.length}/${workspaceData(a).length}</strong></div><div class="telemetry"><small>${s.lang==='bg'?'РЕШЕНИЯ':'DECISIONS'}</small><strong id="eventCount">${a.events}</strong></div><div class="telemetry"><small>${s.lang==='bg'?'СТАТУС':'STATUS'}</small><strong id="workStatus">${s.lang==='bg'?'Избери задача':'Choose task'}</strong></div></div>
+ <div class="timeline"><i id="prog" style="width:${(a.workDone.length/workspaceData(a).length)*100}%"></i></div></div>
+ <div class="sceneBody">${surfaceHTML(a)}
+ <div id="eventArea"><div class="sceneNotice neutral"><b>${s.lang==='bg'?'Смяната е започнала':'Shift started'}</b><span>${s.lang==='bg'?'Избери задача. Повечето работа е рутинна, но по време на смяната могат да възникнат непредвидими ситуации.':'Choose a task. Most work is routine, but unpredictable situations can emerge during the shift.'}</span></div></div>
+ <div class="sceneControls"><span class="muted">${s.lang==='bg'?'Завърши поне 2 задачи, за да приключиш смяната.':'Complete at least 2 tasks to finish the shift.'}</span></div></div></div>`
+}
+function tickShift(){return}
+
+function shouldEvent(a){if(a.events>=3)return false;return a.elapsed===2||(a.elapsed>=5&&Math.random()<.30)||(a.elapsed>=9&&Math.random()<.24)}
+function spawnEvent(){
+ let a=window.activeShift;if(!a||a.busy)return;
+ let tier=jobTier(a.j.id),trustTier=responsibilityTier(a.j);
+ let all=(EVENTS[a.j.id]||[]);
+ let pool=all.filter((e,i)=>{
+   if(a.seen.includes(e.id||i))return false;
+   let need=e.tier||1;
+   return need<=tier&&need<=trustTier
+ });
+ if(!pool.length){maybeEnableFinish();return}
+ let e=pool[Math.floor(Math.random()*pool.length)],idx=(EVENTS[a.j.id]||[]).indexOf(e);
+ a.seen.push(e.id||idx);a.events++;a.busy=true;a.current=e;updateShiftHeader();
+ let t=s.lang==='bg'?e.bg:e.en;
+ let choices=e.choices.map((c,i)=>{
+   let locked=c.need&&(s.skills[c.need[0]]||0)<c.need[1];
+   return `<button type="button" class="choiceCard" ${locked?'disabled':''} onclick="chooseEvent(${i})"><strong>${s.lang==='bg'?c.bg:c.en}</strong>${locked?`<span>${s.lang==='bg'?'Изисква':'Requires'} ${sk(c.need[0])} ${c.need[1]}</span>`:''}</button>`
+ }).join('');
+ $('eventArea').innerHTML=`<div class="eventOverlay"><div class="sceneEventHead"><div class="ey">${e.type==='opportunity'?(s.lang==='bg'?'ВЪЗМОЖНОСТ':'OPPORTUNITY'):e.type==='skill'?'SKILL CHECK':(s.lang==='bg'?'НЕОЧАКВАНА СИТУАЦИЯ':'UNEXPECTED SITUATION')}</div><h3>${t[0]}</h3><p>${t[1]}</p><div class="eventContext">${s.lang==='bg'?'Няма предварително правилен отговор. Избери какво би направил.':'There is no pre-labelled correct answer. Choose what you would do.'}</div></div><div class="choiceDeck">${choices}</div></div>`;
+ saveShiftProgress()
+}
+
+function maybeTrustedResponsibility(){
+ let a=window.activeShift;if(!a||a.busy)return false;
+ let t=responsibilityTier(a.j);
+ if(t<2)return false;
+ let chance=t===2?.16:t===3?.28:.40;
+ if(Math.random()>=chance)return false;
+ let data=t===4
+ ? {bg:['Супервайзорът отсъства','За кратко ти поверяват координацията на текущата работа. Как ще подходиш?'],en:['Supervisor unavailable','You are temporarily trusted to coordinate the current work. How will you handle it?']}
+ : t===3
+ ? {bg:['Приоритетна задача','Работодателят ти поверява по-важна задача, докато останалата работа продължава.'],en:['Priority assignment','Your employer trusts you with a higher-priority assignment while normal work continues.']}
+ : {bg:['Работи самостоятелно','Супервайзорът оставя тази част от работата на теб.'],en:['Work independently','The supervisor leaves this part of the work to you.']};
+ a.events++;a.busy=true;
+ a.current={type:'responsibility',bg:data.bg,en:data.en,choices:[
+  {bg:'Организирай внимателно',en:'Organize carefully',outcomes:[{w:68,pay:2,quality:1,bg:'Работата мина подредено и без излишни проблеми.',en:'The work runs smoothly without unnecessary problems.'},{w:32,pay:0,quality:0,bg:'Справи се, но отне повече внимание от очакваното.',en:'You manage it, but it takes more attention than expected.'}]},
+  {bg:'Действай бързо и по преценка',en:'Move quickly using your judgment',outcomes:[{w:48,pay:4,quality:1,bg:'Преценката ти беше добра и спести време.',en:'Your judgment pays off and saves time.'},{w:30,pay:0,quality:0,bg:'Нищо сериозно не се случи.',en:'Nothing serious happens.'},{w:22,pay:-2,quality:-1,bg:'Прибързаното решение създаде допълнителна работа.',en:'The rushed decision creates extra work.'}]}
+ ]};
+ let e=a.current,evtText=s.lang==='bg'?e.bg:e.en;
+ $('eventArea').innerHTML=`<div class="supervisorCall"><div class="ey">${s.lang==='bg'?'ДОВЕРИЕ ОТ РАБОТОДАТЕЛЯ':'EMPLOYER TRUST'}</div><h3>${evtText[0]}</h3><p>${evtText[1]}</p></div><div class="eventOverlay"><div class="choiceDeck">${e.choices.map((c,i)=>`<button type="button" class="choiceCard" onclick="chooseEvent(${i})"><strong>${s.lang==='bg'?c.bg:c.en}</strong></button>`).join('')}</div></div>`;
+ updateShiftHeader();saveShiftProgress();return true
+}
+function chooseEvent(i){
+ let a=window.activeShift;if(!a||!a.current)return;
+ let c=a.current.choices[i],o=weightedOutcome(c.outcomes||[{w:100,pay:0,quality:0,bg:'Няма особен резултат.',en:'Nothing significant happens.'}]);
+ a.bonus+=(o.pay||0);if(o.quality>0)a.good++;if(o.quality<0)a.bad++;
+ if(o.flag)a.flags[o.flag]=true;
+ if(o.skill){a.skills[o.skill]=(a.skills[o.skill]||0)+1;a.skillXpEarned[o.skill]=(a.skillXpEarned[o.skill]||0)+8;addSkillXp(o.skill,8)}
+ let chosen=s.lang==='bg'?c.bg:c.en,txt=s.lang==='bg'?o.bg:o.en;
+ a.reveals.push({choice:chosen,text:txt,pay:o.pay||0,quality:o.quality||0});
+ a.current=null;a.busy=false;save();saveShiftProgress();updateShiftHeader();
+ let cls=o.quality>0?'good':o.quality<0?'bad':'neutral';
+ $('eventArea').innerHTML=`<div class="outcomeCard ${cls}"><b>${s.lang==='bg'?'Последица':'Consequence'}</b><p style="margin:5px 0 0">${txt}</p></div>`;
+ maybeEnableFinish()
+}
+function finishEarly(){let a=window.activeShift;if(!a||a.busy)return;a.sec=Math.min(a.sec,1)}
+function saveShiftProgress(){
+ let a=window.activeShift;if(!a){localStorage.removeItem('sd_jobs_active_shift');return}
+ localStorage.setItem('sd_jobs_active_shift',JSON.stringify({id:a.j.id,sec:a.sec,elapsed:a.elapsed,bonus:a.bonus,events:a.events,good:a.good,bad:a.bad,skills:a.skills,skillXpEarned:a.skillXpEarned,seen:a.seen,reveals:a.reveals,flags:a.flags,workDone:a.workDone,workSelected:a.workSelected}))
+}
+function finishShift(){
+ if($('modalFooter'))$('modalFooter').style.display='flex';
+ let a=window.activeShift;if(!a||a.finished)return;a.finished=true;clearInterval(window.shiftTimer);
+ let total=Math.max(5,a.basePay+a.bonus+a.good*2-a.bad*2);
+ let completed=(a.workDone||[]).length;
+ let jobGain=10+completed*4+a.good*3;
+ let careerGain=4+completed*2;
+ addJobXp(a.j.id,jobGain);addCareerXp(careerGain);
+ let repDelta=shiftRepDelta(a);
+ addEmployerRep(employerKey(a.j),repDelta);
+ let gained={job:jobGain,career:careerGain,rep:repDelta},base=a.j.gain[0];s.money+=total;s.shifts++;addSkillXp(base,10);a.skills[base]=(a.skills[base]||0)+1;a.skillXpEarned[base]=(a.skillXpEarned[base]||0)+10;
+ let perf=a.bad>0?(a.good>a.bad?'Good':a.good===a.bad?'Mixed':'Needs improvement'):(a.good>=2?'Excellent':a.good===1?'Good':'Completed');
+ s.reliability=Math.max(0,Math.min(100,s.reliability+(perf==='Excellent'?3:perf==='Good'?1:perf==='Needs improvement'?-2:0)));
+ 
+ s.history.unshift({job:jn(a.j),result:`${perf} · $${total}`});s.logs.unshift((s.lang==='bg'?'Завършена смяна: ':'Shift completed: ')+jn(a.j));
+ window.activeShift=null;localStorage.removeItem('sd_jobs_active_shift');save();discover();
+ let reveal=a.reveals.map(r=>`<div class="revealRow"><div><b>${r.choice}</b><br><span>${r.text}</span></div><strong>${r.pay>0?'+$'+r.pay:r.pay<0?'-$'+Math.abs(r.pay):'—'}</strong></div>`).join('')||`<div class="sceneNotice neutral">${s.lang==='bg'?'Спокойна смяна без значими ситуации.':'A quiet shift with no major situations.'}</div>`;
+ let skills=Object.entries(a.skillXpEarned||{}).map(([k,v])=>`<div class="revealRow"><span>${sk(k)}</span><strong>+${v} XP · Lv ${skillLevel(k)}</strong></div>`).join('')||`<div class="sceneNotice neutral">${s.lang==='bg'?'Няма натрупан Skill XP в тази смяна.':'No Skill XP gained this shift.'}</div>`;
+ $('modalBody').innerHTML=`<div class="workScene"><div class="resultHero"><div class="ey">${tr('complete')}</div><div class="sceneIcon" style="margin:auto">${a.j.i}</div><h2>${jn(a.j)}</h2><div class="resultGrade">${perf}</div><div class="resultMoney">$${total}</div></div><div class="sceneBody"><h3>${s.lang==='bg'?'Как се развиха решенията ти':'How your decisions played out'}</h3>${reveal}<h3>${s.lang==='bg'?'Развитие':'Progress'}</h3>${skills}
+<div class="shiftGrowth">
+ <div class="growthLine"><span>Job XP</span><b>+${gained.job}</b></div>
+ <div class="growthLine"><span>Career XP</span><b>+${gained.career}</b></div>
+ <div class="growthLine"><span>${s.lang==='bg'?'Репутация при работодателя':'Employer reputation'}</span><b>${gained.rep>0?'+':''}${gained.rep} · ${employerRepFor(a.j)}/100</b></div>
+</div><div class="actions"><button class="btn primary" onclick="closeM();render()">${s.lang==='bg'?'Продължи':'Continue'}</button></div></div></div>`;render()
+}
+function toggleLang(){s.lang=s.lang==='bg'?'en':'bg';save();render()}function closeM(){if($('modalFooter'))$('modalFooter').style.display='flex';clearInterval(window.shiftTimer);window.activeShift=null;$('modal').classList.remove('on');$('modal').classList.remove('shiftMode')}
+function preset(x){
+ let lang=s.lang||'bg';s=fresh();s.lang=lang;ensureProgress();
+ s.discovered=['warehouse','grounds'];s.pendingUnlocks=[];s.employerRep={};
+ if(x==='some'){
+   s.shifts=10;s.careerXp=180;s.employerRep={warehouse:18,grounds:12};
+   Object.assign(s.jobXp,{warehouse:150,grounds:95,sanitation:60,delivery:45});
+   Object.assign(s.skillXp,{Logistics:105,'Manual Work':90,Safety:75,Driving:42,'Customer Service':25,Cooking:18,Machinery:55});
+ }else if(x==='experienced'){
+   s.shifts=50;s.careerXp=920;s.employerRep={warehouse:58,grounds:42,sanitation:36,delivery:31,retail:24,kitchen:20,construction:28,dock:47};
+   Object.assign(s.jobXp,{warehouse:680,grounds:410,sanitation:520,delivery:460,retail:310,kitchen:260,construction:390,dock:570});
+   Object.assign(s.skillXp,{Logistics:510,'Manual Work':430,Safety:390,Driving:285,Navigation:240,Machinery:360,Technical:210,'Customer Service':250,Construction:280,Cooking:190,Commerce:140});
+ }else if(x==='trusted'){
+   s.shifts=120;s.careerXp=1650;s.employerRep={warehouse:82,grounds:78,sanitation:76,delivery:80,retail:77,kitchen:79,construction:81,dock:84};
+   Object.assign(s.jobXp,{warehouse:1320,grounds:1280,sanitation:1300,delivery:1290,retail:1260,kitchen:1270,construction:1310,dock:1360});
+   Object.assign(s.skillXp,{Logistics:820,'Manual Work':790,Safety:800,Driving:760,Navigation:720,Machinery:810,Technical:690,'Customer Service':710,Construction:780,Cooking:650,Commerce:620});
+ }
+ for(let k of Object.keys(s.skillXp))s.skills[k]=skillLevel(k);
+ discover();save();render();
+}
+function simulate(){
+ ensureProgress();s.shifts+=5;addCareerXp(70);addJobXp('warehouse',70);addJobXp('grounds',45);
+ addSkillXp('Logistics',28);addSkillXp('Manual Work',24);addSkillXp('Safety',20);
+ s.reliability=Math.min(100,s.reliability+4);
+ discover();save();render()
+}
+$('toggle').onclick=()=>{$('nav').classList.toggle('open');$('scrim').classList.toggle('on')};$('scrim').onclick=()=>{$('nav').classList.remove('open');$('scrim').classList.remove('on')};setInterval(()=>$('clock').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),1000);render();
+</script></body></html>
