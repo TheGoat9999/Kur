@@ -7,7 +7,8 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
-    "./world-position": { "types": "./dist/world-position.d.ts", "import": "./dist/world-position.js" }
+    "./world-position": { "types": "./dist/world-position.d.ts", "import": "./dist/world-position.js" },
+    "./items": { "types": "./dist/items.d.ts", "import": "./dist/items.js" }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
