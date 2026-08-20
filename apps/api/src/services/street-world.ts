@@ -9,6 +9,7 @@ import {
 } from '@sol-dorado/contracts';
 import { StreetPositionResultSchema, type StreetPosition } from '@sol-dorado/contracts/world-position';
 import { getActionAvailability, STREET_SEGMENTS } from '../domain/actions.js';
+import { getItemDefinition } from '../domain/items/index.js';
 import type { RedisClient } from '../redis.js';
 
 type Queryable = Pool | PoolClient;
@@ -101,6 +102,11 @@ export async function addStreetReward(
   playerId: string,
   reward: { itemKey: string; displayName: string; quantity: number }
 ): Promise<void> {
+  const definition = getItemDefinition(reward.itemKey);
+  if (!definition) {
+    throw new WorldActionCommandError('unknown_reward_item', 500, { itemKey: reward.itemKey });
+  }
+
   const containerResult = await client.query(
     `SELECT * FROM inventory_containers WHERE player_id = $1 AND container_key = 'player' FOR UPDATE`,
     [playerId]
@@ -108,12 +114,11 @@ export async function addStreetReward(
   const container = containerResult.rows[0];
   if (!container) throw new WorldActionCommandError('inventory_container_not_found', 409);
 
-  const unitWeightGrams = 180;
   const weightResult = await client.query(
     'SELECT COALESCE(SUM(unit_weight_grams * quantity), 0) AS weight_grams FROM inventory_items WHERE container_id = $1',
     [container.id]
   );
-  const nextWeight = Number(weightResult.rows[0].weight_grams) + unitWeightGrams * reward.quantity;
+  const nextWeight = Number(weightResult.rows[0].weight_grams) + definition.unitWeightGrams * reward.quantity;
   if (nextWeight > container.capacity_grams) throw new WorldActionCommandError('inventory_capacity_exceeded', 409);
 
   const stackResult = await client.query(
@@ -138,13 +143,26 @@ export async function addStreetReward(
   const slotIndex = Array.from({ length: container.slot_count }, (_, index) => index).find(index => !occupied.has(index));
   if (slotIndex === undefined) throw new WorldActionCommandError('inventory_container_full', 409);
 
+  const symbol = definition.category.toUpperCase().slice(0, 8);
   await client.query({
     text: `
       INSERT INTO inventory_items
         (player_id, container_id, item_key, display_name, category, symbol, quantity, unit_weight_grams, stackable, slot_index, metadata)
-      VALUES ($1, $2, $3, $4, 'Material', 'PCB', $5, $6, true, $7, '{"source":"mira_alley_dumpster"}'::jsonb)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb)
     `,
-    values: [playerId, container.id, reward.itemKey, reward.displayName, reward.quantity, unitWeightGrams, slotIndex]
+    values: [
+      playerId,
+      container.id,
+      definition.key,
+      definition.displayName,
+      definition.category,
+      symbol,
+      reward.quantity,
+      definition.unitWeightGrams,
+      definition.stackable,
+      slotIndex,
+      JSON.stringify({ source: 'mira_alley_dumpster' })
+    ]
   });
 }
 

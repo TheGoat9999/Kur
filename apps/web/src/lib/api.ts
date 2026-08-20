@@ -19,6 +19,7 @@ import {
   type WorldActionId,
   type WorldActionResult
 } from '@sol-dorado/contracts';
+import { ItemCatalogResponseSchema, type ItemCatalogResponse } from '@sol-dorado/contracts/items';
 import {
   StreetPositionResultSchema,
   type StreetPosition,
@@ -111,6 +112,12 @@ export async function runWorldAction(actionId: WorldActionId, expectedVersion: n
     throw new ApiCommandError(payload?.error ?? `world_action_failed_${response.status}`, payload ?? undefined);
   }
   return WorldActionResultSchema.parse(await response.json());
+}
+
+export async function getItemCatalog(): Promise<ItemCatalogResponse> {
+  const response = await authenticatedFetch('/v1/items/catalog');
+  if (!response.ok) throw new Error(`Item catalog failed (${response.status})`);
+  return ItemCatalogResponseSchema.parse(await response.json());
 }
 
 export async function getInventory(): Promise<InventoryState> {

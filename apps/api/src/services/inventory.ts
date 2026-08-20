@@ -5,6 +5,7 @@ import {
   type InventoryState
 } from '@sol-dorado/contracts';
 import type { Database } from '../db.js';
+import { getItemDefinition } from '../domain/items/index.js';
 
 export class InventoryCommandError extends Error {
   constructor(public readonly code: string, public readonly status: number) {
@@ -229,23 +230,35 @@ export async function useInventoryItem(db: Database, playerId: string, itemId: s
     });
     const item = itemResult.rows[0];
     if (!item) throw new InventoryCommandError('inventory_item_not_carried', 409);
-    const effects: Record<string, { hydration: number; satiety: number }> = {
-      water: { hydration: 18, satiety: 0 },
-      sandwich: { hydration: 0, satiety: 15 }
-    };
-    const effect = effects[item.item_key];
-    if (!effect) throw new InventoryCommandError('inventory_item_not_usable', 409);
+
+    const definition = getItemDefinition(item.item_key);
+    if (!definition || Object.keys(definition.useEffects).length === 0) {
+      throw new InventoryCommandError('inventory_item_not_usable', 409);
+    }
+    const effect = definition.useEffects;
 
     await client.query({
       text: `
         UPDATE player_state
-        SET hydration = LEAST(100, hydration + $2),
-            satiety = LEAST(100, satiety + $3),
+        SET health = GREATEST(0, LEAST(100, health + $2)),
+            energy = GREATEST(0, LEAST(100, energy + $3)),
+            satiety = GREATEST(0, LEAST(100, satiety + $4)),
+            hydration = GREATEST(0, LEAST(100, hydration + $5)),
+            stress = GREATEST(0, LEAST(100, stress + $6)),
+            police_heat = GREATEST(0, LEAST(100, police_heat + $7)),
             version = version + 1,
             updated_at = now()
         WHERE player_id = $1
       `,
-      values: [playerId, effect.hydration, effect.satiety]
+      values: [
+        playerId,
+        effect.health ?? 0,
+        effect.energy ?? 0,
+        effect.satiety ?? 0,
+        effect.hydration ?? 0,
+        effect.stress ?? 0,
+        effect.policeHeat ?? 0
+      ]
     });
     if (item.quantity === 1) await client.query('DELETE FROM inventory_items WHERE id = $1', [item.id]);
     else await client.query('UPDATE inventory_items SET quantity = quantity - 1, updated_at = now() WHERE id = $1', [item.id]);
