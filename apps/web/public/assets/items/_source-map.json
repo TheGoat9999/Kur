@@ -1,0 +1,1602 @@
+{
+  "wallet": {
+    "url": "https://items.rainmad.com/images/general/wallet.png",
+    "source": "rainmad",
+    "sourceFile": "wallet.png",
+    "sourceCategory": "general",
+    "match": "exact",
+    "score": 1220
+  },
+  "identity_card": {
+    "url": "https://items.rainmad.com/images/license/id_card.png",
+    "source": "rainmad",
+    "sourceFile": "id_card.png",
+    "sourceCategory": "license",
+    "match": "alias",
+    "score": 2000
+  },
+  "house_keys": {
+    "url": "https://items.rainmad.com/images/general/key-house.png",
+    "source": "rainmad",
+    "sourceFile": "key-house.png",
+    "sourceCategory": "general",
+    "match": "alias",
+    "score": 2000
+  },
+  "vehicle_keys": {
+    "url": "https://items.rainmad.com/images/general/carkeys.png",
+    "source": "rainmad",
+    "sourceFile": "carkeys.png",
+    "sourceCategory": "general",
+    "match": "alias",
+    "score": 2000
+  },
+  "work_gloves": {
+    "url": "https://items.rainmad.com/images/clothing/gloves.png",
+    "source": "rainmad",
+    "sourceFile": "gloves.png",
+    "sourceCategory": "clothing",
+    "match": "fuzzy",
+    "score": 672
+  },
+  "sandwich": {
+    "url": "https://items.rainmad.com/images/food/sandwich.png",
+    "source": "rainmad",
+    "sourceFile": "sandwich.png",
+    "sourceCategory": "food",
+    "match": "exact",
+    "score": 1220
+  },
+  "ham_sandwich": {
+    "url": "https://items.rainmad.com/images/food/hamsandwich.png",
+    "source": "rainmad",
+    "sourceFile": "hamsandwich.png",
+    "sourceCategory": "food",
+    "match": "exact",
+    "score": 1220
+  },
+  "chicken_sandwich": {
+    "url": "https://items.rainmad.com/images/food/chickensandwich.png",
+    "source": "rainmad",
+    "sourceFile": "chickensandwich.png",
+    "sourceCategory": "food",
+    "match": "exact",
+    "score": 1220
+  },
+  "cheese_sandwich": {
+    "url": "https://items.rainmad.com/images/food/cheesesandwich.png",
+    "source": "rainmad",
+    "sourceFile": "cheesesandwich.png",
+    "sourceCategory": "food",
+    "match": "exact",
+    "score": 1220
+  },
+  "burger": {
+    "url": "https://items.rainmad.com/images/food/burger.png",
+    "source": "rainmad",
+    "sourceFile": "burger.png",
+    "sourceCategory": "food",
+    "match": "exact",
+    "score": 1220
+  },
+  "double_burger": {
+    "url": "https://items.rainmad.com/images/food/burger.png",
+    "source": "rainmad",
+    "sourceFile": "burger.png",
+    "sourceCategory": "food",
+    "match": "fuzzy",
+    "score": 748
+  },
+  "cheeseburger": {
+    "url": "https://items.rainmad.com/images/food/cheeseburger.png",
+    "source": "rainmad",
+    "sourceFile": "cheeseburger.png",
+    "sourceCategory": "food",
+    "match": "exact",
+    "score": 1220
+  },
+  "chicken_burger": {
+    "url": "https://items.rainmad.com/images/food/chickenburger.png",
+    "source": "rainmad",
+    "sourceFile": "chickenburger.png",
+    "sourceCategory": "food",
+    "match": "exact",
+    "score": 1220
+  },
+  "hotdog": {
+    "url": "https://items.rainmad.com/images/food/hotdog.png",
+    "source": "rainmad",
+    "sourceFile": "hotdog.png",
+    "sourceCategory": "food",
+    "match": "exact",
+    "score": 1220
+  },
+  "pizza_slice": {
+    "url": "https://items.rainmad.com/images/food/ppizzaslice.png",
+    "source": "rainmad",
+    "sourceFile": "ppizzaslice.png",
+    "sourceCategory": "food",
+    "match": "fuzzy",
+    "score": 808
+  },
+  "pepperoni_slice": {
+    "url": "https://items.rainmad.com/images/ingredients/pepperoni.png",
+    "source": "rainmad",
+    "sourceFile": "pepperoni.png",
+    "sourceCategory": "ingredients",
+    "match": "fuzzy",
+    "score": 740
+  },
+  "margherita_slice": {
+    "url": "https://items.rainmad.com/images/food/margherita.png",
+    "source": "rainmad",
+    "sourceFile": "margherita.png",
+    "sourceCategory": "food",
+    "match": "fuzzy",
+    "score": 760
+  },
+  "taco": {
+    "url": "https://items.rainmad.com/images/food/taco_beef.png",
+    "source": "rainmad",
+    "sourceFile": "taco_beef.png",
+    "sourceCategory": "food",
+    "match": "alias",
+    "score": 2000
+  },
+  "burrito": {
+    "url": "https://items.rainmad.com/images/food/burrito.png",
+    "source": "rainmad",
+    "sourceFile": "burrito.png",
+    "sourceCategory": "food",
+    "match": "exact",
+    "score": 1220
+  },
+  "fried_chicken": {
+    "url": "https://items.rainmad.com/images/food/chicken_strips.png",
+    "source": "rainmad",
+    "sourceFile": "chicken_strips.png",
+    "sourceCategory": "food",
+    "match": "alias",
+    "score": 2000
+  },
+  "fries": {
+    "url": "https://items.rainmad.com/images/food/fries.png",
+    "source": "rainmad",
+    "sourceFile": "fries.png",
+    "sourceCategory": "food",
+    "match": "exact",
+    "score": 1220
+  },
+  "salad": {
+    "url": "https://items.rainmad.com/images/ingredients/salad.png",
+    "source": "rainmad",
+    "sourceFile": "salad.png",
+    "sourceCategory": "ingredients",
+    "match": "exact",
+    "score": 1200
+  },
+  "caesar_salad": {
+    "url": "https://items.rainmad.com/images/ingredients/salad.png",
+    "source": "rainmad",
+    "sourceFile": "salad.png",
+    "sourceCategory": "ingredients",
+    "match": "fuzzy",
+    "score": 728
+  },
+  "pasta_box": {
+    "url": "https://items.rainmad.com/images/food/pasta.png",
+    "source": "rainmad",
+    "sourceFile": "pasta.png",
+    "sourceCategory": "food",
+    "match": "fuzzy",
+    "score": 784
+  },
+  "rice_bowl": {
+    "url": "https://items.rainmad.com/images/food/rice.png",
+    "source": "rainmad",
+    "sourceFile": "rice.png",
+    "sourceCategory": "food",
+    "match": "fuzzy",
+    "score": 772
+  },
+  "steak_plate": {
+    "url": "https://items.rainmad.com/images/food/steak_potato.png",
+    "source": "rainmad",
+    "sourceFile": "steak_potato.png",
+    "sourceCategory": "food",
+    "match": "alias",
+    "score": 2000
+  },
+  "fish_plate": {
+    "url": "https://items.rainmad.com/images/food/grilledfish.png",
+    "source": "rainmad",
+    "sourceFile": "grilledfish.png",
+    "sourceCategory": "food",
+    "match": "fuzzy",
+    "score": 735
+  },
+  "donut": {
+    "url": "https://items.rainmad.com/images/food/donut.png",
+    "source": "rainmad",
+    "sourceFile": "donut.png",
+    "sourceCategory": "food",
+    "match": "exact",
+    "score": 1220
+  },
+  "chocolate_donut": {
+    "url": "https://items.rainmad.com/images/food/chocolate.png",
+    "source": "rainmad",
+    "sourceFile": "chocolate.png",
+    "sourceCategory": "food",
+    "match": "fuzzy",
+    "score": 760
+  },
+  "muffin": {
+    "url": "https://items.rainmad.com/images/food/muffin.png",
+    "source": "rainmad",
+    "sourceFile": "muffin.png",
+    "sourceCategory": "food",
+    "match": "exact",
+    "score": 1220
+  },
+  "croissant": {
+    "url": "https://items.rainmad.com/images/food/croissant.png",
+    "source": "rainmad",
+    "sourceFile": "croissant.png",
+    "sourceCategory": "food",
+    "match": "exact",
+    "score": 1220
+  },
+  "cookie": {
+    "url": "https://items.rainmad.com/images/food/cookie.png",
+    "source": "rainmad",
+    "sourceFile": "cookie.png",
+    "sourceCategory": "food",
+    "match": "exact",
+    "score": 1220
+  },
+  "chocolate_bar": {
+    "url": "https://items.rainmad.com/images/food/chocolate.png",
+    "source": "rainmad",
+    "sourceFile": "chocolate.png",
+    "sourceCategory": "food",
+    "match": "fuzzy",
+    "score": 784
+  },
+  "chips": {
+    "url": "https://items.rainmad.com/images/food/potato.png",
+    "source": "rainmad",
+    "sourceFile": "potato.png",
+    "sourceCategory": "food",
+    "match": "fuzzy",
+    "score": 735
+  },
+  "protein_bar": {
+    "url": "https://items.rainmad.com/images/food/health_bar.png",
+    "source": "rainmad",
+    "sourceFile": "health_bar.png",
+    "sourceCategory": "food",
+    "match": "alias",
+    "score": 2000
+  },
+  "apple": {
+    "url": "https://items.rainmad.com/images/food/apple.png",
+    "source": "rainmad",
+    "sourceFile": "apple.png",
+    "sourceCategory": "food",
+    "match": "exact",
+    "score": 1220
+  },
+  "banana": {
+    "url": "https://items.rainmad.com/images/food/banana.png",
+    "source": "rainmad",
+    "sourceFile": "banana.png",
+    "sourceCategory": "food",
+    "match": "exact",
+    "score": 1220
+  },
+  "orange": {
+    "url": "https://items.rainmad.com/images/food/orange.png",
+    "source": "rainmad",
+    "sourceFile": "orange.png",
+    "sourceCategory": "food",
+    "match": "exact",
+    "score": 1220
+  },
+  "strawberries": {
+    "url": "https://items.rainmad.com/images/food/strawberry.png",
+    "source": "rainmad",
+    "sourceFile": "strawberry.png",
+    "sourceCategory": "food",
+    "match": "alias",
+    "score": 2000
+  },
+  "bread_loaf": {
+    "url": "https://items.rainmad.com/images/food/bread.png",
+    "source": "rainmad",
+    "sourceFile": "bread.png",
+    "sourceCategory": "food",
+    "match": "fuzzy",
+    "score": 772
+  },
+  "raw_chicken": {
+    "url": "https://items.rainmad.com/images/food/farming_rawchicken.png",
+    "source": "rainmad",
+    "sourceFile": "farming_rawchicken.png",
+    "sourceCategory": "food",
+    "match": "fuzzy",
+    "score": 736
+  },
+  "raw_beef": {
+    "url": "https://items.rainmad.com/images/food/farming_rawbeef.png",
+    "source": "rainmad",
+    "sourceFile": "farming_rawbeef.png",
+    "sourceCategory": "food",
+    "match": "fuzzy",
+    "score": 736
+  },
+  "cheese_block": {
+    "url": "https://items.rainmad.com/images/ingredients/cheese_cubes.png",
+    "source": "rainmad",
+    "sourceFile": "cheese_cubes.png",
+    "sourceCategory": "ingredients",
+    "match": "alias",
+    "score": 2000
+  },
+  "egg_carton": {
+    "url": "https://items.rainmad.com/images/ingredients/eggs.png",
+    "source": "rainmad",
+    "sourceFile": "eggs.png",
+    "sourceCategory": "ingredients",
+    "match": "alias",
+    "score": 2000
+  },
+  "rice_bag": {
+    "url": "https://items.rainmad.com/images/food/rice.png",
+    "source": "rainmad",
+    "sourceFile": "rice.png",
+    "sourceCategory": "food",
+    "match": "alias",
+    "score": 2000
+  },
+  "water_bottle": {
+    "url": "https://items.rainmad.com/images/drinks/water_bottle.png",
+    "source": "rainmad",
+    "sourceFile": "water_bottle.png",
+    "sourceCategory": "drinks",
+    "match": "exact",
+    "score": 1185
+  },
+  "large_water_bottle": {
+    "url": "https://items.rainmad.com/images/drinks/water_bottle.png",
+    "source": "rainmad",
+    "sourceFile": "water_bottle.png",
+    "sourceCategory": "drinks",
+    "match": "alias",
+    "score": 2000
+  },
+  "sparkling_water": {
+    "url": "https://items.rainmad.com/images/drinks/water.png",
+    "source": "rainmad",
+    "sourceFile": "water.png",
+    "sourceCategory": "drinks",
+    "match": "exact",
+    "score": 1220
+  },
+  "cola": {
+    "url": "https://items.rainmad.com/images/drinks/cola.png",
+    "source": "rainmad",
+    "sourceFile": "cola.png",
+    "sourceCategory": "drinks",
+    "match": "exact",
+    "score": 1220
+  },
+  "diet_cola": {
+    "url": "https://items.rainmad.com/images/drinks/cola.png",
+    "source": "rainmad",
+    "sourceFile": "cola.png",
+    "sourceCategory": "drinks",
+    "match": "fuzzy",
+    "score": 772
+  },
+  "orange_soda": {
+    "url": "https://items.rainmad.com/images/drinks/faygo-orange.png",
+    "source": "rainmad",
+    "sourceFile": "faygo-orange.png",
+    "sourceCategory": "drinks",
+    "match": "alias",
+    "score": 2000
+  },
+  "lemon_soda": {
+    "url": "https://items.rainmad.com/images/food/lemonade.png",
+    "source": "rainmad",
+    "sourceFile": "lemonade.png",
+    "sourceCategory": "food",
+    "match": "alias",
+    "score": 2000
+  },
+  "energy_drink": {
+    "url": "https://items.rainmad.com/images/drinks/subdrink.png",
+    "source": "rainmad",
+    "sourceFile": "subdrink.png",
+    "sourceCategory": "drinks",
+    "match": "alias",
+    "score": 2000
+  },
+  "sports_drink": {
+    "url": "https://items.rainmad.com/images/drinks/burger-softdrink.png",
+    "source": "rainmad",
+    "sourceFile": "burger-softdrink.png",
+    "sourceCategory": "drinks",
+    "match": "alias",
+    "score": 2000
+  },
+  "coffee": {
+    "url": "https://items.rainmad.com/images/drinks/coffee.png",
+    "source": "rainmad",
+    "sourceFile": "coffee.png",
+    "sourceCategory": "drinks",
+    "match": "exact",
+    "score": 1220
+  },
+  "espresso": {
+    "url": "https://items.rainmad.com/images/drinks/espresso.png",
+    "source": "rainmad",
+    "sourceFile": "espresso.png",
+    "sourceCategory": "drinks",
+    "match": "exact",
+    "score": 1220
+  },
+  "latte": {
+    "url": "https://items.rainmad.com/images/drinks/latte.png",
+    "source": "rainmad",
+    "sourceFile": "latte.png",
+    "sourceCategory": "drinks",
+    "match": "exact",
+    "score": 1220
+  },
+  "tea": {
+    "url": "https://items.rainmad.com/images/drinks/cc-tea.png",
+    "source": "rainmad",
+    "sourceFile": "cc-tea.png",
+    "sourceCategory": "drinks",
+    "match": "alias",
+    "score": 2000
+  },
+  "hot_chocolate": {
+    "url": "https://items.rainmad.com/images/food/chocolate.png",
+    "source": "rainmad",
+    "sourceFile": "chocolate.png",
+    "sourceCategory": "food",
+    "match": "fuzzy",
+    "score": 764
+  },
+  "orange_juice": {
+    "url": "https://items.rainmad.com/images/drinks/juice.png",
+    "source": "rainmad",
+    "sourceFile": "juice.png",
+    "sourceCategory": "drinks",
+    "match": "fuzzy",
+    "score": 748
+  },
+  "apple_juice": {
+    "url": "https://items.rainmad.com/images/drinks/juice.png",
+    "source": "rainmad",
+    "sourceFile": "juice.png",
+    "sourceCategory": "drinks",
+    "match": "fuzzy",
+    "score": 760
+  },
+  "milk": {
+    "url": "https://items.rainmad.com/images/drinks/milk.png",
+    "source": "rainmad",
+    "sourceFile": "milk.png",
+    "sourceCategory": "drinks",
+    "match": "exact",
+    "score": 1220
+  },
+  "beer": {
+    "url": "https://items.rainmad.com/images/drinks/beer.png",
+    "source": "rainmad",
+    "sourceFile": "beer.png",
+    "sourceCategory": "drinks",
+    "match": "exact",
+    "score": 1185
+  },
+  "lager": {
+    "url": "https://items.rainmad.com/images/drinks/beer.png",
+    "source": "rainmad",
+    "sourceFile": "beer.png",
+    "sourceCategory": "drinks",
+    "match": "exact",
+    "score": 1220
+  },
+  "red_wine": {
+    "url": "https://items.rainmad.com/images/drinks/wine.png",
+    "source": "rainmad",
+    "sourceFile": "wine.png",
+    "sourceCategory": "drinks",
+    "match": "fuzzy",
+    "score": 784
+  },
+  "white_wine": {
+    "url": "https://items.rainmad.com/images/drinks/wine.png",
+    "source": "rainmad",
+    "sourceFile": "wine.png",
+    "sourceCategory": "drinks",
+    "match": "exact",
+    "score": 1220
+  },
+  "whiskey": {
+    "url": "https://items.rainmad.com/images/drinks/whiskey.png",
+    "source": "rainmad",
+    "sourceFile": "whiskey.png",
+    "sourceCategory": "drinks",
+    "match": "exact",
+    "score": 1220
+  },
+  "vodka": {
+    "url": "https://items.rainmad.com/images/drinks/absolute_vodka.png",
+    "source": "rainmad",
+    "sourceFile": "absolute_vodka.png",
+    "sourceCategory": "drinks",
+    "match": "exact",
+    "score": 1220
+  },
+  "rum": {
+    "url": "https://items.rainmad.com/images/drinks/rum.png",
+    "source": "rainmad",
+    "sourceFile": "rum.png",
+    "sourceCategory": "drinks",
+    "match": "exact",
+    "score": 1220
+  },
+  "champagne": {
+    "url": "https://items.rainmad.com/images/drinks/champagne.png",
+    "source": "rainmad",
+    "sourceFile": "champagne.png",
+    "sourceCategory": "drinks",
+    "match": "exact",
+    "score": 1220
+  },
+  "toolbox": {
+    "url": "https://items.rainmad.com/images/mechanic/toolbox.png",
+    "source": "rainmad",
+    "sourceFile": "toolbox.png",
+    "sourceCategory": "mechanic",
+    "match": "exact",
+    "score": 1200
+  },
+  "hammer": {
+    "url": "https://items.rainmad.com/images/materials/hammer.png",
+    "source": "rainmad",
+    "sourceFile": "hammer.png",
+    "sourceCategory": "materials",
+    "match": "exact",
+    "score": 1160
+  },
+  "rubber_mallet": {
+    "url": "https://items.rainmad.com/images/materials/hammer.png",
+    "source": "rainmad",
+    "sourceFile": "hammer.png",
+    "sourceCategory": "materials",
+    "match": "alias",
+    "score": 2000
+  },
+  "screwdriver_set": {
+    "url": "https://items.rainmad.com/images/mechanic/screwdriverset.png",
+    "source": "rainmad",
+    "sourceFile": "screwdriverset.png",
+    "sourceCategory": "mechanic",
+    "match": "exact",
+    "score": 1200
+  },
+  "wrench": {
+    "url": "https://items.rainmad.com/images/mechanic/wrench.png",
+    "source": "rainmad",
+    "sourceFile": "wrench.png",
+    "sourceCategory": "mechanic",
+    "match": "exact",
+    "score": 1200
+  },
+  "socket_set": {
+    "url": "https://items.rainmad.com/images/mechanic/screwdriverset.png",
+    "source": "rainmad",
+    "sourceFile": "screwdriverset.png",
+    "sourceCategory": "mechanic",
+    "match": "alias",
+    "score": 2000
+  },
+  "pliers": {
+    "url": "https://items.rainmad.com/images/mechanic/cutter.png",
+    "source": "rainmad",
+    "sourceFile": "cutter.png",
+    "sourceCategory": "mechanic",
+    "match": "alias",
+    "score": 2000
+  },
+  "wire_cutters": {
+    "url": "https://items.rainmad.com/images/mechanic/cutter.png",
+    "source": "rainmad",
+    "sourceFile": "cutter.png",
+    "sourceCategory": "mechanic",
+    "match": "fuzzy",
+    "score": 740
+  },
+  "crowbar": {
+    "url": "https://items.rainmad.com/images/weapons/weapon_crowbar.png",
+    "source": "rainmad",
+    "sourceFile": "weapon_crowbar.png",
+    "sourceCategory": "weapons",
+    "match": "alias",
+    "score": 2000
+  },
+  "bolt_cutters": {
+    "url": "https://items.rainmad.com/images/mechanic/boltcutter.png",
+    "source": "rainmad",
+    "sourceFile": "boltcutter.png",
+    "sourceCategory": "mechanic",
+    "match": "fuzzy",
+    "score": 788
+  },
+  "handsaw": {
+    "url": "https://items.rainmad.com/images/tools/tool_woodsaw.png",
+    "source": "rainmad",
+    "sourceFile": "tool_woodsaw.png",
+    "sourceCategory": "tools",
+    "match": "alias",
+    "score": 2000
+  },
+  "hacksaw": {
+    "url": "https://items.rainmad.com/images/tools/tool_woodsaw.png",
+    "source": "rainmad",
+    "sourceFile": "tool_woodsaw.png",
+    "sourceCategory": "tools",
+    "match": "alias",
+    "score": 2000
+  },
+  "drill": {
+    "url": "https://items.rainmad.com/images/general/drill.png",
+    "source": "rainmad",
+    "sourceFile": "drill.png",
+    "sourceCategory": "general",
+    "match": "exact",
+    "score": 1140
+  },
+  "impact_driver": {
+    "url": "https://items.rainmad.com/images/mechanic/screwdriver.png",
+    "source": "rainmad",
+    "sourceFile": "screwdriver.png",
+    "sourceCategory": "mechanic",
+    "match": "alias",
+    "score": 2000
+  },
+  "angle_grinder": {
+    "url": "https://items.rainmad.com/images/mechanic/anglegrinder.png",
+    "source": "rainmad",
+    "sourceFile": "anglegrinder.png",
+    "sourceCategory": "mechanic",
+    "match": "exact",
+    "score": 1200
+  },
+  "soldering_iron": {
+    "url": "https://items.rainmad.com/images/mechanic/electronickit.png",
+    "source": "rainmad",
+    "sourceFile": "electronickit.png",
+    "sourceCategory": "mechanic",
+    "match": "alias",
+    "score": 2000
+  },
+  "multimeter": {
+    "url": "https://items.rainmad.com/images/tech/electronickit-1.png",
+    "source": "rainmad",
+    "sourceFile": "electronickit-1.png",
+    "sourceCategory": "tech",
+    "match": "alias",
+    "score": 2000
+  },
+  "flashlight": {
+    "url": "https://items.rainmad.com/images/weapons/weapon_flashlight.png",
+    "source": "rainmad",
+    "sourceFile": "weapon_flashlight.png",
+    "sourceCategory": "weapons",
+    "match": "alias",
+    "score": 2000
+  },
+  "headlamp": {
+    "url": "https://items.rainmad.com/images/tech/light.png",
+    "source": "rainmad",
+    "sourceFile": "light.png",
+    "sourceCategory": "tech",
+    "match": "alias",
+    "score": 2000
+  },
+  "shovel": {
+    "url": "https://items.rainmad.com/images/tools/shovel.png",
+    "source": "rainmad",
+    "sourceFile": "shovel.png",
+    "sourceCategory": "tools",
+    "match": "exact",
+    "score": 1220
+  },
+  "pickaxe": {
+    "url": "https://items.rainmad.com/images/mining/pickaxe.png",
+    "source": "rainmad",
+    "sourceFile": "pickaxe.png",
+    "sourceCategory": "mining",
+    "match": "exact",
+    "score": 1180
+  },
+  "axe": {
+    "url": "https://items.rainmad.com/images/tools/tool_lumber_axe.png",
+    "source": "rainmad",
+    "sourceFile": "tool_lumber_axe.png",
+    "sourceCategory": "tools",
+    "match": "alias",
+    "score": 2000
+  },
+  "fishing_rod": {
+    "url": "https://items.rainmad.com/images/hunting/fishingrod.png",
+    "source": "rainmad",
+    "sourceFile": "fishingrod.png",
+    "sourceCategory": "hunting",
+    "match": "exact",
+    "score": 1100
+  },
+  "lockpick_set": {
+    "url": "https://items.rainmad.com/images/tools/lockpick.png",
+    "source": "rainmad",
+    "sourceFile": "lockpick.png",
+    "sourceCategory": "tools",
+    "match": "fuzzy",
+    "score": 784
+  },
+  "repair_kit": {
+    "url": "https://items.rainmad.com/images/mechanic/repairkit.png",
+    "source": "rainmad",
+    "sourceFile": "repairkit.png",
+    "sourceCategory": "mechanic",
+    "match": "exact",
+    "score": 1200
+  },
+  "wood_plank": {
+    "url": "https://items.rainmad.com/images/materials/woodplank.png",
+    "source": "rainmad",
+    "sourceFile": "woodplank.png",
+    "sourceCategory": "materials",
+    "match": "exact",
+    "score": 1220
+  },
+  "wood_scrap": {
+    "url": "https://items.rainmad.com/images/materials/wood_scraps.png",
+    "source": "rainmad",
+    "sourceFile": "wood_scraps.png",
+    "sourceCategory": "materials",
+    "match": "fuzzy",
+    "score": 808
+  },
+  "plywood_sheet": {
+    "url": "https://items.rainmad.com/images/materials/wood.png",
+    "source": "rainmad",
+    "sourceFile": "wood.png",
+    "sourceCategory": "materials",
+    "match": "exact",
+    "score": 1220
+  },
+  "steel_bar": {
+    "url": "https://items.rainmad.com/images/materials/steel.png",
+    "source": "rainmad",
+    "sourceFile": "steel.png",
+    "sourceCategory": "materials",
+    "match": "fuzzy",
+    "score": 784
+  },
+  "steel_sheet": {
+    "url": "https://items.rainmad.com/images/materials/steel.png",
+    "source": "rainmad",
+    "sourceFile": "steel.png",
+    "sourceCategory": "materials",
+    "match": "fuzzy",
+    "score": 760
+  },
+  "iron_bar": {
+    "url": "https://items.rainmad.com/images/materials/iron.png",
+    "source": "rainmad",
+    "sourceFile": "iron.png",
+    "sourceCategory": "materials",
+    "match": "fuzzy",
+    "score": 784
+  },
+  "iron_ore": {
+    "url": "https://items.rainmad.com/images/materials/iron-ore.png",
+    "source": "rainmad",
+    "sourceFile": "iron-ore.png",
+    "sourceCategory": "materials",
+    "match": "exact",
+    "score": 1220
+  },
+  "aluminum_bar": {
+    "url": "https://items.rainmad.com/images/materials/aluminum.png",
+    "source": "rainmad",
+    "sourceFile": "aluminum.png",
+    "sourceCategory": "materials",
+    "match": "fuzzy",
+    "score": 784
+  },
+  "aluminum_sheet": {
+    "url": "https://items.rainmad.com/images/materials/aluminum.png",
+    "source": "rainmad",
+    "sourceFile": "aluminum.png",
+    "sourceCategory": "materials",
+    "match": "fuzzy",
+    "score": 760
+  },
+  "copper_bar": {
+    "url": "https://items.rainmad.com/images/materials/copper.png",
+    "source": "rainmad",
+    "sourceFile": "copper.png",
+    "sourceCategory": "materials",
+    "match": "fuzzy",
+    "score": 784
+  },
+  "copper_wire": {
+    "url": "https://items.rainmad.com/images/materials/copperwire.png",
+    "source": "rainmad",
+    "sourceFile": "copperwire.png",
+    "sourceCategory": "materials",
+    "match": "exact",
+    "score": 1220
+  },
+  "electrical_wire": {
+    "url": "https://items.rainmad.com/images/materials/copperwire.png",
+    "source": "rainmad",
+    "sourceFile": "copperwire.png",
+    "sourceCategory": "materials",
+    "match": "alias",
+    "score": 2000
+  },
+  "plastic_sheet": {
+    "url": "https://items.rainmad.com/images/materials/plastic.png",
+    "source": "rainmad",
+    "sourceFile": "plastic.png",
+    "sourceCategory": "materials",
+    "match": "fuzzy",
+    "score": 760
+  },
+  "plastic_pellets": {
+    "url": "https://items.rainmad.com/images/materials/plastic.png",
+    "source": "rainmad",
+    "sourceFile": "plastic.png",
+    "sourceCategory": "materials",
+    "match": "fuzzy",
+    "score": 736
+  },
+  "rubber_sheet": {
+    "url": "https://items.rainmad.com/images/materials/rubber.png",
+    "source": "rainmad",
+    "sourceFile": "rubber.png",
+    "sourceCategory": "materials",
+    "match": "fuzzy",
+    "score": 760
+  },
+  "rubber_hose": {
+    "url": "https://items.rainmad.com/images/materials/rubber.png",
+    "source": "rainmad",
+    "sourceFile": "rubber.png",
+    "sourceCategory": "materials",
+    "match": "fuzzy",
+    "score": 772
+  },
+  "glass_sheet": {
+    "url": "https://items.rainmad.com/images/materials/glass.png",
+    "source": "rainmad",
+    "sourceFile": "glass.png",
+    "sourceCategory": "materials",
+    "match": "fuzzy",
+    "score": 760
+  },
+  "glass_shards": {
+    "url": "https://items.rainmad.com/images/materials/glass.png",
+    "source": "rainmad",
+    "sourceFile": "glass.png",
+    "sourceCategory": "materials",
+    "match": "fuzzy",
+    "score": 748
+  },
+  "fabric_roll": {
+    "url": "https://items.rainmad.com/images/ingredients/fabric.png",
+    "source": "rainmad",
+    "sourceFile": "fabric.png",
+    "sourceCategory": "ingredients",
+    "match": "fuzzy",
+    "score": 712
+  },
+  "cloth_scraps": {
+    "url": "https://items.rainmad.com/images/materials/cloth.png",
+    "source": "rainmad",
+    "sourceFile": "cloth.png",
+    "sourceCategory": "materials",
+    "match": "fuzzy",
+    "score": 748
+  },
+  "leather_roll": {
+    "url": "https://items.rainmad.com/images/ingredients/fabric.png",
+    "source": "rainmad",
+    "sourceFile": "fabric.png",
+    "sourceCategory": "ingredients",
+    "match": "alias",
+    "score": 2000
+  },
+  "leather_scraps": {
+    "url": "https://items.rainmad.com/images/materials/cloth.png",
+    "source": "rainmad",
+    "sourceFile": "cloth.png",
+    "sourceCategory": "materials",
+    "match": "alias",
+    "score": 2000
+  },
+  "nails_box": {
+    "url": "https://items.rainmad.com/images/materials/nails.png",
+    "source": "rainmad",
+    "sourceFile": "nails.png",
+    "sourceCategory": "materials",
+    "match": "fuzzy",
+    "score": 784
+  },
+  "screws_box": {
+    "url": "https://items.rainmad.com/images/materials/nails.png",
+    "source": "rainmad",
+    "sourceFile": "nails.png",
+    "sourceCategory": "materials",
+    "match": "alias",
+    "score": 2000
+  },
+  "bolts_box": {
+    "url": "https://items.rainmad.com/images/materials/nails.png",
+    "source": "rainmad",
+    "sourceFile": "nails.png",
+    "sourceCategory": "materials",
+    "match": "alias",
+    "score": 2000
+  },
+  "washers_box": {
+    "url": "https://items.rainmad.com/images/materials/nails.png",
+    "source": "rainmad",
+    "sourceFile": "nails.png",
+    "sourceCategory": "materials",
+    "match": "alias",
+    "score": 2000
+  },
+  "adhesive": {
+    "url": "https://items.rainmad.com/images/general/duct_tape.png",
+    "source": "rainmad",
+    "sourceFile": "duct_tape.png",
+    "sourceCategory": "general",
+    "match": "alias",
+    "score": 2000
+  },
+  "duct_tape": {
+    "url": "https://items.rainmad.com/images/general/duct_tape.png",
+    "source": "rainmad",
+    "sourceFile": "duct_tape.png",
+    "sourceCategory": "general",
+    "match": "exact",
+    "score": 1140
+  },
+  "epoxy_resin": {
+    "url": "https://items.rainmad.com/images/materials/plastic.png",
+    "source": "rainmad",
+    "sourceFile": "plastic.png",
+    "sourceCategory": "materials",
+    "match": "alias",
+    "score": 2000
+  },
+  "paint_can": {
+    "url": "https://items.rainmad.com/images/mechanic/mechanic_paint_spray.png",
+    "source": "rainmad",
+    "sourceFile": "mechanic_paint_spray.png",
+    "sourceCategory": "mechanic",
+    "match": "alias",
+    "score": 2000
+  },
+  "spray_paint": {
+    "url": "https://items.rainmad.com/images/mechanic/spray.png",
+    "source": "rainmad",
+    "sourceFile": "spray.png",
+    "sourceCategory": "mechanic",
+    "match": "fuzzy",
+    "score": 740
+  },
+  "concrete_mix": {
+    "url": "https://items.rainmad.com/images/materials/box.png",
+    "source": "rainmad",
+    "sourceFile": "box.png",
+    "sourceCategory": "materials",
+    "match": "alias",
+    "score": 2000
+  },
+  "cement_bag": {
+    "url": "https://items.rainmad.com/images/materials/box.png",
+    "source": "rainmad",
+    "sourceFile": "box.png",
+    "sourceCategory": "materials",
+    "match": "alias",
+    "score": 2000
+  },
+  "brick_stack": {
+    "url": "https://items.rainmad.com/images/materials/box.png",
+    "source": "rainmad",
+    "sourceFile": "box.png",
+    "sourceCategory": "materials",
+    "match": "alias",
+    "score": 2000
+  },
+  "ceramic_tile_box": {
+    "url": "https://items.rainmad.com/images/materials/box.png",
+    "source": "rainmad",
+    "sourceFile": "box.png",
+    "sourceCategory": "materials",
+    "match": "alias",
+    "score": 2000
+  },
+  "phone": {
+    "url": "https://items.rainmad.com/images/tech/phone.png",
+    "source": "rainmad",
+    "sourceFile": "phone.png",
+    "sourceCategory": "tech",
+    "match": "exact",
+    "score": 1220
+  },
+  "smartphone": {
+    "url": "https://items.rainmad.com/images/tech/smartphone.png",
+    "source": "rainmad",
+    "sourceFile": "smartphone.png",
+    "sourceCategory": "tech",
+    "match": "exact",
+    "score": 1220
+  },
+  "burner_phone": {
+    "url": "https://items.rainmad.com/images/tech/phone.png",
+    "source": "rainmad",
+    "sourceFile": "phone.png",
+    "sourceCategory": "tech",
+    "match": "fuzzy",
+    "score": 748
+  },
+  "radio": {
+    "url": "https://items.rainmad.com/images/tech/radio.png",
+    "source": "rainmad",
+    "sourceFile": "radio.png",
+    "sourceCategory": "tech",
+    "match": "exact",
+    "score": 1220
+  },
+  "scanner_radio": {
+    "url": "https://items.rainmad.com/images/tech/radio.png",
+    "source": "rainmad",
+    "sourceFile": "radio.png",
+    "sourceCategory": "tech",
+    "match": "exact",
+    "score": 1220
+  },
+  "laptop": {
+    "url": "https://items.rainmad.com/images/tech/laptop.png",
+    "source": "rainmad",
+    "sourceFile": "laptop.png",
+    "sourceCategory": "tech",
+    "match": "exact",
+    "score": 1220
+  },
+  "rugged_laptop": {
+    "url": "https://items.rainmad.com/images/tech/laptop.png",
+    "source": "rainmad",
+    "sourceFile": "laptop.png",
+    "sourceCategory": "tech",
+    "match": "fuzzy",
+    "score": 748
+  },
+  "tablet": {
+    "url": "https://items.rainmad.com/images/tech/tablet.png",
+    "source": "rainmad",
+    "sourceFile": "tablet.png",
+    "sourceCategory": "tech",
+    "match": "exact",
+    "score": 1220
+  },
+  "smartwatch": {
+    "url": "https://items.rainmad.com/images/clothing/kq_expensive_watch.png",
+    "source": "rainmad",
+    "sourceFile": "kq_expensive_watch.png",
+    "sourceCategory": "clothing",
+    "match": "alias",
+    "score": 2000
+  },
+  "gps_unit": {
+    "url": "https://items.rainmad.com/images/tech/garmin-gps.png",
+    "source": "rainmad",
+    "sourceFile": "garmin-gps.png",
+    "sourceCategory": "tech",
+    "match": "alias",
+    "score": 2000
+  },
+  "digital_camera": {
+    "url": "https://items.rainmad.com/images/tech/camera.png",
+    "source": "rainmad",
+    "sourceFile": "camera.png",
+    "sourceCategory": "tech",
+    "match": "fuzzy",
+    "score": 736
+  },
+  "body_camera": {
+    "url": "https://items.rainmad.com/images/tech/bodycam.png",
+    "source": "rainmad",
+    "sourceFile": "bodycam.png",
+    "sourceCategory": "tech",
+    "match": "fuzzy",
+    "score": 784
+  },
+  "action_camera": {
+    "url": "https://items.rainmad.com/images/tech/camera.png",
+    "source": "rainmad",
+    "sourceFile": "camera.png",
+    "sourceCategory": "tech",
+    "match": "fuzzy",
+    "score": 748
+  },
+  "power_bank": {
+    "url": "https://items.rainmad.com/images/tech/powerbank.png",
+    "source": "rainmad",
+    "sourceFile": "powerbank.png",
+    "sourceCategory": "tech",
+    "match": "exact",
+    "score": 1220
+  },
+  "phone_charger": {
+    "url": "https://items.rainmad.com/images/tech/phone.png",
+    "source": "rainmad",
+    "sourceFile": "phone.png",
+    "sourceCategory": "tech",
+    "match": "exact",
+    "score": 1220
+  },
+  "usb_cable": {
+    "url": "https://items.rainmad.com/images/materials/cable.png",
+    "source": "rainmad",
+    "sourceFile": "cable.png",
+    "sourceCategory": "materials",
+    "match": "fuzzy",
+    "score": 744
+  },
+  "usb_drive": {
+    "url": "https://items.rainmad.com/images/tech/usb_drive1.png",
+    "source": "rainmad",
+    "sourceFile": "usb_drive1.png",
+    "sourceCategory": "tech",
+    "match": "fuzzy",
+    "score": 808
+  },
+  "external_drive": {
+    "url": "https://items.rainmad.com/images/tech/hardrive.png",
+    "source": "rainmad",
+    "sourceFile": "hardrive.png",
+    "sourceCategory": "tech",
+    "match": "alias",
+    "score": 2000
+  },
+  "battery_pack": {
+    "url": "https://items.rainmad.com/images/tech/battery_package_9v.png",
+    "source": "rainmad",
+    "sourceFile": "battery_package_9v.png",
+    "sourceCategory": "tech",
+    "match": "fuzzy",
+    "score": 760
+  },
+  "aa_batteries": {
+    "url": "https://items.rainmad.com/images/tech/battery_package_aaa.png",
+    "source": "rainmad",
+    "sourceFile": "battery_package_aaa.png",
+    "sourceCategory": "tech",
+    "match": "alias",
+    "score": 2000
+  },
+  "circuit_board": {
+    "url": "https://items.rainmad.com/images/materials/circuit_board.png",
+    "source": "rainmad",
+    "sourceFile": "circuit_board.png",
+    "sourceCategory": "materials",
+    "match": "exact",
+    "score": 1180
+  },
+  "microcontroller": {
+    "url": "https://items.rainmad.com/images/tech/electronickit-1.png",
+    "source": "rainmad",
+    "sourceFile": "electronickit-1.png",
+    "sourceCategory": "tech",
+    "match": "alias",
+    "score": 2000
+  },
+  "electronic_kit": {
+    "url": "https://items.rainmad.com/images/mechanic/electronickit.png",
+    "source": "rainmad",
+    "sourceFile": "electronickit.png",
+    "sourceCategory": "mechanic",
+    "match": "exact",
+    "score": 1200
+  },
+  "security_camera": {
+    "url": "https://items.rainmad.com/images/tech/camera.png",
+    "source": "rainmad",
+    "sourceFile": "camera.png",
+    "sourceCategory": "tech",
+    "match": "exact",
+    "score": 1220
+  },
+  "salvaged_electronics": {
+    "url": "https://items.rainmad.com/images/tech/electronickit-2.png",
+    "source": "rainmad",
+    "sourceFile": "electronickit-2.png",
+    "sourceCategory": "tech",
+    "match": "alias",
+    "score": 2000
+  },
+  "bandage": {
+    "url": "https://items.rainmad.com/images/medical/bandage.png",
+    "source": "rainmad",
+    "sourceFile": "bandage.png",
+    "sourceCategory": "medical",
+    "match": "exact",
+    "score": 1220
+  },
+  "gauze": {
+    "url": "https://items.rainmad.com/images/medical/bandage.png",
+    "source": "rainmad",
+    "sourceFile": "bandage.png",
+    "sourceCategory": "medical",
+    "match": "alias",
+    "score": 2000
+  },
+  "antiseptic": {
+    "url": "https://items.rainmad.com/images/medical/salinebag.png",
+    "source": "rainmad",
+    "sourceFile": "salinebag.png",
+    "sourceCategory": "medical",
+    "match": "alias",
+    "score": 2000
+  },
+  "medkit": {
+    "url": "https://items.rainmad.com/images/medical/medkit.png",
+    "source": "rainmad",
+    "sourceFile": "medkit.png",
+    "sourceCategory": "medical",
+    "match": "exact",
+    "score": 1220
+  },
+  "first_aid_kit": {
+    "url": "https://items.rainmad.com/images/tools/firstaid_kit.png",
+    "source": "rainmad",
+    "sourceFile": "firstaid_kit.png",
+    "sourceCategory": "tools",
+    "match": "exact",
+    "score": 1200
+  },
+  "painkillers": {
+    "url": "https://items.rainmad.com/images/medical/painkillers.png",
+    "source": "rainmad",
+    "sourceFile": "painkillers.png",
+    "sourceCategory": "medical",
+    "match": "exact",
+    "score": 1220
+  },
+  "cold_medicine": {
+    "url": "https://items.rainmad.com/images/medical/coldnflubox.png",
+    "source": "rainmad",
+    "sourceFile": "coldnflubox.png",
+    "sourceCategory": "medical",
+    "match": "alias",
+    "score": 2000
+  },
+  "antibiotics": {
+    "url": "https://items.rainmad.com/images/medical/antibiotics.png",
+    "source": "rainmad",
+    "sourceFile": "antibiotics.png",
+    "sourceCategory": "medical",
+    "match": "exact",
+    "score": 1220
+  },
+  "inhaler": {
+    "url": "https://items.rainmad.com/images/medical/inhaler-blue.png",
+    "source": "rainmad",
+    "sourceFile": "inhaler-blue.png",
+    "sourceCategory": "medical",
+    "match": "fuzzy",
+    "score": 772
+  },
+  "epipen": {
+    "url": "https://items.rainmad.com/images/medical/epi_pen.png",
+    "source": "rainmad",
+    "sourceFile": "epi_pen.png",
+    "sourceCategory": "medical",
+    "match": "exact",
+    "score": 1220
+  },
+  "splint": {
+    "url": "https://items.rainmad.com/images/medical/bandage.png",
+    "source": "rainmad",
+    "sourceFile": "bandage.png",
+    "sourceCategory": "medical",
+    "match": "alias",
+    "score": 2000
+  },
+  "tourniquet": {
+    "url": "https://items.rainmad.com/images/medical/bandage.png",
+    "source": "rainmad",
+    "sourceFile": "bandage.png",
+    "sourceCategory": "medical",
+    "match": "alias",
+    "score": 2000
+  },
+  "trauma_dressing": {
+    "url": "https://items.rainmad.com/images/medical/burndressing.png",
+    "source": "rainmad",
+    "sourceFile": "burndressing.png",
+    "sourceCategory": "medical",
+    "match": "alias",
+    "score": 2000
+  },
+  "burn_dressing": {
+    "url": "https://items.rainmad.com/images/medical/burndressing.png",
+    "source": "rainmad",
+    "sourceFile": "burndressing.png",
+    "sourceCategory": "medical",
+    "match": "exact",
+    "score": 1220
+  },
+  "ice_pack": {
+    "url": "https://items.rainmad.com/images/medical/icepack.png",
+    "source": "rainmad",
+    "sourceFile": "icepack.png",
+    "sourceCategory": "medical",
+    "match": "exact",
+    "score": 1220
+  },
+  "saline_bag": {
+    "url": "https://items.rainmad.com/images/medical/salinebag.png",
+    "source": "rainmad",
+    "sourceFile": "salinebag.png",
+    "sourceCategory": "medical",
+    "match": "exact",
+    "score": 1220
+  },
+  "surgical_mask": {
+    "url": "https://items.rainmad.com/images/medical/surgicalkit.png",
+    "source": "rainmad",
+    "sourceFile": "surgicalkit.png",
+    "sourceCategory": "medical",
+    "match": "alias",
+    "score": 2000
+  },
+  "medical_gloves": {
+    "url": "https://items.rainmad.com/images/clothing/gloves.png",
+    "source": "rainmad",
+    "sourceFile": "gloves.png",
+    "sourceCategory": "clothing",
+    "match": "alias",
+    "score": 2000
+  },
+  "thermometer": {
+    "url": "https://items.rainmad.com/images/medical/glucosemeter.png",
+    "source": "rainmad",
+    "sourceFile": "glucosemeter.png",
+    "sourceCategory": "medical",
+    "match": "alias",
+    "score": 2000
+  },
+  "crutches": {
+    "url": "https://items.rainmad.com/images/medical/crutch.png",
+    "source": "rainmad",
+    "sourceFile": "crutch.png",
+    "sourceCategory": "medical",
+    "match": "fuzzy",
+    "score": 796
+  },
+  "kitchen_knife": {
+    "url": "https://items.rainmad.com/images/weapons/bpknife.png",
+    "source": "rainmad",
+    "sourceFile": "bpknife.png",
+    "sourceCategory": "weapons",
+    "match": "alias",
+    "score": 2000
+  },
+  "pocket_knife": {
+    "url": "https://items.rainmad.com/images/weapons/weapon_knife.png",
+    "source": "rainmad",
+    "sourceFile": "weapon_knife.png",
+    "sourceCategory": "weapons",
+    "match": "alias",
+    "score": 2000
+  },
+  "combat_knife": {
+    "url": "https://items.rainmad.com/images/weapons/weapon_combat_knife.png",
+    "source": "rainmad",
+    "sourceFile": "weapon_combat_knife.png",
+    "sourceCategory": "weapons",
+    "match": "fuzzy",
+    "score": 748
+  },
+  "baseball_bat": {
+    "url": "https://items.rainmad.com/images/weapons/bpbat.png",
+    "source": "rainmad",
+    "sourceFile": "bpbat.png",
+    "sourceCategory": "weapons",
+    "match": "alias",
+    "score": 2000
+  },
+  "baton": {
+    "url": "https://items.rainmad.com/images/weapons/meleeWpnBatonT0PipeBaton.png",
+    "source": "rainmad",
+    "sourceFile": "meleeWpnBatonT0PipeBaton.png",
+    "sourceCategory": "weapons",
+    "match": "exact",
+    "score": 1220
+  },
+  "machete": {
+    "url": "https://items.rainmad.com/images/weapons/bpmachete.png",
+    "source": "rainmad",
+    "sourceFile": "bpmachete.png",
+    "sourceCategory": "weapons",
+    "match": "fuzzy",
+    "score": 796
+  },
+  "hatchet": {
+    "url": "https://items.rainmad.com/images/weapons/bphatchet.png",
+    "source": "rainmad",
+    "sourceFile": "bphatchet.png",
+    "sourceCategory": "weapons",
+    "match": "fuzzy",
+    "score": 796
+  },
+  "compact_pistol": {
+    "url": "https://items.rainmad.com/images/weapons/bpsnspistol.png",
+    "source": "rainmad",
+    "sourceFile": "bpsnspistol.png",
+    "sourceCategory": "weapons",
+    "match": "alias",
+    "score": 2000
+  },
+  "service_pistol": {
+    "url": "https://items.rainmad.com/images/weapons/combatpistol.png",
+    "source": "rainmad",
+    "sourceFile": "combatpistol.png",
+    "sourceCategory": "weapons",
+    "match": "alias",
+    "score": 2000
+  },
+  "revolver": {
+    "url": "https://items.rainmad.com/images/weapons/bprevolver.png",
+    "source": "rainmad",
+    "sourceFile": "bprevolver.png",
+    "sourceCategory": "weapons",
+    "match": "fuzzy",
+    "score": 796
+  },
+  "machine_pistol": {
+    "url": "https://items.rainmad.com/images/weapons/bpmachinepistol.png",
+    "source": "rainmad",
+    "sourceFile": "bpmachinepistol.png",
+    "sourceCategory": "weapons",
+    "match": "fuzzy",
+    "score": 796
+  },
+  "compact_smg": {
+    "url": "https://items.rainmad.com/images/weapons/bpminismg.png",
+    "source": "rainmad",
+    "sourceFile": "bpminismg.png",
+    "sourceCategory": "weapons",
+    "match": "alias",
+    "score": 2000
+  },
+  "smg": {
+    "url": "https://items.rainmad.com/images/weapons/bpsmg.png",
+    "source": "rainmad",
+    "sourceFile": "bpsmg.png",
+    "sourceCategory": "weapons",
+    "match": "alias",
+    "score": 2000
+  },
+  "pump_shotgun": {
+    "url": "https://items.rainmad.com/images/weapons/bppumpshotgun.png",
+    "source": "rainmad",
+    "sourceFile": "bppumpshotgun.png",
+    "sourceCategory": "weapons",
+    "match": "fuzzy",
+    "score": 796
+  },
+  "carbine_rifle": {
+    "url": "https://items.rainmad.com/images/weapons/bpcarbinerifle.png",
+    "source": "rainmad",
+    "sourceFile": "bpcarbinerifle.png",
+    "sourceCategory": "weapons",
+    "match": "fuzzy",
+    "score": 796
+  },
+  "assault_rifle": {
+    "url": "https://items.rainmad.com/images/weapons/bpassaultrifle.png",
+    "source": "rainmad",
+    "sourceFile": "bpassaultrifle.png",
+    "sourceCategory": "weapons",
+    "match": "fuzzy",
+    "score": 796
+  },
+  "marksman_rifle": {
+    "url": "https://items.rainmad.com/images/weapons/bpmarksmanrifle.png",
+    "source": "rainmad",
+    "sourceFile": "bpmarksmanrifle.png",
+    "sourceCategory": "weapons",
+    "match": "fuzzy",
+    "score": 796
+  },
+  "ammo_9mm": {
+    "url": "https://items.rainmad.com/images/weapons/ammo9mmBulletAP.png",
+    "source": "rainmad",
+    "sourceFile": "ammo9mmBulletAP.png",
+    "sourceCategory": "weapons",
+    "match": "fuzzy",
+    "score": 724
+  },
+  "ammo_45": {
+    "url": "https://items.rainmad.com/images/weapons/pistol_ammo.png",
+    "source": "rainmad",
+    "sourceFile": "pistol_ammo.png",
+    "sourceCategory": "weapons",
+    "match": "alias",
+    "score": 2000
+  },
+  "ammo_revolver": {
+    "url": "https://items.rainmad.com/images/weapons/pistol_ammo.png",
+    "source": "rainmad",
+    "sourceFile": "pistol_ammo.png",
+    "sourceCategory": "weapons",
+    "match": "alias",
+    "score": 2000
+  },
+  "shotgun_shells": {
+    "url": "https://items.rainmad.com/images/weapons/shotgun_ammo.png",
+    "source": "rainmad",
+    "sourceFile": "shotgun_ammo.png",
+    "sourceCategory": "weapons",
+    "match": "alias",
+    "score": 2000
+  },
+  "rifle_ammo": {
+    "url": "https://items.rainmad.com/images/weapons/rifle_ammo.png",
+    "source": "rainmad",
+    "sourceFile": "rifle_ammo.png",
+    "sourceCategory": "weapons",
+    "match": "exact",
+    "score": 1220
+  },
+  "pistol_magazine": {
+    "url": "https://items.rainmad.com/images/weapons/pistol_ammopack.png",
+    "source": "rainmad",
+    "sourceFile": "pistol_ammopack.png",
+    "sourceCategory": "weapons",
+    "match": "alias",
+    "score": 2000
+  },
+  "rifle_magazine": {
+    "url": "https://items.rainmad.com/images/weapons/rifle_drummag.png",
+    "source": "rainmad",
+    "sourceFile": "rifle_drummag.png",
+    "sourceCategory": "weapons",
+    "match": "alias",
+    "score": 2000
+  },
+  "weapon_cleaning_kit": {
+    "url": "https://items.rainmad.com/images/general/cleaningkit.png",
+    "source": "rainmad",
+    "sourceFile": "cleaningkit.png",
+    "sourceCategory": "general",
+    "match": "fuzzy",
+    "score": 688
+  }
+}
