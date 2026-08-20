@@ -1,19 +1,12 @@
 export type CharacterSex = 'male' | 'female';
 
-export type CharacterAppearanceRecipe = {
-  schemaVersion: 1;
-  sex: CharacterSex;
+export type CharacterAppearance = {
   height: number;
   weight: number;
   muscle: number;
   age: number;
   skinTone: string;
   eyeColor: string;
-  bodyMorphs: Record<string, number>;
-  faceMorphs: Record<string, number>;
-  hairAssetId: string | null;
-  hairColor: string;
-  equipped: Partial<Record<GarmentSlot, string>>;
 };
 
 export type GarmentSlot =
@@ -26,12 +19,21 @@ export type GarmentSlot =
   | 'hands'
   | 'accessory';
 
-export type CharacterAssetStatus =
-  | 'draft'
-  | 'generating'
-  | 'validating'
-  | 'ready'
-  | 'rejected';
+export type CharacterGrooming = {
+  hairStyle: string;
+  hairColor: string;
+  equipped: Partial<Record<GarmentSlot, string>>;
+};
+
+export type CharacterAppearanceRecipe = {
+  body: CharacterSex;
+  appearance: CharacterAppearance;
+  grooming: CharacterGrooming;
+  morphs: Record<string, number>;
+  faceMorphs: Record<string, number>;
+};
+
+export type CharacterAssetStatus = 'draft' | 'generating' | 'validating' | 'ready' | 'rejected';
 
 export type CharacterAssetManifest = {
   id: string;
@@ -49,20 +51,49 @@ export type CharacterAssetManifest = {
   createdAt: string;
 };
 
+export const BODY_MORPHS = [
+  ['shoulders', 'Shoulders'],
+  ['chest', 'Chest'],
+  ['waist', 'Waist'],
+  ['hips', 'Hips'],
+  ['upperArms', 'Upper arms'],
+  ['thighs', 'Thighs'],
+  ['calves', 'Calves'],
+  ['armLength', 'Arm length'],
+  ['legLength', 'Leg length']
+] as const;
+
+export const FACE_MORPHS = [
+  ['cheekbones', 'Cheekbones'],
+  ['cheekVolume', 'Cheek volume'],
+  ['chinWidth', 'Chin width'],
+  ['chinHeight', 'Chin height'],
+  ['eyeSize', 'Eye size'],
+  ['eyeSpacing', 'Eye spacing'],
+  ['noseWidth', 'Nose width'],
+  ['noseLength', 'Nose length'],
+  ['mouthWidth', 'Mouth width'],
+  ['upperLip', 'Upper lip'],
+  ['lowerLip', 'Lower lip']
+] as const;
+
 export const DEFAULT_CHARACTER_RECIPE: CharacterAppearanceRecipe = {
-  schemaVersion: 1,
-  sex: 'male',
-  height: 0,
-  weight: 0,
-  muscle: 0,
-  age: 28,
-  skinTone: 'warm-medium',
-  eyeColor: 'brown',
-  bodyMorphs: {},
-  faceMorphs: {},
-  hairAssetId: null,
-  hairColor: 'dark-brown',
-  equipped: {}
+  body: 'male',
+  appearance: {
+    height: 0,
+    weight: 0,
+    muscle: 0,
+    age: 28,
+    skinTone: 'warm-medium',
+    eyeColor: 'brown'
+  },
+  grooming: {
+    hairStyle: 'bald',
+    hairColor: 'dark-brown',
+    equipped: {}
+  },
+  morphs: {},
+  faceMorphs: {}
 };
 
 export function normalizeMorph(value: number): number {
@@ -70,24 +101,29 @@ export function normalizeMorph(value: number): number {
   return Math.max(-100, Math.min(100, Math.round(value)));
 }
 
-export function normalizeRecipe(
-  input: Partial<CharacterAppearanceRecipe>
-): CharacterAppearanceRecipe {
+export function normalizeRecipe(input?: Partial<CharacterAppearanceRecipe> | null): CharacterAppearanceRecipe {
+  const appearance = input?.appearance ?? {} as Partial<CharacterAppearance>;
+  const grooming = input?.grooming ?? {} as Partial<CharacterGrooming>;
   return {
-    ...DEFAULT_CHARACTER_RECIPE,
-    ...input,
-    schemaVersion: 1,
-    sex: input.sex === 'female' ? 'female' : 'male',
-    height: normalizeMorph(input.height ?? 0),
-    weight: normalizeMorph(input.weight ?? 0),
-    muscle: normalizeMorph(input.muscle ?? 0),
-    age: Math.max(18, Math.min(80, Math.round(input.age ?? 28))),
-    bodyMorphs: Object.fromEntries(
-      Object.entries(input.bodyMorphs ?? {}).map(([key, value]) => [key, normalizeMorph(value)])
-    ),
-    faceMorphs: Object.fromEntries(
-      Object.entries(input.faceMorphs ?? {}).map(([key, value]) => [key, normalizeMorph(value)])
-    ),
-    equipped: { ...(input.equipped ?? {}) }
+    body: input?.body === 'female' ? 'female' : 'male',
+    appearance: {
+      height: normalizeMorph(Number(appearance.height ?? 0)),
+      weight: normalizeMorph(Number(appearance.weight ?? 0)),
+      muscle: normalizeMorph(Number(appearance.muscle ?? 0)),
+      age: Math.max(18, Math.min(80, Math.round(Number(appearance.age ?? 28)))),
+      skinTone: String(appearance.skinTone ?? 'warm-medium'),
+      eyeColor: String(appearance.eyeColor ?? 'brown')
+    },
+    grooming: {
+      hairStyle: String(grooming.hairStyle ?? 'bald'),
+      hairColor: String(grooming.hairColor ?? 'dark-brown'),
+      equipped: { ...(grooming.equipped ?? {}) }
+    },
+    morphs: normalizeMorphMap(input?.morphs),
+    faceMorphs: normalizeMorphMap(input?.faceMorphs)
   };
+}
+
+function normalizeMorphMap(values?: Record<string, number>) {
+  return Object.fromEntries(Object.entries(values ?? {}).map(([key, value]) => [key, normalizeMorph(value)]));
 }
