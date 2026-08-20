@@ -19,6 +19,11 @@ import {
   type WorldActionId,
   type WorldActionResult
 } from '@sol-dorado/contracts';
+import {
+  StreetPositionResultSchema,
+  type StreetPosition,
+  type StreetPositionResult
+} from '@sol-dorado/contracts/world-position';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 const TOKEN_KEY = 'sd_session_token_v1';
@@ -58,6 +63,21 @@ export async function getStreetState(): Promise<StreetState> {
   const response = await authenticatedFetch('/v1/world');
   if (!response.ok) throw new ApiCommandError(await responseErrorCode(response, 'world_load_failed'));
   return StreetStateSchema.parse(await response.json());
+}
+
+export async function getStreetPosition(): Promise<StreetPositionResult> {
+  const response = await authenticatedFetch('/v1/world/position');
+  if (!response.ok) throw new ApiCommandError(await responseErrorCode(response, 'world_position_load_failed'));
+  return StreetPositionResultSchema.parse(await response.json());
+}
+
+export async function moveStreetPlayer(position: StreetPosition): Promise<StreetPositionResult> {
+  const response = await authenticatedFetch('/v1/world/move', {
+    method: 'POST',
+    body: JSON.stringify(position)
+  });
+  if (!response.ok) throw new ApiCommandError(await responseErrorCode(response, `world_move_failed_${response.status}`));
+  return StreetPositionResultSchema.parse(await response.json());
 }
 
 export async function runWorldAction(actionId: WorldActionId, expectedVersion: number): Promise<WorldActionResult> {
@@ -112,51 +132,19 @@ export async function getFinance(): Promise<FinanceState> {
   return FinanceStateSchema.parse(await response.json());
 }
 
-export function setFinanceAccess(accessMode: FinanceAccessMode) {
-  return financeCommand('/v1/finance/access', { accessMode });
-}
-
-export function moveFinanceCash(direction: 'deposit' | 'withdraw', amountCents: number) {
-  return financeCommand('/v1/finance/cash', { direction, amountCents });
-}
-
-export function moveFinanceInternal(direction: 'checking_to_savings' | 'savings_to_checking', amountCents: number) {
-  return financeCommand('/v1/finance/internal-transfer', { direction, amountCents });
-}
-
-export function sendFinanceTransfer(recipientId: 'maya' | 'leo' | 'landlord', amountCents: number, reference: string) {
-  return financeCommand('/v1/finance/recipient-transfer', { recipientId, amountCents, reference });
-}
-
-export function applyFinanceLoan(kind: 'personal' | 'vehicle') {
-  return financeCommand('/v1/finance/loan/apply', { kind });
-}
-
-export function payFinanceLoan() {
-  return financeCommand('/v1/finance/loan/pay-next');
-}
-
-export function fundFinanceExchange(amountCents: number) {
-  return financeCommand('/v1/finance/exchange/fund', { amountCents });
-}
-
-export function withdrawFinanceExchange() {
-  return financeCommand('/v1/finance/exchange/withdraw');
-}
-
-export function tradeFinanceCrypto(side: 'buy' | 'sell', symbol: FinanceAssetSymbol, usdCents: number) {
-  return financeCommand('/v1/finance/crypto/trade', { side, symbol, usdCents });
-}
-
-export function advanceFinanceMarket() {
-  return financeCommand('/v1/finance/market/advance');
-}
+export function setFinanceAccess(accessMode: FinanceAccessMode) { return financeCommand('/v1/finance/access', { accessMode }); }
+export function moveFinanceCash(direction: 'deposit' | 'withdraw', amountCents: number) { return financeCommand('/v1/finance/cash', { direction, amountCents }); }
+export function moveFinanceInternal(direction: 'checking_to_savings' | 'savings_to_checking', amountCents: number) { return financeCommand('/v1/finance/internal-transfer', { direction, amountCents }); }
+export function sendFinanceTransfer(recipientId: 'maya' | 'leo' | 'landlord', amountCents: number, reference: string) { return financeCommand('/v1/finance/recipient-transfer', { recipientId, amountCents, reference }); }
+export function applyFinanceLoan(kind: 'personal' | 'vehicle') { return financeCommand('/v1/finance/loan/apply', { kind }); }
+export function payFinanceLoan() { return financeCommand('/v1/finance/loan/pay-next'); }
+export function fundFinanceExchange(amountCents: number) { return financeCommand('/v1/finance/exchange/fund', { amountCents }); }
+export function withdrawFinanceExchange() { return financeCommand('/v1/finance/exchange/withdraw'); }
+export function tradeFinanceCrypto(side: 'buy' | 'sell', symbol: FinanceAssetSymbol, usdCents: number) { return financeCommand('/v1/finance/crypto/trade', { side, symbol, usdCents }); }
+export function advanceFinanceMarket() { return financeCommand('/v1/finance/market/advance'); }
 
 async function financeCommand(path: string, body?: unknown): Promise<FinanceMutationResult> {
-  const response = await authenticatedFetch(path, {
-    method: 'POST',
-    body: body === undefined ? undefined : JSON.stringify(body)
-  });
+  const response = await authenticatedFetch(path, { method: 'POST', body: body === undefined ? undefined : JSON.stringify(body) });
   if (!response.ok) throw new Error(await apiError(response, 'Finance action failed'));
   return FinanceMutationResultSchema.parse(await response.json());
 }
@@ -172,7 +160,5 @@ async function responseErrorCode(response: Response, fallback: string) {
 }
 
 export class ApiCommandError extends Error {
-  constructor(public readonly code: string, public readonly details?: Record<string, unknown>) {
-    super(code);
-  }
+  constructor(public readonly code: string, public readonly details?: Record<string, unknown>) { super(code); }
 }

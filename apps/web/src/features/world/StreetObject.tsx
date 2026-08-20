@@ -26,10 +26,9 @@ export function StreetObject({ definition, selected, alerted, onSelect }: {
       aria-pressed={selected}
       onClick={onSelect}
     >
-      <span className="street-object-hitframe" />
       <span className="street-object-marker">
-        <span className="street-object-pulse" />
-        <span className="street-object-icon"><GameIcon name={definition.icon} size={definition.kind === 'exit' ? 15 : 17} /></span>
+        <span className="street-object-anchor-dot" />
+        <span className="street-object-icon"><GameIcon name={definition.icon} size={definition.kind === 'exit' ? 14 : 16} /></span>
         <span className="street-object-label"><b>{t(definition.labelKey)}</b><small>{t(definition.detailKey)}</small></span>
       </span>
     </button>

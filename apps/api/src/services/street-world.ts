@@ -7,6 +7,7 @@ import {
   type StreetState,
   type WorldActionId
 } from '@sol-dorado/contracts';
+import { StreetPositionResultSchema, type StreetPosition } from '@sol-dorado/contracts/world-position';
 import { getActionAvailability, STREET_SEGMENTS } from '../domain/actions.js';
 import type { RedisClient } from '../redis.js';
 
@@ -26,6 +27,7 @@ export interface StreetProgressRow {
   currentSegmentId: StreetSegmentId;
   visitedSegmentIds: StreetSegmentId[];
   flags: StreetFlags;
+  position: StreetPosition;
 }
 
 export function worldCooldownKey(playerId: string, actionId: WorldActionId) {
@@ -46,10 +48,20 @@ export async function ensureStreetProgress(db: Queryable, playerId: string): Pro
 export async function lockStreetProgress(client: PoolClient, playerId: string): Promise<StreetProgressRow> {
   await ensureStreetProgress(client, playerId);
   const result = await client.query(
-    'SELECT current_segment_id, visited_segment_ids, flags FROM player_street_state WHERE player_id = $1 FOR UPDATE',
+    'SELECT current_segment_id, visited_segment_ids, flags, position_x, position_y FROM player_street_state WHERE player_id = $1 FOR UPDATE',
     [playerId]
   );
   return mapProgressRow(result.rows[0]);
+}
+
+export async function getStreetPosition(db: Queryable, playerId: string) {
+  await ensureStreetProgress(db, playerId);
+  const result = await db.query(
+    'SELECT current_segment_id, visited_segment_ids, flags, position_x, position_y FROM player_street_state WHERE player_id = $1',
+    [playerId]
+  );
+  const progress = mapProgressRow(result.rows[0]);
+  return StreetPositionResultSchema.parse({ segmentId: progress.currentSegmentId, position: progress.position });
 }
 
 export async function getStreetState(
@@ -59,7 +71,7 @@ export async function getStreetState(
 ): Promise<StreetState> {
   await ensureStreetProgress(db, playerId);
   const result = await db.query(
-    'SELECT current_segment_id, visited_segment_ids, flags FROM player_street_state WHERE player_id = $1',
+    'SELECT current_segment_id, visited_segment_ids, flags, position_x, position_y FROM player_street_state WHERE player_id = $1',
     [playerId]
   );
   const progress = mapProgressRow(result.rows[0]);
@@ -145,6 +157,10 @@ function mapProgressRow(row: Record<string, unknown> | undefined): StreetProgres
     flags: {
       cornerStoreAlerted: rawFlags.cornerStoreAlerted === true,
       alleyTipKnown: rawFlags.alleyTipKnown === true
+    },
+    position: {
+      x: Number(row.position_x ?? 50),
+      y: Number(row.position_y ?? 57)
     }
   };
 }
