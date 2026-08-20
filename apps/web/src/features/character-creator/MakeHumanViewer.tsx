@@ -140,8 +140,8 @@ export function MakeHumanViewer({ recipe, focus = 'full' }: { recipe: CharacterA
 }
 
 function summaryText(summary: ViewerSummary) {
-  if (summary.failedAssets) return `HM08 на живо · ${summary.loadedAssets} заредени · ${summary.failedAssets} неуспешни asset-а`;
-  if (summary.loadedAssets) return `HM08 на живо · ${summary.loadedAssets} asset-а заредени`;
+  if (summary.failedAssets) return `HM08 на живо · ${summary.loadedAssets} заредени · ${summary.failedAssets} неуспешни елемента`;
+  if (summary.loadedAssets) return `HM08 на живо · ${summary.loadedAssets} заредени елемента`;
   return 'HM08 на живо';
 }
 
@@ -217,14 +217,11 @@ class ViewerRuntime {
     const skin = SKIN[recipe.appearance.skinTone] ?? SKIN['warm-medium'];
     const material = new this.THREE.MeshPhysicalMaterial({ color: skin, roughness: .66, metalness: 0, sheen: .08, sheenColor: 0xffd9c5 });
     this.mesh = new this.THREE.Mesh(built.geometry, material);
-    built.geometry.computeBoundingBox();
-    const box = built.geometry.boundingBox;
-    const size = new this.THREE.Vector3(); box.getSize(size);
-    const center = new this.THREE.Vector3(); box.getCenter(center);
+    const bounds = measureBodyBounds(base, built.deformed);
     const heightScale = 1 + (recipe.appearance.height / 100) * .085;
-    const scale = (2.02 * heightScale) / Math.max(size.y, .001);
+    const scale = (2.02 * heightScale) / Math.max(bounds.maxY - bounds.minY, .001);
     this.mesh.scale.setScalar(scale);
-    this.mesh.position.set(-center.x * scale, -box.min.y * scale, -center.z * scale);
+    this.mesh.position.set(-bounds.centerX * scale, -bounds.minY * scale, -bounds.centerZ * scale);
     this.root.add(this.mesh);
 
     this.addNativeEyes(base, built.deformed, scale, this.mesh.position, recipe.appearance.eyeColor);
@@ -569,6 +566,20 @@ function buildBodyGeometry(THREE: any, base: BaseMesh, targets: Array<{ target: 
   return { geometry, deformed: verts };
 }
 
+function measureBodyBounds(base: BaseMesh, deformed: number[][]) {
+  const used = new Set<number>();
+  for (const tri of base.tris) for (const [vi] of tri) used.add(vi);
+  let minX = Infinity, minY = Infinity, minZ = Infinity, maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+  for (const index of used) {
+    const point = deformed[index];
+    if (!point) continue;
+    minX = Math.min(minX, point[0]); maxX = Math.max(maxX, point[0]);
+    minY = Math.min(minY, point[1]); maxY = Math.max(maxY, point[1]);
+    minZ = Math.min(minZ, point[2]); maxZ = Math.max(maxZ, point[2]);
+  }
+  return { minY, maxY, centerX: (minX + maxX) / 2, centerZ: (minZ + maxZ) / 2 };
+}
+
 function buildAuxGeometry(THREE: any, deformed: number[][], tris: Tri[]) {
   const positions: number[] = [], indices: number[] = [];
   const map = new Map<number, number>();
@@ -631,8 +642,8 @@ async function fetchAssetText(spec: MakeHumanSystemAsset, file: string) {
       const text = await response.text();
       const head = text.slice(0, 180).toLowerCase();
       if (text.length < 20) throw new Error('празен файл');
-      if (head.includes('<html') || head.includes('<!doctype html')) throw new Error('получен е HTML вместо asset');
-      if (head.includes('version https://git-lfs.github.com/spec/v1')) throw new Error('получен е Git LFS указател вместо asset');
+      if (head.includes('<html') || head.includes('<!doctype html')) throw new Error('получен е HTML вместо елемент');
+      if (head.includes('version https://git-lfs.github.com/spec/v1')) throw new Error('получен е Git LFS указател вместо елемент');
       return text;
     } catch (error) {
       errors.push(error instanceof Error ? error.message : String(error));
