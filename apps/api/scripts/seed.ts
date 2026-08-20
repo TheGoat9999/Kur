@@ -30,7 +30,7 @@ try {
   await db.query(`
     INSERT INTO inventory_containers (id, player_id, container_key, label, capacity_grams, slot_count)
     VALUES
-      ('00000000-0000-4000-8000-000000000201', $1, 'player', 'Backpack & Pockets', 14000, 20),
+      ('00000000-0000-4000-8000-000000000201', $1, 'player', 'Backpack & Pockets', 20000, 64),
       ('00000000-0000-4000-8000-000000000202', $1, 'ground', 'Nearby / Ground', 50000, 20),
       ('00000000-0000-4000-8000-000000000203', $1, 'home', 'Cypress Apartment · Storage', 60000, 20),
       ('00000000-0000-4000-8000-000000000204', $1, 'vehicle_trunk', 'Active Vehicle · Trunk', 35000, 20)
