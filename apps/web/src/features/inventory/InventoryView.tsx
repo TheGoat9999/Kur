@@ -8,10 +8,14 @@ import type {
 } from '@sol-dorado/contracts';
 import { getInventory, moveInventoryItem, useInventoryItem } from '../../lib/api';
 import { GameIcon } from '../../components/GameIcon';
+import { useI18n } from '../../i18n';
+import { useNotifications } from '../../components/Notifications';
 
 interface Props { onStateChange: (state: BootstrapState) => void; }
 
 export function InventoryView({ onStateChange }: Props) {
+  const { locale, t, runtime } = useI18n();
+  const { push } = useNotifications();
   const [inventory, setInventory] = useState<InventoryState | null>(null);
   const [externalKey, setExternalKey] = useState<InventoryContainerKey>('ground');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -21,8 +25,12 @@ export function InventoryView({ onStateChange }: Props) {
   useEffect(() => {
     getInventory()
       .then(next => { setInventory(next); setExternalKey(next.selectedExternalKey); })
-      .catch(reason => setError(reason instanceof Error ? reason.message : String(reason)));
-  }, []);
+      .catch(reason => {
+        const message = humanizeError(reason, locale);
+        setError(message);
+        push({ tone: 'error', title: t('common.actionBlocked'), message });
+      });
+  }, [locale, push, t]);
 
   const selected = useMemo(
     () => inventory?.containers.flatMap(container => container.items).find(item => item.id === selectedId) ?? null,
@@ -37,8 +45,11 @@ export function InventoryView({ onStateChange }: Props) {
     try {
       setInventory(await moveInventoryItem(itemId, target, slot));
       setSelectedId(null);
+      push({ tone: 'info', title: t('inventory.movedTitle'), message: t('inventory.movedMessage') });
     } catch (reason) {
-      setError(humanizeError(reason));
+      const message = humanizeError(reason, locale);
+      setError(message);
+      push({ tone: 'error', title: t('common.actionBlocked'), message });
     } finally { setBusy(false); }
   }
 
@@ -50,13 +61,16 @@ export function InventoryView({ onStateChange }: Props) {
       setInventory(result.inventory);
       onStateChange(result.state);
       setSelectedId(null);
+      push({ tone: 'success', title: t('inventory.usedTitle'), message: t('inventory.usedMessage') });
     } catch (reason) {
-      setError(humanizeError(reason));
+      const message = humanizeError(reason, locale);
+      setError(message);
+      push({ tone: 'error', title: t('common.actionBlocked'), message });
     } finally { setBusy(false); }
   }
 
   if (!inventory || !player || !external) {
-    return <section className="glass-panel grid min-h-[420px] place-items-center p-8"><div className="text-center"><GameIcon name="package" size={26} /><p className="mt-3 text-sm text-slate-400">{error ?? 'Loading physical inventory…'}</p></div></section>;
+    return <section className="glass-panel grid min-h-[420px] place-items-center p-8"><div className="text-center"><GameIcon name="package" size={26} /><p className="mt-3 text-sm text-slate-400">{error ?? t('inventory.loading')}</p></div></section>;
   }
 
   const source = selected ? inventory.containers.find(container => container.key === selected.containerKey) : null;
@@ -67,24 +81,24 @@ export function InventoryView({ onStateChange }: Props) {
     <section className="space-y-4">
       <div className="screen-heading">
         <div>
-          <span className="eyebrow">Physical possessions</span>
-          <h1>Inventory</h1>
-          <p>Every item occupies a real container and slot. Access follows the player, property and vehicle state.</p>
+          <span className="eyebrow">{t('inventory.eyebrow')}</span>
+          <h1>{t('inventory.title')}</h1>
+          <p>{t('inventory.description')}</p>
         </div>
-        <div className="feature-badge feature-badge-live"><span /> Backend live</div>
+        <div className="feature-badge feature-badge-live"><span /> {t('common.backendLive')}</div>
       </div>
 
-      <div className="context-switcher" aria-label="External inventory context">
+      <div className="context-switcher" aria-label={t('inventory.context')}>
         {inventory.containers.filter(container => container.key !== 'player').map(container => (
           <button
             key={container.key}
             className={container.key === externalKey ? 'context-option context-option-active' : 'context-option'}
             disabled={!container.accessible}
-            title={container.accessReason}
+            title={runtime(container.accessReason)}
             onClick={() => setExternalKey(container.key)}
           >
             <GameIcon name={containerIcon(container.key)} size={16} />
-            <span><b>{container.label}</b><small>{container.accessible ? 'Accessible now' : container.accessReason}</small></span>
+            <span><b>{runtime(container.label)}</b><small>{container.accessible ? t('inventory.accessible') : runtime(container.accessReason)}</small></span>
             {!container.accessible && <GameIcon name="lock" size={13} />}
           </button>
         ))}
@@ -94,7 +108,7 @@ export function InventoryView({ onStateChange }: Props) {
 
       <div className="inventory-layout">
         <ContainerPane container={player} selectedId={selectedId} busy={busy} onSelect={setSelectedId} onMove={move} />
-        <div className="inventory-transfer"><GameIcon name="arrow-left-right" size={20} /><small>DRAG</small></div>
+        <div className="inventory-transfer"><GameIcon name="arrow-left-right" size={20} /><small>{t('inventory.drag')}</small></div>
         <ContainerPane container={external} selectedId={selectedId} busy={busy} onSelect={setSelectedId} onMove={move} />
       </div>
 
@@ -103,17 +117,17 @@ export function InventoryView({ onStateChange }: Props) {
           <>
             <div className="item-mark item-mark-large">{selected.symbol}</div>
             <div className="min-w-0 flex-1">
-              <span className="eyebrow">Selected item</span>
-              <h2>{selected.displayName}</h2>
-              <p>{selected.category} · {formatWeight(selected.unitWeightGrams * selected.quantity)} · {source.label}</p>
+              <span className="eyebrow">{t('inventory.selected')}</span>
+              <h2>{runtime(selected.displayName)}</h2>
+              <p>{runtime(selected.category)} · {formatWeight(selected.unitWeightGrams * selected.quantity)} · {runtime(source.label)}</p>
             </div>
             <div className="item-actions">
-              {usable && <button className="primary-button" disabled={busy} onClick={useSelected}>{selected.itemKey === 'water' ? 'Drink' : 'Eat'}</button>}
-              {moveTarget?.accessible && <button className="secondary-button" disabled={busy} onClick={() => move(selected.id, moveTarget.key)}>Move to {moveTarget.label}</button>}
-              <button className="secondary-button" onClick={() => setSelectedId(null)}>Clear</button>
+              {usable && <button className="primary-button" disabled={busy} onClick={useSelected}>{selected.itemKey === 'water' ? t('inventory.drink') : t('inventory.eat')}</button>}
+              {moveTarget?.accessible && <button className="secondary-button" disabled={busy} onClick={() => move(selected.id, moveTarget.key)}>{t('inventory.moveTo', { target: runtime(moveTarget.label) })}</button>}
+              <button className="secondary-button" onClick={() => setSelectedId(null)}>{t('common.clear')}</button>
             </div>
           </>
-        ) : <div className="flex items-center gap-3 text-sm text-slate-500"><GameIcon name="mouse-pointer" size={17} /> Select an item to inspect or move it.</div>}
+        ) : <div className="flex items-center gap-3 text-sm text-slate-500"><GameIcon name="mouse-pointer" size={17} /> {t('inventory.selectHint')}</div>}
       </div>
     </section>
   );
@@ -128,6 +142,7 @@ interface ContainerPaneProps {
 }
 
 function ContainerPane({ container, selectedId, busy, onSelect, onMove }: ContainerPaneProps) {
+  const { t, runtime } = useI18n();
   const slots = Array.from({ length: container.slotCount }, (_, slotIndex) =>
     container.items.find(item => item.slotIndex === slotIndex) ?? null
   );
@@ -142,8 +157,8 @@ function ContainerPane({ container, selectedId, busy, onSelect, onMove }: Contai
   return (
     <article className="inventory-pane">
       <header>
-        <div><span className="eyebrow">{container.key === 'player' ? 'Player' : 'External'}</span><h2>{container.label}</h2></div>
-        <div className="inventory-weight"><b>{formatWeight(container.weightGrams)}</b><small>of {formatWeight(container.capacityGrams)}</small></div>
+        <div><span className="eyebrow">{container.key === 'player' ? t('inventory.player') : t('inventory.external')}</span><h2>{runtime(container.label)}</h2></div>
+        <div className="inventory-weight"><b>{formatWeight(container.weightGrams)}</b><small>{t('inventory.of', { weight: formatWeight(container.capacityGrams) })}</small></div>
       </header>
       <div className="capacity-track"><i style={{ width: `${weightPercentage}%` }} /></div>
       <div className="slot-grid">
@@ -172,7 +187,8 @@ function ContainerPane({ container, selectedId, busy, onSelect, onMove }: Contai
 }
 
 function ItemContents({ item, quickSlot }: { item: InventoryItem; quickSlot: number | null }) {
-  return <><span className="item-name">{item.displayName}</span><span className="item-mark">{item.symbol}</span>{item.quantity > 1 && <b className="item-quantity">×{item.quantity}</b>}{quickSlot && <small className="quick-slot">{quickSlot}</small>}</>;
+  const { runtime } = useI18n();
+  return <><span className="item-name">{runtime(item.displayName)}</span><span className="item-mark">{item.symbol}</span>{item.quantity > 1 && <b className="item-quantity">×{item.quantity}</b>}{quickSlot && <small className="quick-slot">{quickSlot}</small>}</>;
 }
 
 function containerIcon(key: InventoryContainerKey) {
@@ -182,7 +198,17 @@ function containerIcon(key: InventoryContainerKey) {
 }
 
 function formatWeight(grams: number) { return `${(grams / 1000).toFixed(2)} kg`; }
-function humanizeError(reason: unknown) {
+function humanizeError(reason: unknown, locale: 'bg' | 'en') {
   const value = reason instanceof Error ? reason.message : String(reason);
+  const messages: Record<string, { en: string; bg: string }> = {
+    inventory_container_not_accessible: { en: 'This container is not accessible from your current location.', bg: 'Този контейнер не е достъпен от текущото ти местоположение.' },
+    inventory_item_not_found: { en: 'The item could not be found.', bg: 'Предметът не беше намерен.' },
+    inventory_container_not_found: { en: 'The target container could not be found.', bg: 'Целевият контейнер не беше намерен.' },
+    inventory_container_full: { en: 'The target container is full.', bg: 'Целевият контейнер е пълен.' },
+    inventory_capacity_exceeded: { en: 'The target container cannot carry this weight.', bg: 'Целевият контейнер не може да поеме това тегло.' },
+    inventory_item_not_carried: { en: 'Carry the item before using it.', bg: 'Трябва да носиш предмета, преди да го използваш.' },
+    inventory_item_not_usable: { en: 'This item cannot be used yet.', bg: 'Този предмет все още не може да бъде използван.' }
+  };
+  if (messages[value]) return messages[value][locale];
   return value.replaceAll('_', ' ').replace(/^inventory /, '').replace(/^./, letter => letter.toUpperCase());
 }

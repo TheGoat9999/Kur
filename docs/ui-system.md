@@ -8,7 +8,18 @@ SOL DORADO uses Tailwind CSS for visual tokens and layout but does not adopt an 
 - **Lucide React** for consistent, typed, tree-shakable SVG icons.
 - **Motion for React** for restrained screen, panel and feedback transitions.
 
-Libraries are introduced incrementally when the first production component needs them. They do not replace Tailwind or define the game's art direction.
+Libraries are introduced incrementally when the first production component needs them. They do not replace Tailwind or define the game's art direction. Radix Select is now active in the Finance slice and is the baseline for future dropdowns.
+
+## UI & localization v0.3
+
+- Bulgarian and English are first-class interface languages. Bulgarian is the default for a new browser profile.
+- The `BG / EN` switch lives in the persistent header and the preference is stored under `sd_locale`.
+- Visible copy is resolved through the central i18n provider. Currency, dates and time use locale-aware `Intl` formatting.
+- API error codes remain language-neutral; React maps known codes to localized player-facing copy.
+- Routine action feedback uses the global glass notification queue with success, error, warning, info and reward tones. Inline feedback remains only where it carries durable gameplay context.
+- Native browser selects are not part of the visual system. Use the accessible `GlassSelect` wrapper around Radix Select.
+
+The glass direction is inspired by modern game interfaces: layered translucent surfaces, subtle edge light, compact pill controls and restrained contextual color. SOL DORADO keeps its own charcoal, Dorado gold, Pacific teal and warm off-white palette and does not import FiveM-specific HUD elements.
 
 ## Rules
 

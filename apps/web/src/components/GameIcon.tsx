@@ -6,7 +6,8 @@ export type GameIconName =
   | 'flame' | 'map-pin' | 'clock' | 'panel-left-close' | 'panel-left-open'
   | 'arrow-left-right' | 'mouse-pointer' | 'lock' | 'wifi' | 'coins'
   | 'wallet' | 'credit-card' | 'receipt' | 'chart' | 'smartphone' | 'banknote'
-  | 'send' | 'arrow-down-left' | 'arrow-up-right' | 'check' | 'x' | 'sparkles';
+  | 'send' | 'arrow-down-left' | 'arrow-up-right' | 'check' | 'x' | 'sparkles'
+  | 'chevron-down' | 'languages' | 'info' | 'alert-triangle' | 'gift';
 
 const paths: Record<GameIconName, ReactNode> = {
   world: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" /></>,
@@ -45,6 +46,11 @@ const paths: Record<GameIconName, ReactNode> = {
   check: <path d="m5 12 4 4L19 6" />,
   x: <path d="m6 6 12 12M18 6 6 18" />,
   sparkles: <><path d="m12 3 1.2 3.8L17 8l-3.8 1.2L12 13l-1.2-3.8L7 8l3.8-1.2L12 3ZM5 14l.7 2.3L8 17l-2.3.7L5 20l-.7-2.3L2 17l2.3-.7L5 14ZM19 13l.7 2.3 2.3.7-2.3.7L19 19l-.7-2.3L16 16l2.3-.7L19 13Z" /></>
+  , 'chevron-down': <path d="m6 9 6 6 6-6" />
+  , languages: <><path d="m5 8 6 6M4 14l6-7M2 5h12M7 3v2M22 21l-5-10-5 10M14 17h6" /></>
+  , info: <><circle cx="12" cy="12" r="9" /><path d="M12 11v6M12 7h.01" /></>
+  , 'alert-triangle': <><path d="M10.3 3.6 2.4 17.4A2 2 0 0 0 4.1 20h15.8a2 2 0 0 0 1.7-2.6L13.7 3.6a2 2 0 0 0-3.4 0Z" /><path d="M12 9v4M12 17h.01" /></>
+  , gift: <><rect x="3" y="8" width="18" height="13" rx="2" /><path d="M12 8v13M3 12h18M7.5 8C5 8 4 6.5 4.8 5.2 6 3.2 9 5 12 8M16.5 8c2.5 0 3.5-1.5 2.7-2.8C18 3.2 15 5 12 8" /></>
 };
 
 export function GameIcon({ name, size = 18, className = '' }: { name: GameIconName; size?: number; className?: string }) {

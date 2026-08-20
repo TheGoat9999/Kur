@@ -1,12 +1,17 @@
-const copy = {
-  finance: ['Branch, ATM and phone access rules', 'Checking, savings, transfers and transaction ledger', 'Credit score, loans and DoradoX crypto exchange'],
-  vehicles: ['Persistent owned vehicles and active vehicle selection', 'Fuel, condition, mileage, trunk and parking location', 'Walk, bus, taxi and vehicle travel consequences'],
-  property: ['Property ownership separated from operating businesses', 'Rentals, tenants, storage, parking and access', 'Agent, broker and commission progression'],
-  jobs: ['Opportunity-based work offers', 'Career, job and skill XP with qualifications', 'Reliability, employer trust and shift history'],
-  hospitality: ['Supplier orders, ingredients and slot storage', 'Recipes, prepared products and customer demand', 'Staff, reputation, certification and venue operations'],
-  police: ['Imperfect dispatch information and civilian perspective', 'Encounters, legal grounds, evidence and intelligence', 'Pursuit, visual loss, Last Known Position and search areas']
+import { useI18n, type TranslationKey } from '../../i18n';
+
+const copy: Record<string, ReadonlyArray<TranslationKey>> = {
+  finance: ['integration.finance.1', 'integration.finance.2', 'integration.finance.3'],
+  vehicles: ['integration.vehicles.1', 'integration.vehicles.2', 'integration.vehicles.3'],
+  property: ['integration.property.1', 'integration.property.2', 'integration.property.3'],
+  jobs: ['integration.jobs.1', 'integration.jobs.2', 'integration.jobs.3'],
+  hospitality: ['integration.hospitality.1', 'integration.hospitality.2', 'integration.hospitality.3'],
+  police: ['integration.police.1', 'integration.police.2', 'integration.police.3']
 } as const;
 
+const titles: Record<keyof typeof copy, TranslationKey> = { finance: 'nav.finance', vehicles: 'nav.vehicles', property: 'nav.property', jobs: 'nav.jobs', hospitality: 'nav.hospitality', police: 'nav.police' };
+
 export function IntegrationView({ feature }: { feature: keyof typeof copy }) {
-  return <section className="glass-panel migration-panel"><div className="feature-badge feature-badge-migration"><span /> Not yet playable</div><span className="eyebrow">Prototype migration</span><h1>{feature}</h1><p>The prototype defines the functionality below. It is visible in navigation so the browser game has a stable information architecture, but it will not be counted as implemented until its PostgreSQL state, API commands and React interactions work together.</p><div className="migration-grid">{copy[feature].map((item, index) => <div key={item}><b>0{index + 1}</b><span>{item}</span></div>)}</div></section>;
+  const { t } = useI18n();
+  return <section className="glass-panel migration-panel"><div className="feature-badge feature-badge-migration"><span /> {t('integration.notPlayable')}</div><span className="eyebrow">{t('integration.migration')}</span><h1>{t(titles[feature])}</h1><p>{t('integration.description')}</p><div className="migration-grid">{copy[feature].map((item, index) => <div key={item}><b>0{index + 1}</b><span>{t(item)}</span></div>)}</div></section>;
 }
