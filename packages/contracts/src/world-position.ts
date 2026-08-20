@@ -70,7 +70,7 @@ export const STREET_SPATIAL: Record<StreetSpatialSegmentId, StreetSpatialDefinit
       edges: [
         edge('north_west', 'el_camino'), edge('el_camino', 'north_mid'), edge('north_mid', 'apartments'), edge('apartments', 'north_east_mid'), edge('north_east_mid', 'mercado'), edge('mercado', 'north_east'),
         edge('south_west', 'south_mid_west'), edge('south_mid_west', 'crossing_south'), edge('crossing_south', 'south_mid_east'), edge('south_mid_east', 'south_east'),
-        edge('crossing_north', 'crossing_south'), edge('west_exit', 'north_west'), edge('west_exit', 'south_west'), edge('east_exit', 'north_east'), edge('east_exit', 'south_east'), edge('south_east', 'service_alley')
+        edge('apartments', 'crossing_north'), edge('crossing_north', 'crossing_south'), edge('west_exit', 'north_west'), edge('west_exit', 'south_west'), edge('east_exit', 'north_east'), edge('east_exit', 'south_east'), edge('south_east', 'service_alley')
       ]
     }
   },
