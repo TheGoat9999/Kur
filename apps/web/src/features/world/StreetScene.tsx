@@ -27,7 +27,7 @@ export function StreetScene({ street, position, moving, activeRoute, characterRe
   position: StreetPosition;
   moving: boolean;
   activeRoute: StreetPosition[] | null;
-  characterRecipe?: CharacterRecipe | null;
+  characterRecipe: CharacterRecipe | null | undefined;
   selectedObjectId: string | null;
   busy: WorldActionId | null;
   onMove: (position: StreetPosition) => void;
