@@ -3,6 +3,7 @@ import type { GameIconName } from '../../components/GameIcon';
 import type { TranslationKey } from '../../i18n';
 
 export type StreetObjectKind = 'poi' | 'entrance' | 'street' | 'npc' | 'exit';
+export type StreetObjectImportance = 'anchor' | 'contextual' | 'route';
 export type StreetActionTone = 'neutral' | 'legal' | 'crime' | 'travel';
 
 export interface StreetActionPresentation {
@@ -16,11 +17,13 @@ export interface StreetActionPresentation {
 export interface StreetObjectDefinition {
   id: StreetObjectId;
   kind: StreetObjectKind;
+  importance: StreetObjectImportance;
   labelKey: TranslationKey;
   detailKey: TranslationKey;
   icon: GameIconName;
   x: number;
   y: number;
+  hitbox: { width: number; height: number };
   actions: WorldActionId[];
 }
 
@@ -58,19 +61,19 @@ export const STREET_SCENES: Record<StreetSegmentId, StreetSceneDefinition> = {
     nameKey: 'world.segment.market',
     atmosphereKey: 'world.segment.marketAtmosphere',
     theme: 'market',
-    player: { x: 50, y: 77 },
+    player: { x: 50, y: 76 },
     objects: [
-      object('corner_store', 'poi', 'world.object.cornerStore', 'world.object.cornerStoreDetail', 'store', 77, 48,
+      object('corner_store', 'poi', 'anchor', 'world.object.cornerStore', 'world.object.cornerStoreDetail', 'store', 79, 34, 24, 22,
         ['inspect_corner_store', 'enter_corner_store', 'shoplift_corner_store', 'speak_corner_clerk']),
-      object('el_camino', 'poi', 'world.object.elCamino', 'world.object.elCaminoDetail', 'utensils', 23, 51,
+      object('el_camino', 'poi', 'anchor', 'world.object.elCamino', 'world.object.elCaminoDetail', 'utensils', 21, 35, 23, 22,
         ['deliver_el_camino', 'inspect_el_camino', 'enter_el_camino']),
-      object('cypress_apartments', 'entrance', 'world.object.apartments', 'world.object.apartmentsDetail', 'building', 43, 33,
+      object('cypress_apartments', 'entrance', 'anchor', 'world.object.apartments', 'world.object.apartmentsDetail', 'building', 50, 23, 24, 17,
         ['inspect_apartment', 'enter_apartment']),
-      object('service_alley', 'street', 'world.object.serviceAlley', 'world.object.serviceAlleyDetail', 'search', 91, 42,
+      object('service_alley', 'street', 'contextual', 'world.object.serviceAlley', 'world.object.serviceAlleyDetail', 'search', 90, 57, 12, 24,
         ['inspect_service_alley', 'travel_mira_alley']),
-      object('exit_cypress', 'exit', 'world.object.exitCypress', 'world.object.exitCypressDetail', 'arrow-right', 7, 79,
+      object('exit_cypress', 'exit', 'route', 'world.object.exitCypress', 'world.object.exitCypressDetail', 'arrow-right', 6, 80, 12, 14,
         ['travel_cypress_corner']),
-      object('exit_alley', 'exit', 'world.object.exitAlley', 'world.object.exitAlleyDetail', 'arrow-right', 93, 79,
+      object('exit_alley', 'exit', 'route', 'world.object.exitAlley', 'world.object.exitAlleyDetail', 'arrow-right', 94, 80, 12, 14,
         ['travel_mira_alley'])
     ]
   },
@@ -81,13 +84,13 @@ export const STREET_SCENES: Record<StreetSegmentId, StreetSceneDefinition> = {
     theme: 'corner',
     player: { x: 50, y: 78 },
     objects: [
-      object('cypress_apartments', 'entrance', 'world.object.apartments', 'world.object.apartmentsDetail', 'building', 24, 43,
+      object('cypress_apartments', 'entrance', 'anchor', 'world.object.apartments', 'world.object.apartmentsDetail', 'building', 20, 31, 27, 24,
         ['inspect_apartment', 'enter_apartment']),
-      object('maya_rojas', 'npc', 'world.object.maya', 'world.object.mayaDetail', 'user', 57, 58,
+      object('maya_rojas', 'npc', 'contextual', 'world.object.maya', 'world.object.mayaDetail', 'user', 58, 60, 12, 18,
         ['talk_maya', 'ask_maya_information']),
-      object('exit_market', 'exit', 'world.object.exitMarket', 'world.object.exitMarketDetail', 'arrow-right', 7, 80,
+      object('exit_market', 'exit', 'route', 'world.object.exitMarket', 'world.object.exitMarketDetail', 'arrow-right', 6, 81, 12, 14,
         ['travel_market_block_3']),
-      object('exit_alley', 'exit', 'world.object.exitAlley', 'world.object.exitAlleyDetail', 'arrow-right', 93, 80,
+      object('exit_alley', 'exit', 'route', 'world.object.exitAlley', 'world.object.exitAlleyDetail', 'arrow-right', 94, 81, 12, 14,
         ['travel_mira_alley'])
     ]
   },
@@ -96,17 +99,17 @@ export const STREET_SCENES: Record<StreetSegmentId, StreetSceneDefinition> = {
     nameKey: 'world.segment.alley',
     atmosphereKey: 'world.segment.alleyAtmosphere',
     theme: 'alley',
-    player: { x: 50, y: 81 },
+    player: { x: 50, y: 82 },
     objects: [
-      object('market_dumpster', 'street', 'world.object.dumpster', 'world.object.dumpsterDetail', 'trash', 27, 58,
+      object('market_dumpster', 'street', 'contextual', 'world.object.dumpster', 'world.object.dumpsterDetail', 'trash', 25, 58, 12, 13,
         ['search_dumpster']),
-      object('service_alley', 'street', 'world.object.serviceAlley', 'world.object.serviceAlleyDetail', 'search', 52, 34,
+      object('service_alley', 'street', 'contextual', 'world.object.serviceAlley', 'world.object.serviceAlleyDetail', 'search', 51, 36, 17, 13,
         ['inspect_service_alley']),
-      object('el_camino', 'entrance', 'world.object.elCaminoBack', 'world.object.elCaminoBackDetail', 'utensils', 78, 44,
+      object('el_camino', 'entrance', 'anchor', 'world.object.elCaminoBack', 'world.object.elCaminoBackDetail', 'utensils', 79, 38, 20, 18,
         ['inspect_el_camino']),
-      object('exit_market', 'exit', 'world.object.exitMarket', 'world.object.exitMarketDetail', 'arrow-right', 7, 82,
+      object('exit_market', 'exit', 'route', 'world.object.exitMarket', 'world.object.exitMarketDetail', 'arrow-right', 6, 83, 12, 14,
         ['travel_market_block_3']),
-      object('exit_cypress', 'exit', 'world.object.exitCypress', 'world.object.exitCypressDetail', 'arrow-right', 93, 82,
+      object('exit_cypress', 'exit', 'route', 'world.object.exitCypress', 'world.object.exitCypressDetail', 'arrow-right', 94, 83, 12, 14,
         ['travel_cypress_corner'])
     ]
   }
@@ -119,12 +122,15 @@ function action(id: WorldActionId, labelKey: TranslationKey, descriptionKey: Tra
 function object(
   id: StreetObjectId,
   kind: StreetObjectKind,
+  importance: StreetObjectImportance,
   labelKey: TranslationKey,
   detailKey: TranslationKey,
   icon: GameIconName,
   x: number,
   y: number,
+  width: number,
+  height: number,
   actions: WorldActionId[]
 ): StreetObjectDefinition {
-  return { id, kind, labelKey, detailKey, icon, x, y, actions };
+  return { id, kind, importance, labelKey, detailKey, icon, x, y, hitbox: { width, height }, actions };
 }

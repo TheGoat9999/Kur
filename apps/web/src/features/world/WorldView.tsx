@@ -3,7 +3,7 @@ import type { BootstrapState, StreetObjectId, StreetState, WorldActionId, WorldN
 import { GameIcon } from '../../components/GameIcon';
 import { useNotifications, type NotificationTone } from '../../components/Notifications';
 import { useI18n, type TranslationKey } from '../../i18n';
-import { ApiCommandError, getStreetState, runWorldAction } from '../../lib/api';
+import { ApiCommandError, getBootstrap, getStreetState, runWorldAction } from '../../lib/api';
 import { StreetScene } from './StreetScene';
 
 interface Props {
@@ -44,7 +44,30 @@ export function WorldView({ state, onStateChange }: Props) {
     catch { setLoadError(true); }
   }, []);
 
+  const refreshAuthoritative = useCallback(async () => {
+    setLoadError(false);
+    try {
+      const [nextStreet, nextState] = await Promise.all([getStreetState(), getBootstrap()]);
+      setStreet(nextStreet);
+      onStateChange(nextState);
+    } catch {
+      setLoadError(true);
+    }
+  }, [onStateChange]);
+
   useEffect(() => { void load(); }, [load]);
+
+  useEffect(() => {
+    if (!street) return;
+    const now = Date.now();
+    const nextCooldown = street.actionStates
+      .map(action => action.cooldownEndsAt ? new Date(action.cooldownEndsAt).getTime() : null)
+      .filter((value): value is number => value !== null && value > now)
+      .sort((a, b) => a - b)[0];
+    if (!nextCooldown) return;
+    const timer = window.setTimeout(() => void load(), Math.max(250, nextCooldown - now + 150));
+    return () => window.clearTimeout(timer);
+  }, [street, load]);
 
   async function act(actionId: WorldActionId) {
     if (busy || !street) return;
@@ -63,7 +86,8 @@ export function WorldView({ state, onStateChange }: Props) {
     } catch (reason) {
       const code = reason instanceof ApiCommandError ? reason.code : 'world_action_failed';
       push({ tone: 'error', title: t('common.actionBlocked'), message: worldError(code, t) });
-      if (reason instanceof ApiCommandError && ['world_action_cooldown', 'state_version_conflict'].includes(reason.code)) await load();
+      if (reason instanceof ApiCommandError && reason.code === 'state_version_conflict') await refreshAuthoritative();
+      else if (reason instanceof ApiCommandError && reason.code === 'world_action_cooldown') await load();
     } finally {
       setBusy(null);
     }
