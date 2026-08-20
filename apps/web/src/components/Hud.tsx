@@ -17,13 +17,13 @@ interface HudPreferences {
   widgets: Record<WidgetKey, boolean>;
 }
 
-const STORAGE_KEY = 'sd_hud_settings_v1';
+const STORAGE_KEY = 'sd_hud_settings_v2';
 
 const DEFAULT_PREFERENCES: HudPreferences = {
   preset: 'dorado',
   anchor: 'bottom-left',
-  scale: 1,
-  opacity: 0.96,
+  scale: 1.08,
+  opacity: 0.98,
   showValues: true,
   widgets: {
     health: true,
@@ -58,8 +58,8 @@ const dynamicThresholds: Record<StatKey, number> = {
   stress: 20
 };
 
-export function Hud({ state, location }: { state: HudState; location: BootstrapState['location'] }) {
-  const { t, money, locale } = useI18n();
+export function Hud({ state, location, worldMode = false }: { state: HudState; location: BootstrapState['location']; worldMode?: boolean }) {
+  const { t, locale } = useI18n();
   const [preferences, setPreferences] = useState<HudPreferences>(readPreferences);
   const [editorOpen, setEditorOpen] = useState(false);
   const [cashDelta, setCashDelta] = useState<number | null>(null);
@@ -125,11 +125,11 @@ export function Hud({ state, location }: { state: HudState; location: BootstrapS
   const policeVisible = preferences.widgets.policeHeat && state.policeHeat > 0;
 
   return (
-    <div className={`player-hud hud-anchor-${preferences.anchor} hud-preset-${preferences.preset}`}>
+    <div className={`player-hud ${worldMode ? 'player-hud-world' : ''} hud-anchor-${preferences.anchor} hud-preset-${preferences.preset}`}>
       <div className="player-hud-frame" style={frameStyle}>
         {preferences.widgets.location && (
           <div className="hud-location-card" key={`${location.district}-${location.streetSegment}`}>
-            <span><GameIcon name="map-pin" size={13} /> {location.district}</span>
+            <span><GameIcon name="map-pin" size={15} /> {location.district}</span>
             <b>{location.streetSegment}</b>
           </div>
         )}
@@ -140,9 +140,10 @@ export function Hud({ state, location }: { state: HudState; location: BootstrapS
               {visibleStats.map(item => {
                 const value = state[item.key];
                 const danger = item.key === 'stress' ? value >= 75 : value <= 25;
+                const attention = !danger && (item.key === 'stress' ? value >= 50 : value <= 50);
                 return (
-                  <div className={`hud-stat hud-stat-${item.tone} ${danger ? 'hud-stat-danger' : ''}`} key={item.key} title={`${t(item.label)}: ${value}`}>
-                    <span className="hud-stat-icon"><GameIcon name={item.icon} size={15} /></span>
+                  <div className={`hud-stat hud-stat-${item.tone} ${attention ? 'hud-stat-attention' : ''} ${danger ? 'hud-stat-danger' : ''}`} key={item.key} title={`${t(item.label)}: ${value}`}>
+                    <span className="hud-stat-icon"><GameIcon name={item.icon} size={17} /></span>
                     <span className="hud-stat-body">
                       <small>{t(item.label)}</small>
                       <i><b style={{ width: `${Math.max(0, Math.min(100, value))}%` }} /></i>
@@ -153,8 +154,8 @@ export function Hud({ state, location }: { state: HudState; location: BootstrapS
               })}
 
               {policeVisible && (
-                <div className={`hud-stat hud-stat-red hud-police ${state.policeHeat >= 70 ? 'hud-stat-danger' : ''}`} title={`${t('hud.policeHeat')}: ${state.policeHeat}`}>
-                  <span className="hud-stat-icon"><GameIcon name="flame" size={15} /></span>
+                <div className={`hud-stat hud-stat-red hud-police ${state.policeHeat >= 35 ? 'hud-stat-attention' : ''} ${state.policeHeat >= 70 ? 'hud-stat-danger' : ''}`} title={`${t('hud.policeHeat')}: ${state.policeHeat}`}>
+                  <span className="hud-stat-icon"><GameIcon name="flame" size={17} /></span>
                   <span className="hud-stat-body">
                     <small>{t('hud.policeHeat')}</small>
                     <i><b style={{ width: `${Math.max(0, Math.min(100, state.policeHeat))}%` }} /></i>
@@ -167,18 +168,18 @@ export function Hud({ state, location }: { state: HudState; location: BootstrapS
 
           {preferences.widgets.cash && (
             <div className="hud-cash-card">
-              <span className="hud-cash-icon"><GameIcon name="coins" size={16} /></span>
-              <span><small>{copy.cash}</small><b>{money(state.cashCents)}</b></span>
+              <span className="hud-cash-icon"><GameIcon name="coins" size={18} /></span>
+              <span><small>{copy.cash}</small><b>{formatUsd(state.cashCents)}</b></span>
               {cashDelta !== null && cashDelta !== 0 && (
-                <em className={cashDelta > 0 ? 'hud-cash-delta-positive' : 'hud-cash-delta-negative'}>
-                  {cashDelta > 0 ? '+' : '-'}{money(Math.abs(cashDelta))}
+                <em className={cashDelta > 0 ? 'hud-cash-delta-positive' : 'hud-cash-delta-negative'} aria-live="polite">
+                  {cashDelta > 0 ? '+' : '-'}{formatUsd(Math.abs(cashDelta))}
                 </em>
               )}
             </div>
           )}
 
           <button className={`hud-edit-button ${editorOpen ? 'hud-edit-button-active' : ''}`} onClick={() => setEditorOpen(open => !open)} title={copy.customize} aria-label={copy.customize}>
-            <GameIcon name="sparkles" size={15} />
+            <GameIcon name="sparkles" size={16} />
             <span>HUD</span>
           </button>
         </div>
@@ -217,11 +218,11 @@ export function Hud({ state, location }: { state: HudState; location: BootstrapS
 
           <div className="hud-slider-row">
             <label>{copy.scale}<strong>{Math.round(preferences.scale * 100)}%</strong></label>
-            <input type="range" min="0.8" max="1.2" step="0.05" value={preferences.scale} onChange={event => patch('scale', Number(event.target.value))} />
+            <input type="range" min="0.85" max="1.35" step="0.05" value={preferences.scale} onChange={event => patch('scale', Number(event.target.value))} />
           </div>
           <div className="hud-slider-row">
             <label>{copy.opacity}<strong>{Math.round(preferences.opacity * 100)}%</strong></label>
-            <input type="range" min="0.6" max="1" step="0.05" value={preferences.opacity} onChange={event => patch('opacity', Number(event.target.value))} />
+            <input type="range" min="0.65" max="1" step="0.05" value={preferences.opacity} onChange={event => patch('opacity', Number(event.target.value))} />
           </div>
 
           <div className="hud-editor-section">
@@ -246,6 +247,16 @@ export function Hud({ state, location }: { state: HudState; location: BootstrapS
       )}
     </div>
   );
+}
+
+function formatUsd(cents: number) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    currencyDisplay: 'narrowSymbol',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(cents / 100);
 }
 
 function readPreferences(): HudPreferences {
