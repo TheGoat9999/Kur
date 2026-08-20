@@ -106,6 +106,17 @@ export const WorldMapStateSchema = z.object({
   current: WorldMapCurrentSchema
 });
 
+export const WorldMapTravelRequestSchema = z.object({
+  segmentId: z.string().min(1)
+});
+
+export const WorldMapTravelResultSchema = z.object({
+  segmentId: z.string().min(1),
+  distanceMeters: z.number().int().nonnegative(),
+  energyCost: z.number().int().nonnegative(),
+  hydrationCost: z.number().int().nonnegative()
+});
+
 export type WorldMapPoint = z.infer<typeof WorldMapPointSchema>;
 export type WorldMapGeometry = z.infer<typeof WorldMapGeometrySchema>;
 export type WorldRegion = z.infer<typeof WorldRegionSchema>;
@@ -118,6 +129,7 @@ export type WorldStreetConnection = z.infer<typeof WorldStreetConnectionSchema>;
 export type WorldParcel = z.infer<typeof WorldParcelSchema>;
 export type WorldMapCurrent = z.infer<typeof WorldMapCurrentSchema>;
 export type WorldMapState = z.infer<typeof WorldMapStateSchema>;
+export type WorldMapTravelResult = z.infer<typeof WorldMapTravelResultSchema>;
 
 export function resolveWorldPath(map: WorldMapState, segmentId: string): WorldMapCurrent | null {
   const segment = map.segments.find(item => item.id === segmentId);
