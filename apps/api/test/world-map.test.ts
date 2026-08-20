@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { WorldMapStateSchema, resolveWorldPath, type WorldMapState } from '@sol-dorado/contracts/world-map';
+import { WorldMapStateSchema, WorldMapTravelResultSchema, resolveWorldPath, type WorldMapState } from '@sol-dorado/contracts/world-map';
 
 const geometry = { center: { x: 50, y: 50 }, polygon: [], path: [] };
 const fixture: WorldMapState = {
@@ -25,5 +25,11 @@ describe('canonical world hierarchy', () => {
 
   it('rejects an unknown segment path without inventing geography', () => {
     expect(resolveWorldPath(fixture, 'missing')).toBeNull();
+  });
+
+  it('validates server-authoritative map travel costs', () => {
+    expect(WorldMapTravelResultSchema.parse({ segmentId: 'segment', distanceMeters: 140, energyCost: 2, hydrationCost: 1 })).toEqual({
+      segmentId: 'segment', distanceMeters: 140, energyCost: 2, hydrationCost: 1
+    });
   });
 });
