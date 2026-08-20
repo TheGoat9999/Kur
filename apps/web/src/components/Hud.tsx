@@ -17,12 +17,12 @@ interface HudPreferences {
   widgets: Record<WidgetKey, boolean>;
 }
 
-const STORAGE_KEY = 'sd_hud_settings_v2';
+const STORAGE_KEY = 'sd_hud_settings_v3';
 
 const DEFAULT_PREFERENCES: HudPreferences = {
   preset: 'dorado',
   anchor: 'bottom-left',
-  scale: 1.08,
+  scale: 1,
   opacity: 0.98,
   showValues: true,
   widgets: {
@@ -127,26 +127,33 @@ export function Hud({ state, location, worldMode = false }: { state: HudState; l
   return (
     <div className={`player-hud ${worldMode ? 'player-hud-world' : ''} hud-anchor-${preferences.anchor} hud-preset-${preferences.preset}`}>
       <div className="player-hud-frame" style={frameStyle}>
-        {preferences.widgets.location && (
-          <div className="hud-location-card" key={`${location.district}-${location.streetSegment}`}>
-            <span><GameIcon name="map-pin" size={15} /> {location.district}</span>
-            <b>{location.streetSegment}</b>
-          </div>
-        )}
-
         <div className="hud-main-row">
+          {preferences.widgets.location && (
+            <div className="hud-location-card" key={`${location.district}-${location.streetSegment}`}>
+              <span><GameIcon name="map-pin" size={15} /> {location.district}</span>
+              <b>{location.streetSegment}</b>
+            </div>
+          )}
+
           {(visibleStats.length > 0 || policeVisible) && (
             <div className="hud-vitals-cluster" aria-label="Player status">
               {visibleStats.map(item => {
                 const value = state[item.key];
+                const progress = Math.max(0, Math.min(100, value));
                 const danger = item.key === 'stress' ? value >= 75 : value <= 25;
                 const attention = !danger && (item.key === 'stress' ? value >= 50 : value <= 50);
                 return (
-                  <div className={`hud-stat hud-stat-${item.tone} ${attention ? 'hud-stat-attention' : ''} ${danger ? 'hud-stat-danger' : ''}`} key={item.key} title={`${t(item.label)}: ${value}`}>
-                    <span className="hud-stat-icon"><GameIcon name={item.icon} size={17} /></span>
+                  <div
+                    className={`hud-stat hud-stat-${item.tone} ${attention ? 'hud-stat-attention' : ''} ${danger ? 'hud-stat-danger' : ''}`}
+                    key={item.key}
+                    title={`${t(item.label)}: ${value}`}
+                    aria-label={`${t(item.label)}: ${value}`}
+                    style={{ '--hud-progress': `${progress}%` } as CSSProperties}
+                  >
+                    <span className="hud-stat-icon"><GameIcon name={item.icon} size={18} /></span>
                     <span className="hud-stat-body">
                       <small>{t(item.label)}</small>
-                      <i><b style={{ width: `${Math.max(0, Math.min(100, value))}%` }} /></i>
+                      <i><b style={{ width: `${progress}%` }} /></i>
                     </span>
                     {preferences.showValues && <strong>{value}</strong>}
                   </div>
@@ -154,8 +161,13 @@ export function Hud({ state, location, worldMode = false }: { state: HudState; l
               })}
 
               {policeVisible && (
-                <div className={`hud-stat hud-stat-red hud-police ${state.policeHeat >= 35 ? 'hud-stat-attention' : ''} ${state.policeHeat >= 70 ? 'hud-stat-danger' : ''}`} title={`${t('hud.policeHeat')}: ${state.policeHeat}`}>
-                  <span className="hud-stat-icon"><GameIcon name="flame" size={17} /></span>
+                <div
+                  className={`hud-stat hud-stat-red hud-police ${state.policeHeat >= 35 ? 'hud-stat-attention' : ''} ${state.policeHeat >= 70 ? 'hud-stat-danger' : ''}`}
+                  title={`${t('hud.policeHeat')}: ${state.policeHeat}`}
+                  aria-label={`${t('hud.policeHeat')}: ${state.policeHeat}`}
+                  style={{ '--hud-progress': `${Math.max(0, Math.min(100, state.policeHeat))}%` } as CSSProperties}
+                >
+                  <span className="hud-stat-icon"><GameIcon name="flame" size={18} /></span>
                   <span className="hud-stat-body">
                     <small>{t('hud.policeHeat')}</small>
                     <i><b style={{ width: `${Math.max(0, Math.min(100, state.policeHeat))}%` }} /></i>
@@ -179,7 +191,7 @@ export function Hud({ state, location, worldMode = false }: { state: HudState; l
           )}
 
           <button className={`hud-edit-button ${editorOpen ? 'hud-edit-button-active' : ''}`} onClick={() => setEditorOpen(open => !open)} title={copy.customize} aria-label={copy.customize}>
-            <GameIcon name="sparkles" size={16} />
+            <GameIcon name="sparkles" size={17} />
             <span>HUD</span>
           </button>
         </div>
@@ -218,7 +230,7 @@ export function Hud({ state, location, worldMode = false }: { state: HudState; l
 
           <div className="hud-slider-row">
             <label>{copy.scale}<strong>{Math.round(preferences.scale * 100)}%</strong></label>
-            <input type="range" min="0.85" max="1.35" step="0.05" value={preferences.scale} onChange={event => patch('scale', Number(event.target.value))} />
+            <input type="range" min="0.85" max="1.3" step="0.05" value={preferences.scale} onChange={event => patch('scale', Number(event.target.value))} />
           </div>
           <div className="hud-slider-row">
             <label>{copy.opacity}<strong>{Math.round(preferences.opacity * 100)}%</strong></label>
