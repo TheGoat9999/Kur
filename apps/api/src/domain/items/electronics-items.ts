@@ -25,5 +25,5 @@ export const ELECTRONICS_ITEMS = defineCategory('electronics', [
   ['microcontroller', 'Microcontroller', 'component', 80, 10, 4200],
   ['electronic_kit', 'Electronics Kit', 'component', 1200, 10, 16000],
   ['security_camera', 'Security Camera', 'security', 900, 1, 22000],
-  ['portable_speaker', 'Portable Speaker', 'audio', 850, 1, 18000]
+  ['salvaged_electronics', 'Salvaged Electronics', 'salvage', 180, 20, 600]
 ]);
