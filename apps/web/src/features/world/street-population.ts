@@ -1,7 +1,7 @@
 import type { StreetObjectId, StreetSegmentId } from '@sol-dorado/contracts';
 import type { WorldCharacterDirection, WorldCharacterVisual } from '../../components/WorldCharacter';
 import { visualFromSeed } from '../../components/WorldCharacter';
-import type { WorldVehicleHeading, WorldVehicleType } from '../../components/WorldVehicle';
+import type { WorldVehicleHeading, WorldVehicleService, WorldVehicleType } from '../../components/WorldVehicle';
 
 export interface StreetNpcSlot {
   id: string;
@@ -27,6 +27,7 @@ export interface StreetVehicleSlot {
   heading: WorldVehicleHeading;
   color: string;
   widthPercent?: number;
+  service?: WorldVehicleService;
   serviceLabel?: string;
 }
 
@@ -36,6 +37,7 @@ export interface StreetPopulationDefinition {
 }
 
 type StreetNpcMotion = Partial<Pick<StreetNpcSlot, 'toX' | 'toY' | 'durationSeconds' | 'delaySeconds' | 'direction'>>;
+type StreetVehiclePresentation = Partial<Pick<StreetVehicleSlot, 'widthPercent' | 'service' | 'serviceLabel'>>;
 
 const MAYA_VISUAL: WorldCharacterVisual = {
   ...visualFromSeed('maya-rojas'),
@@ -61,7 +63,7 @@ export const STREET_POPULATION: Record<StreetSegmentId, StreetPopulationDefiniti
       vehicle('market-car-1', 32.2, 47.0, 'sedan', 'east', '#526c73'),
       vehicle('market-car-2', 64.7, 62.0, 'hatchback', 'west', '#6d5a52'),
       vehicle('market-car-3', 77.6, 47.4, 'suv', 'east', '#425d66'),
-      vehicle('market-car-4', 14.7, 62.0, 'sedan', 'west', '#686f68'),
+      vehicle('market-car-4', 14.7, 62.0, 'coupe', 'west', '#686f68'),
       { ...vehicle('market-traffic', -9, 53.5, 'sedan', 'east', '#354e63'), toX: 109, durationSeconds: 17, delaySeconds: -8 }
     ]
   },
@@ -77,7 +79,7 @@ export const STREET_POPULATION: Record<StreetSegmentId, StreetPopulationDefiniti
       vehicle('cypress-car-2', 45.1, 61.7, 'sedan', 'west', '#77594e'),
       vehicle('cypress-car-3', 80.5, 47.1, 'suv', 'east', '#485e68'),
       vehicle('cypress-car-4', 88.4, 61.9, 'sedan', 'west', '#5a655d'),
-      { ...vehicle('cypress-traffic', 109, 53.7, 'hatchback', 'west', '#6a4f55'), toX: -9, durationSeconds: 20, delaySeconds: -11 }
+      { ...vehicle('cypress-taxi', 109, 53.7, 'sedan', 'west', '#c7a146', { service: 'taxi' }), toX: -9, durationSeconds: 20, delaySeconds: -11 }
     ]
   },
   mira_alley: {
@@ -87,10 +89,10 @@ export const STREET_POPULATION: Record<StreetSegmentId, StreetPopulationDefiniti
       npc('alley-walker', 72, 72, 'alley-walker', { toX: 54, toY: 72, durationSeconds: 11, delaySeconds: -2, direction: 'west' })
     ],
     vehicles: [
-      vehicle('alley-van', 44.0, 47.7, 'van', 'east', '#697579', 11.2, 'DORADO'),
+      vehicle('alley-van', 44.0, 47.7, 'van', 'east', '#697579', { widthPercent: 11.2, service: 'delivery', serviceLabel: 'DORADO' }),
       vehicle('alley-car-1', 68.8, 61.7, 'suv', 'west', '#4f6267'),
       vehicle('alley-car-2', 13.3, 47.4, 'pickup', 'east', '#6e5c4f'),
-      { ...vehicle('alley-delivery-pass', -10, 53.6, 'van', 'east', '#57676c', 10.8, 'EXPRESS'), toX: 110, durationSeconds: 24, delaySeconds: -16 }
+      { ...vehicle('alley-delivery-pass', -10, 53.6, 'van', 'east', '#57676c', { widthPercent: 10.8, service: 'delivery', serviceLabel: 'EXPRESS' }), toX: 110, durationSeconds: 24, delaySeconds: -16 }
     ]
   }
 };
@@ -99,6 +101,6 @@ function npc(id: string, x: number, y: number, seed: string, overrides: StreetNp
   return { id, x, y, visual: visualFromSeed(seed), ...overrides };
 }
 
-function vehicle(id: string, x: number, y: number, type: WorldVehicleType, heading: WorldVehicleHeading, color: string, widthPercent = 9.6, serviceLabel?: string): StreetVehicleSlot {
-  return { id, x, y, type, heading, color, widthPercent, ...(serviceLabel ? { serviceLabel } : {}) };
+function vehicle(id: string, x: number, y: number, type: WorldVehicleType, heading: WorldVehicleHeading, color: string, presentation: StreetVehiclePresentation = {}): StreetVehicleSlot {
+  return { id, x, y, type, heading, color, widthPercent: 9.6, ...presentation };
 }
