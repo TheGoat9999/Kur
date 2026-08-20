@@ -1,4 +1,4 @@
-/* SOL DORADO HUD v1.0 — persistent, contextual and player-customizable */
+/* SOL DORADO HUD v1.1 — viewport-bound, contextual and player-customizable */
 .game-shell { --sidebar-half: 138px; }
 .game-shell-collapsed { --sidebar-half: 43px; }
 
@@ -8,62 +8,125 @@
 }
 .header-context-screen { min-width: 150px; }
 .header-context-screen > b { margin-top: 3px; font-size: 12px; }
-.game-content { padding-bottom: 150px; }
+.game-content { padding-bottom: 170px; }
+
+/* The World is a game viewport, not a scrolling document. HUD and street remain one visual surface. */
+.game-stage-world {
+  height: 100dvh;
+  overflow: hidden;
+}
+.game-stage-world .game-header { position: relative; }
+.game-stage-world .game-content {
+  height: calc(100dvh - 64px);
+  max-width: none;
+  overflow: hidden;
+  padding: 14px 18px 16px;
+}
+.game-stage-world .world-screen,
+.game-stage-world .world-screen .street-scene-shell {
+  height: 100%;
+  min-height: 0;
+}
+.game-stage-world .world-screen .street-scene {
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+}
+.game-stage-world .street-loading,
+.game-stage-world .street-load-error {
+  height: 100%;
+  min-height: 0;
+}
+/* Location has one canonical source: the persistent HUD. */
+.game-stage-world .world-screen .street-scene-meta { display: none; }
 
 .player-hud {
   position: fixed;
   z-index: 45;
   width: max-content;
-  max-width: calc(100vw - var(--sidebar-width) - 48px);
+  max-width: calc(100vw - var(--sidebar-width) - 56px);
   pointer-events: none;
 }
-.hud-anchor-bottom-left { left: calc(var(--sidebar-width) + 24px); bottom: 22px; }
-.hud-anchor-bottom-center { left: calc(50% + var(--sidebar-half)); bottom: 22px; transform: translateX(-50%); }
-.hud-anchor-top-left { left: calc(var(--sidebar-width) + 24px); top: 82px; }
+.hud-anchor-bottom-left { left: calc(var(--sidebar-width) + 28px); bottom: 26px; }
+.hud-anchor-bottom-center { left: calc(50% + var(--sidebar-half)); bottom: 26px; transform: translateX(-50%); }
+.hud-anchor-top-left { left: calc(var(--sidebar-width) + 28px); top: 84px; }
+.player-hud-world.hud-anchor-bottom-left,
+.player-hud-world.hud-anchor-bottom-center { bottom: 30px; }
 
 .player-hud-frame {
   display: flex;
   width: max-content;
   max-width: 100%;
   flex-direction: column;
-  gap: 7px;
+  gap: 8px;
   transform-origin: left bottom;
   transition: opacity .18s ease, transform .18s ease;
 }
 .hud-anchor-bottom-center .player-hud-frame { transform-origin: center bottom; }
 .hud-anchor-top-left .player-hud-frame { transform-origin: left top; }
 
+/* Dorado world dock: one composed object instead of unrelated floating cards. */
+.player-hud-world .player-hud-frame {
+  position: relative;
+  gap: 7px;
+  overflow: visible;
+  border: 1px solid rgb(255 255 255 / .14);
+  border-radius: 19px;
+  background: linear-gradient(145deg, rgb(12 27 32 / .88), rgb(5 14 18 / .8));
+  padding: 9px;
+  box-shadow: 0 24px 72px rgb(0 0 0 / .36), inset 0 1px rgb(255 255 255 / .05);
+  backdrop-filter: blur(28px) saturate(1.32);
+}
+.player-hud-world .player-hud-frame::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(231 190 115 / .42), transparent);
+  pointer-events: none;
+}
+
 .hud-location-card {
   display: flex;
   width: max-content;
-  max-width: 360px;
+  max-width: 460px;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   border: 1px solid rgb(255 255 255 / .11);
-  border-radius: 13px;
-  background: linear-gradient(145deg, rgb(13 27 32 / .84), rgb(6 14 18 / .72));
-  padding: 8px 11px 9px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgb(13 27 32 / .86), rgb(6 14 18 / .76));
+  padding: 9px 12px 10px;
   box-shadow: 0 16px 45px rgb(0 0 0 / .24), inset 0 1px rgb(255 255 255 / .04);
   backdrop-filter: blur(22px) saturate(1.28);
   animation: hud-location-in .28s cubic-bezier(.2,.82,.24,1) both;
 }
+.player-hud-world .hud-location-card {
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  padding: 3px 6px 5px;
+  box-shadow: none;
+  backdrop-filter: none;
+}
 .hud-location-card > span {
   display: flex;
   align-items: center;
-  gap: 5px;
-  color: #9babb1;
-  font-size: 8px;
-  font-weight: 780;
+  gap: 6px;
+  color: #9eafb5;
+  font-size: 9px;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: .12em;
+  letter-spacing: .115em;
 }
 .hud-location-card > span svg { color: var(--gold); }
 .hud-location-card > b {
   overflow: hidden;
-  max-width: 330px;
-  color: #edf3f5;
-  font-size: 11px;
-  font-weight: 680;
+  max-width: 420px;
+  color: #f2f6f7;
+  font-size: 13px;
+  font-weight: 710;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -77,92 +140,100 @@
   width: max-content;
   max-width: 100%;
   align-items: flex-end;
-  gap: 7px;
+  gap: 8px;
 }
 .hud-vitals-cluster {
   display: flex;
-  max-width: 700px;
+  max-width: 900px;
   flex-wrap: wrap;
-  gap: 6px;
-  border: 1px solid rgb(255 255 255 / .105);
-  border-radius: 15px;
-  background: linear-gradient(145deg, rgb(13 27 32 / .82), rgb(6 14 18 / .72));
-  padding: 6px;
+  gap: 7px;
+  border: 1px solid rgb(255 255 255 / .11);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgb(13 27 32 / .84), rgb(6 14 18 / .74));
+  padding: 7px;
   box-shadow: 0 18px 50px rgb(0 0 0 / .25), inset 0 1px rgb(255 255 255 / .035);
   backdrop-filter: blur(24px) saturate(1.28);
+}
+.player-hud-world .hud-vitals-cluster {
+  border-color: rgb(255 255 255 / .07);
+  background: rgb(255 255 255 / .018);
+  box-shadow: inset 0 1px rgb(255 255 255 / .025);
+  backdrop-filter: none;
 }
 
 .hud-stat {
   --metric: #8fa0a7;
   position: relative;
   display: grid;
-  min-height: 39px;
-  min-width: 112px;
-  grid-template-columns: 28px minmax(48px, 1fr) auto;
+  min-height: 47px;
+  min-width: 128px;
+  grid-template-columns: 32px minmax(56px, 1fr) auto;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   overflow: hidden;
-  border: 1px solid rgb(255 255 255 / .055);
-  border-radius: 10px;
-  background: rgb(255 255 255 / .026);
-  padding: 5px 7px;
+  border: 1px solid rgb(255 255 255 / .06);
+  border-radius: 11px;
+  background: rgb(255 255 255 / .028);
+  padding: 6px 8px;
   color: var(--metric);
+  transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
 }
 .hud-stat::before {
   content: "";
   position: absolute;
   left: -24px;
   top: -38px;
-  height: 76px;
-  width: 76px;
+  height: 82px;
+  width: 82px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--metric) 10%, transparent);
+  background: color-mix(in srgb, var(--metric) 11%, transparent);
   filter: blur(22px);
   pointer-events: none;
 }
 .hud-stat-icon {
   position: relative;
   display: grid;
-  height: 28px;
-  width: 28px;
+  height: 32px;
+  width: 32px;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--metric) 16%, transparent);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--metric) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--metric) 18%, transparent);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--metric) 8%, transparent);
   color: var(--metric);
 }
 .hud-stat-body { min-width: 0; }
 .hud-stat-body small {
   display: block;
   overflow: hidden;
-  margin-bottom: 5px;
-  color: #82949b;
-  font-size: 7px;
-  font-weight: 760;
+  margin-bottom: 6px;
+  color: #8b9da4;
+  font-size: 8px;
+  font-weight: 780;
   text-overflow: ellipsis;
   text-transform: uppercase;
-  letter-spacing: .1em;
+  letter-spacing: .095em;
   white-space: nowrap;
 }
 .hud-stat-body > i {
   display: block;
-  height: 3px;
+  height: 4px;
   overflow: hidden;
   border-radius: 99px;
-  background: rgb(255 255 255 / .07);
+  background: rgb(255 255 255 / .075);
 }
 .hud-stat-body > i > b {
   display: block;
   height: 100%;
   border-radius: inherit;
   background: var(--metric);
-  box-shadow: 0 0 9px color-mix(in srgb, var(--metric) 28%, transparent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--metric) 32%, transparent);
   transition: width .35s ease;
 }
 .hud-stat > strong {
-  min-width: 21px;
-  color: #e3eaec;
-  font-size: 9px;
+  min-width: 24px;
+  color: #edf3f5;
+  font-size: 11px;
+  font-weight: 780;
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
@@ -172,66 +243,71 @@
 .hud-stat-cyan { --metric: #54bdd2; }
 .hud-stat-violet { --metric: #a58ae0; }
 .hud-stat-red { --metric: #ef7777; border-color: rgb(239 119 119 / .18); }
+.hud-stat-attention {
+  border-color: color-mix(in srgb, var(--metric) 24%, transparent);
+  background: color-mix(in srgb, var(--metric) 5%, rgb(255 255 255 / .025));
+}
 .hud-stat-danger {
-  border-color: color-mix(in srgb, var(--metric) 34%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--metric) 5%, transparent), 0 0 22px color-mix(in srgb, var(--metric) 6%, transparent);
+  border-color: color-mix(in srgb, var(--metric) 42%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--metric) 6%, transparent), 0 0 24px color-mix(in srgb, var(--metric) 8%, transparent);
   animation: hud-warning-pulse 1.8s ease-in-out infinite;
 }
 @keyframes hud-warning-pulse {
-  50% { border-color: color-mix(in srgb, var(--metric) 55%, transparent); }
+  50% { border-color: color-mix(in srgb, var(--metric) 65%, transparent); }
 }
 
 .hud-cash-card {
   position: relative;
   display: flex;
-  min-height: 51px;
-  min-width: 135px;
+  min-height: 60px;
+  min-width: 154px;
   align-items: center;
-  gap: 8px;
-  border: 1px solid rgb(81 211 153 / .14);
-  border-radius: 14px;
-  background: linear-gradient(145deg, rgb(13 34 31 / .83), rgb(6 18 18 / .74));
-  padding: 7px 10px;
+  gap: 9px;
+  border: 1px solid rgb(81 211 153 / .16);
+  border-radius: 15px;
+  background: linear-gradient(145deg, rgb(13 34 31 / .86), rgb(6 18 18 / .76));
+  padding: 8px 11px;
   box-shadow: 0 18px 50px rgb(0 0 0 / .23), inset 0 1px rgb(255 255 255 / .04);
   backdrop-filter: blur(24px) saturate(1.28);
 }
 .hud-cash-icon {
   display: grid;
-  height: 30px;
-  width: 30px;
-  flex: 0 0 30px;
+  height: 34px;
+  width: 34px;
+  flex: 0 0 34px;
   place-items: center;
-  border-radius: 9px;
-  background: rgb(81 211 153 / .085);
+  border-radius: 10px;
+  background: rgb(81 211 153 / .09);
   color: #61dca3;
 }
 .hud-cash-card > span:nth-child(2) small,
 .hud-cash-card > span:nth-child(2) b { display: block; }
 .hud-cash-card > span:nth-child(2) small {
-  color: #668079;
-  font-size: 7px;
-  font-weight: 760;
+  color: #708a82;
+  font-size: 8px;
+  font-weight: 780;
   text-transform: uppercase;
   letter-spacing: .12em;
 }
 .hud-cash-card > span:nth-child(2) b {
   margin-top: 2px;
-  color: #b8efd5;
-  font-size: 11px;
+  color: #c4f2dc;
+  font-size: 14px;
+  font-weight: 780;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 .hud-cash-card em {
   position: absolute;
   right: 8px;
-  top: -19px;
+  top: -21px;
   border: 1px solid currentColor;
   border-radius: 99px;
-  background: rgb(7 16 20 / .9);
-  padding: 3px 6px;
-  font-size: 8px;
+  background: rgb(7 16 20 / .92);
+  padding: 3px 7px;
+  font-size: 9px;
   font-style: normal;
-  font-weight: 800;
+  font-weight: 820;
   box-shadow: 0 8px 20px rgb(0 0 0 / .24);
   animation: hud-delta-in .22s ease both;
 }
@@ -241,37 +317,38 @@
 
 .hud-edit-button {
   display: flex;
-  min-height: 38px;
+  min-height: 46px;
   align-items: center;
-  gap: 5px;
-  border: 1px solid rgb(255 255 255 / .09);
-  border-radius: 11px;
-  background: rgb(9 19 23 / .74);
-  padding: 0 9px;
-  color: #778b94;
+  gap: 6px;
+  border: 1px solid rgb(255 255 255 / .095);
+  border-radius: 12px;
+  background: rgb(9 19 23 / .78);
+  padding: 0 10px;
+  color: #81949c;
   box-shadow: 0 14px 38px rgb(0 0 0 / .2);
   backdrop-filter: blur(20px);
   pointer-events: auto;
 }
-.hud-edit-button span { font-size: 7px; font-weight: 850; letter-spacing: .13em; }
+.player-hud-world .hud-edit-button { min-height: 60px; }
+.hud-edit-button span { font-size: 8px; font-weight: 850; letter-spacing: .13em; }
 .hud-edit-button:hover,
 .hud-edit-button-active {
-  border-color: rgb(255 216 147 / .24);
-  background: rgb(231 190 115 / .07);
+  border-color: rgb(255 216 147 / .28);
+  background: rgb(231 190 115 / .08);
   color: var(--gold-bright);
 }
 
-.hud-preset-compact .hud-vitals-cluster { gap: 4px; padding: 5px; }
+.hud-preset-compact .hud-vitals-cluster { gap: 5px; padding: 5px; }
 .hud-preset-compact .hud-stat {
-  min-height: 38px;
-  min-width: 42px;
-  width: 42px;
+  min-height: 44px;
+  min-width: 48px;
+  width: 48px;
   grid-template-columns: 1fr;
   gap: 0;
   place-items: center;
   padding: 4px;
 }
-.hud-preset-compact .hud-stat-icon { height: 27px; width: 27px; }
+.hud-preset-compact .hud-stat-icon { height: 30px; width: 30px; }
 .hud-preset-compact .hud-stat-body small { display: none; }
 .hud-preset-compact .hud-stat-body {
   position: absolute;
@@ -284,25 +361,26 @@
   top: 1px;
   min-width: 0;
   border-radius: 6px;
-  background: rgb(7 16 20 / .88);
+  background: rgb(7 16 20 / .9);
   padding: 1px 3px;
-  font-size: 6px;
+  font-size: 7px;
 }
-.hud-preset-compact .hud-cash-card { min-height: 47px; }
+.hud-preset-compact .hud-cash-card { min-height: 52px; }
+.player-hud-world.hud-preset-compact .hud-edit-button { min-height: 52px; }
 
 .hud-editor {
   position: absolute;
   left: 0;
-  bottom: calc(100% + 11px);
+  bottom: calc(100% + 12px);
   z-index: 230;
-  width: 410px;
-  max-height: min(650px, calc(100vh - 120px));
+  width: 430px;
+  max-height: min(680px, calc(100vh - 120px));
   overflow-y: auto;
   border: 1px solid rgb(255 255 255 / .14);
   border-radius: 19px;
-  background: linear-gradient(150deg, rgb(20 38 44 / .965), rgb(5 13 17 / .975));
-  padding: 15px;
-  box-shadow: 0 32px 100px rgb(0 0 0 / .5), inset 0 1px rgb(255 255 255 / .055);
+  background: linear-gradient(150deg, rgb(20 38 44 / .97), rgb(5 13 17 / .98));
+  padding: 16px;
+  box-shadow: 0 32px 100px rgb(0 0 0 / .52), inset 0 1px rgb(255 255 255 / .055);
   backdrop-filter: blur(30px) saturate(1.35);
   pointer-events: auto;
   scrollbar-width: thin;
@@ -310,7 +388,7 @@
   animation: hud-editor-in .2s ease both;
 }
 .hud-anchor-bottom-center .hud-editor { left: 50%; transform: translateX(-50%); }
-.hud-anchor-top-left .hud-editor { top: calc(100% + 11px); bottom: auto; }
+.hud-anchor-top-left .hud-editor { top: calc(100% + 12px); bottom: auto; }
 @keyframes hud-editor-in { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: none; } }
 .hud-anchor-bottom-center .hud-editor { animation-name: hud-editor-center-in; }
 @keyframes hud-editor-center-in { from { opacity: 0; transform: translate(-50%, 8px) scale(.985); } to { opacity: 1; transform: translateX(-50%); } }
@@ -472,12 +550,14 @@
 .hud-editor-footer > button:hover { border-color: rgb(239 119 119 / .2); color: #e89a9a; background: rgb(239 119 119 / .05); }
 
 @media (max-width: 1360px) {
-  .hud-stat { min-width: 96px; }
-  .hud-location-card { max-width: 300px; }
-  .hud-vitals-cluster { max-width: 590px; }
+  .hud-stat { min-width: 108px; }
+  .hud-location-card { max-width: 340px; }
+  .hud-vitals-cluster { max-width: 720px; }
+  .hud-cash-card { min-width: 140px; }
 }
 
 @media (max-width: 900px) {
+  .game-stage-world .game-content { padding: 8px 10px 10px; }
   .player-hud,
   .hud-anchor-bottom-left,
   .hud-anchor-top-left {
@@ -485,14 +565,22 @@
     max-width: calc(100vw - 28px);
   }
   .hud-anchor-bottom-center { left: 50%; }
-  .hud-main-row { max-width: calc(100vw - 28px); }
-  .hud-vitals-cluster { max-width: calc(100vw - 115px); }
-  .hud-stat { min-width: 42px; width: 42px; grid-template-columns: 1fr; place-items: center; padding: 4px; }
+  .player-hud-world.hud-anchor-bottom-left,
+  .player-hud-world.hud-anchor-bottom-center { bottom: 14px; }
+  .player-hud-world .player-hud-frame { padding: 7px; border-radius: 16px; }
+  .hud-main-row { max-width: calc(100vw - 28px); gap: 5px; }
+  .hud-vitals-cluster { max-width: calc(100vw - 122px); gap: 4px; padding: 5px; }
+  .hud-stat { min-height: 44px; min-width: 46px; width: 46px; grid-template-columns: 1fr; place-items: center; padding: 4px; }
+  .hud-stat-icon { width: 30px; height: 30px; }
   .hud-stat-body small { display: none; }
   .hud-stat-body { position: absolute; inset: auto 5px 4px; }
   .hud-stat-body > i { height: 2px; }
-  .hud-stat > strong { position: absolute; right: 2px; top: 1px; min-width: 0; border-radius: 6px; background: rgb(7 16 20 / .88); padding: 1px 3px; font-size: 6px; }
-  .hud-cash-card { min-width: 100px; }
+  .hud-stat > strong { position: absolute; right: 2px; top: 1px; min-width: 0; border-radius: 6px; background: rgb(7 16 20 / .9); padding: 1px 3px; font-size: 7px; }
+  .hud-cash-card { min-height: 52px; min-width: 104px; padding-inline: 8px; }
+  .hud-cash-icon { width: 30px; height: 30px; flex-basis: 30px; }
   .hud-cash-card > span:nth-child(2) small { display: none; }
-  .hud-editor { width: min(390px, calc(100vw - 28px)); }
+  .hud-cash-card > span:nth-child(2) b { font-size: 12px; }
+  .player-hud-world .hud-edit-button { min-height: 52px; padding-inline: 8px; }
+  .hud-edit-button span { display: none; }
+  .hud-editor { width: min(400px, calc(100vw - 28px)); }
 }
