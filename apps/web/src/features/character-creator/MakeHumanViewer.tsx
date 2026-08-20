@@ -4,7 +4,6 @@ import { getSystemAsset, type MakeHumanSystemAsset } from './systemAssets';
 
 const THREE_MODULE_URL = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
-// HM08 body + target source. Keep this pinned so character recipes stay deterministic.
 const MAKEHUMAN_COMMIT = 'a8bc2d54ff0ac92e78ff71431b1023eda42bf482';
 const MAKEHUMAN_ROOT = 'makehuman/data';
 const MAKEHUMAN_ROUTES = [
@@ -12,10 +11,6 @@ const MAKEHUMAN_ROUTES = [
   (path: string) => `https://raw.githubusercontent.com/makehumancommunity/makehuman/${MAKEHUMAN_COMMIT}/${MAKEHUMAN_ROOT}/${path}`
 ];
 
-// MakeHuman system assets are not stored in the current makehuman/data/hair and
-// makehuman/data/clothes directories. Use pinned public mirrors of the historical
-// makehuman-assets repository for the transitional MHCLO runtime. The final game
-// pipeline will vendor/convert validated assets to game-owned GLB files.
 const SYSTEM_ASSET_PRIMARY_COMMIT = '8cf9645b975a98eea056b140df11a1d278da0d10';
 const SYSTEM_ASSET_FALLBACK_COMMIT = '2f4033a364a7e97479e17ed630ccb999395730c6';
 
@@ -31,13 +26,13 @@ const SKIN: Record<string, string> = {
 };
 
 const EYE: Record<string, string> = {
-  'dark-brown': '#38261d',
-  brown: '#5d4938',
-  hazel: '#7a653d',
-  amber: '#8b652d',
-  green: '#4f6951',
-  blue: '#4b6f86',
-  gray: '#69767b'
+  'dark-brown': '#3a2418',
+  brown: '#65452d',
+  hazel: '#806b3f',
+  amber: '#a06b27',
+  green: '#536e4f',
+  blue: '#456d88',
+  gray: '#737f83'
 };
 
 const HAIR: Record<string, string> = {
@@ -123,7 +118,7 @@ type BaseMesh = {
   eyeTris: { left: Tri[]; right: Tri[] };
 };
 type Target = Array<[number, number, number, number]>;
-type ViewerSummary = { loadedAssets: number; failedAssets: number };
+type ViewerSummary = { loadedAssets: number; failedAssets: number; eyeMode: 'high-poly' | 'fallback' };
 type MHCLOMapping = {
   v: [number, number, number];
   w: [number, number, number];
@@ -146,8 +141,10 @@ type AccessoryData = {
   meta: MHCLO;
   obj: AccessoryObj;
 };
+type EyeData = { meta: MHCLO; obj: AccessoryObj };
 
 let basePromise: Promise<BaseMesh> | null = null;
+let eyePromise: Promise<EyeData> | null = null;
 const targetCache = new Map<string, Promise<Target>>();
 const accessoryCache = new Map<string, Promise<AccessoryData>>();
 
@@ -172,12 +169,14 @@ export function MakeHumanViewer({
       try {
         const THREE = await import(/* @vite-ignore */ THREE_MODULE_URL);
         if (cancelled) return;
+
         const runtime = new ViewerRuntime(THREE, canvas);
         runtimeRef.current = runtime;
         setStatus('Зареждане на MakeHuman геометрия…');
         const summary = await runtime.init(recipe);
+
         if (cancelled) return runtime.dispose();
-        setFailed(summary.failedAssets > 0);
+        setFailed(summary.failedAssets > 0 || summary.eyeMode === 'fallback');
         setStatus(summaryText(summary));
       } catch (error) {
         console.error('[character] viewer init failed', error);
@@ -198,9 +197,10 @@ export function MakeHumanViewer({
   useEffect(() => {
     const runtime = runtimeRef.current;
     if (!runtime) return;
+
     setStatus('Прилагане на промените…');
     void runtime.rebuild(recipe).then(summary => {
-      setFailed(summary.failedAssets > 0);
+      setFailed(summary.failedAssets > 0 || summary.eyeMode === 'fallback');
       setStatus(summaryText(summary));
     }).catch(error => {
       console.error('[character] rebuild failed', error);
@@ -220,7 +220,7 @@ export function MakeHumanViewer({
         className="absolute inset-0 h-full w-full touch-none"
         aria-label="Триизмерен преглед на героя"
       />
-      <div className={`absolute left-3 top-3 max-w-[82%] rounded-full border px-3 py-1 text-[10px] font-bold tracking-[.08em] backdrop-blur ${failed ? 'border-red-400/30 bg-red-950/60 text-red-200' : 'border-emerald-300/20 bg-black/45 text-emerald-200'}`}>
+      <div className={`absolute left-3 top-3 max-w-[84%] rounded-full border px-3 py-1 text-[10px] font-bold tracking-[.08em] backdrop-blur ${failed ? 'border-amber-300/30 bg-amber-950/60 text-amber-100' : 'border-emerald-300/20 bg-black/45 text-emerald-200'}`}>
         {status}
       </div>
       <div className="absolute bottom-3 left-3 rounded-lg border border-white/10 bg-black/35 px-2 py-1 text-[9px] uppercase tracking-[.11em] text-slate-400 backdrop-blur">
@@ -231,11 +231,12 @@ export function MakeHumanViewer({
 }
 
 function summaryText(summary: ViewerSummary) {
+  const eyeText = summary.eyeMode === 'high-poly' ? 'високодетайлни очи' : 'резервни очи';
   if (summary.failedAssets) {
-    return `HM08 на живо · ${summary.loadedAssets} заредени · ${summary.failedAssets} неуспешни елемента`;
+    return `HM08 на живо · ${eyeText} · ${summary.loadedAssets} заредени · ${summary.failedAssets} неуспешни елемента`;
   }
-  if (summary.loadedAssets) return `HM08 на живо · ${summary.loadedAssets} заредени елемента`;
-  return 'HM08 на живо';
+  if (summary.loadedAssets) return `HM08 на живо · ${eyeText} · ${summary.loadedAssets} заредени елемента`;
+  return `HM08 на живо · ${eyeText}`;
 }
 
 class ViewerRuntime {
@@ -253,6 +254,8 @@ class ViewerRuntime {
   private pointerMap = new Map<number, { x: number; y: number }>();
   private pinchBase: { distance: number } | null = null;
   private cleanup: Array<() => void> = [];
+  private eyeTexturePromise: Promise<any> | null = null;
+  private textureObjects = new Set<any>();
 
   constructor(private THREE: any, private canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({
@@ -271,12 +274,15 @@ class ViewerRuntime {
     this.scene.add(this.root);
 
     this.scene.add(new THREE.HemisphereLight(0xe3edf0, 0x253039, 1.55));
+
     const key = new THREE.DirectionalLight(0xffdcc5, 3.2);
     key.position.set(3.5, 5.4, 4.8);
     this.scene.add(key);
+
     const fill = new THREE.DirectionalLight(0xb8d8ea, 1.35);
     fill.position.set(-4, 3, 2.5);
     this.scene.add(fill);
+
     const rim = new THREE.DirectionalLight(0xffc6ad, 1.0);
     rim.position.set(-2, 4, -4);
     this.scene.add(rim);
@@ -305,7 +311,7 @@ class ViewerRuntime {
     const id = ++this.rebuildId;
     const base = await getBase();
     const targets = await weightedTargets(recipe);
-    if (id !== this.rebuildId) return { loadedAssets: 0, failedAssets: 0 };
+    if (id !== this.rebuildId) return { loadedAssets: 0, failedAssets: 0, eyeMode: 'high-poly' };
 
     const deformed = applyTargets(base, targets);
     const requestedSpecs = requestedAssets(recipe);
@@ -322,7 +328,7 @@ class ViewerRuntime {
       }
     });
 
-    if (id !== this.rebuildId) return { loadedAssets: 0, failedAssets };
+    if (id !== this.rebuildId) return { loadedAssets: 0, failedAssets, eyeMode: 'high-poly' };
 
     const hidden = new Set<number>();
     for (const data of loaded) {
@@ -333,7 +339,7 @@ class ViewerRuntime {
     const geometry = buildBodyGeometry(this.THREE, base, deformed, hidden);
     if (id !== this.rebuildId) {
       geometry.dispose();
-      return { loadedAssets: 0, failedAssets };
+      return { loadedAssets: 0, failedAssets, eyeMode: 'high-poly' };
     }
 
     this.clearRenderedMeshes();
@@ -361,7 +367,16 @@ class ViewerRuntime {
     );
     this.root.add(this.mesh);
 
-    this.addNativeEyes(base, deformed, scale, this.mesh.position, recipe.appearance.eyeColor);
+    let eyeMode: ViewerSummary['eyeMode'] = 'high-poly';
+    try {
+      const eyes = await getHighPolyEyes();
+      if (id !== this.rebuildId) return { loadedAssets: 0, failedAssets, eyeMode };
+      await this.addHighPolyEyes(eyes, deformed, scale, this.mesh.position, recipe.appearance.eyeColor);
+    } catch (error) {
+      console.warn('[character] high-poly eyes failed, using helper-eye fallback', error);
+      eyeMode = 'fallback';
+      this.addFallbackEyes(base, deformed, scale, this.mesh.position);
+    }
 
     let renderedAssets = 0;
     for (const data of loaded) {
@@ -375,101 +390,127 @@ class ViewerRuntime {
       }
     }
 
-    return { loadedAssets: renderedAssets, failedAssets };
+    return { loadedAssets: renderedAssets, failedAssets, eyeMode };
   }
 
   setFocus(focus: 'full' | 'face') {
     this.updateCamera(focus === 'face' ? 1.72 : 1.05, focus === 'face' ? 1.35 : 4.25);
   }
 
-  private addNativeEyes(
-    base: BaseMesh,
+  private async addHighPolyEyes(
+    data: EyeData,
     deformed: number[][],
     scale: number,
     position: any,
     eyeColor: string
   ) {
+    const fitted = fitMHCLO(data.meta.mappings, deformed, data.meta.scales);
+    const geometry = buildAccessoryGeometry(this.THREE, data.obj, fitted);
+    const texture = await this.getEyeTexture();
     const irisColor = EYE[eyeColor] ?? EYE.brown;
+
+    const material = new this.THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      map: texture,
+      roughness: .28,
+      metalness: 0,
+      clearcoat: .42,
+      clearcoatRoughness: .12,
+      side: this.THREE.FrontSide
+    });
+
+    // The bundled texture supplies the sclera, pupil and natural detail. We only
+    // recolor sufficiently saturated mid/dark pixels, which correspond mainly to
+    // the iris, while keeping the sclera and pupil physically plausible.
+    material.onBeforeCompile = (shader: any) => {
+      shader.uniforms.solDoradoIrisColor = { value: new this.THREE.Color(irisColor) };
+      shader.fragmentShader = shader.fragmentShader
+        .replace(
+          '#include <common>',
+          '#include <common>\nuniform vec3 solDoradoIrisColor;'
+        )
+        .replace(
+          '#include <map_fragment>',
+          `#ifdef USE_MAP
+            vec4 sampledDiffuseColor = texture2D(map, vMapUv);
+            float eyeMax = max(sampledDiffuseColor.r, max(sampledDiffuseColor.g, sampledDiffuseColor.b));
+            float eyeMin = min(sampledDiffuseColor.r, min(sampledDiffuseColor.g, sampledDiffuseColor.b));
+            float eyeChroma = eyeMax - eyeMin;
+            float eyeSaturation = eyeChroma / max(eyeMax, 0.001);
+            float eyeLuma = dot(sampledDiffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+            float eyeWarm = smoothstep(0.005, 0.16, sampledDiffuseColor.r - sampledDiffuseColor.b);
+            float irisMask = smoothstep(0.11, 0.30, eyeSaturation)
+              * (1.0 - smoothstep(0.68, 0.90, eyeLuma))
+              * eyeWarm;
+            vec3 recoloredIris = solDoradoIrisColor * (0.38 + eyeLuma * 1.22);
+            sampledDiffuseColor.rgb = mix(sampledDiffuseColor.rgb, recoloredIris, irisMask * 0.86);
+            diffuseColor *= sampledDiffuseColor;
+          #endif`
+        );
+    };
+    material.customProgramCacheKey = () => `sol-dorado-eye-${eyeColor}`;
+
+    const mesh = new this.THREE.Mesh(geometry, material);
+    this.applySourceTransform(mesh, scale, position);
+    this.addExtra(mesh);
+  }
+
+  private addFallbackEyes(
+    base: BaseMesh,
+    deformed: number[][],
+    scale: number,
+    position: any
+  ) {
     for (const tris of [base.eyeTris.left, base.eyeTris.right]) {
       if (!tris.length) continue;
-
       const geometry = buildAuxGeometry(this.THREE, deformed, tris);
       const eye = new this.THREE.Mesh(
         geometry,
         new this.THREE.MeshPhysicalMaterial({
-          color: 0xf1eee8,
-          roughness: .38,
+          color: 0xe9e4dc,
+          roughness: .34,
           metalness: 0,
-          clearcoat: .12,
-          clearcoatRoughness: .22
+          clearcoat: .18,
+          clearcoatRoughness: .18
         })
       );
       this.applySourceTransform(eye, scale, position);
       this.addExtra(eye);
-
-      const bounds = geometry.boundingBox;
-      const center = new this.THREE.Vector3();
-      bounds.getCenter(center);
-      const size = new this.THREE.Vector3();
-      bounds.getSize(size);
-      const frontZ = bounds.max.z + .0012;
-      const radius = Math.max(.025, Math.min(.052, Math.min(size.x, size.y) * .145));
-
-      const ring = new this.THREE.Mesh(
-        new this.THREE.CircleGeometry(radius * 1.08, 42),
-        new this.THREE.MeshStandardMaterial({
-          color: 0x332a25,
-          roughness: .72,
-          side: this.THREE.DoubleSide
-        })
-      );
-      ring.position.set(center.x, center.y, frontZ);
-      this.applySourceTransform(ring, scale, position);
-      this.addExtra(ring);
-
-      const iris = new this.THREE.Mesh(
-        new this.THREE.CircleGeometry(radius, 42),
-        new this.THREE.MeshPhysicalMaterial({
-          color: irisColor,
-          roughness: .42,
-          metalness: 0,
-          clearcoat: .08,
-          side: this.THREE.DoubleSide
-        })
-      );
-      iris.position.set(center.x, center.y, frontZ + .0008);
-      this.applySourceTransform(iris, scale, position);
-      this.addExtra(iris);
-
-      const pupil = new this.THREE.Mesh(
-        new this.THREE.CircleGeometry(radius * .39, 36),
-        new this.THREE.MeshStandardMaterial({
-          color: 0x090909,
-          roughness: .7,
-          side: this.THREE.DoubleSide
-        })
-      );
-      pupil.position.set(center.x, center.y, frontZ + .0016);
-      this.applySourceTransform(pupil, scale, position);
-      this.addExtra(pupil);
-
-      const highlight = new this.THREE.Mesh(
-        new this.THREE.CircleGeometry(radius * .13, 20),
-        new this.THREE.MeshBasicMaterial({
-          color: 0xffffff,
-          transparent: true,
-          opacity: .62,
-          depthWrite: false
-        })
-      );
-      highlight.position.set(
-        center.x - radius * .22,
-        center.y + radius * .24,
-        frontZ + .0024
-      );
-      this.applySourceTransform(highlight, scale, position);
-      this.addExtra(highlight);
     }
+  }
+
+  private getEyeTexture(): Promise<any> {
+    if (this.eyeTexturePromise) return this.eyeTexturePromise;
+
+    this.eyeTexturePromise = new Promise((resolve, reject) => {
+      const loader = new this.THREE.TextureLoader();
+      loader.setCrossOrigin?.('anonymous');
+      const urls = MAKEHUMAN_ROUTES.map(route => route('eyes/materials/brown_eye.png'));
+      let index = 0;
+
+      const next = () => {
+        if (index >= urls.length) {
+          reject(new Error('Неуспешно зареждане на текстурата за очите'));
+          return;
+        }
+        loader.load(
+          urls[index++],
+          (texture: any) => {
+            texture.colorSpace = this.THREE.SRGBColorSpace;
+            texture.wrapS = texture.wrapT = this.THREE.ClampToEdgeWrapping;
+            texture.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy?.() ?? 1);
+            this.textureObjects.add(texture);
+            resolve(texture);
+          },
+          undefined,
+          next
+        );
+      };
+
+      next();
+    });
+
+    return this.eyeTexturePromise;
   }
 
   private addAccessory(
@@ -485,9 +526,6 @@ class ViewerRuntime {
       ? (HAIR[recipe.grooming.hairColor] ?? HAIR['dark-brown'])
       : data.spec.fallbackColor;
 
-    // Intentionally use a reliable solid material in the transitional runtime.
-    // Historical MakeHuman mirror textures are Git-LFS objects and must not be
-    // required for geometry to render. The production GLB pipeline will own PBR textures.
     const material = new this.THREE.MeshStandardMaterial({
       color,
       roughness: data.spec.kind === 'hair' ? .78 : .68,
@@ -523,6 +561,7 @@ class ViewerRuntime {
       disposeMaterial(this.mesh.material);
       this.mesh = null;
     }
+
     for (const object of this.extras) {
       this.root.remove(object);
       object.geometry?.dispose?.();
@@ -533,6 +572,7 @@ class ViewerRuntime {
 
   private bindControls() {
     const point = (event: PointerEvent) => ({ x: event.clientX, y: event.clientY });
+
     const recalcPinch = () => {
       if (this.pointerMap.size !== 2) {
         this.pinchBase = null;
@@ -630,6 +670,8 @@ class ViewerRuntime {
     this.observer.disconnect();
     this.cleanup.forEach(fn => fn());
     this.clearRenderedMeshes();
+    this.textureObjects.forEach(texture => texture.dispose?.());
+    this.textureObjects.clear();
     this.renderer.dispose();
   }
 }
@@ -642,6 +684,7 @@ function requestedAssets(recipe: CharacterAppearanceRecipe) {
   Object.values(recipe.grooming.equipped).forEach(id => {
     if (id) ids.add(id);
   });
+
   return [...ids]
     .map(id => getSystemAsset(id))
     .filter((asset): asset is MakeHumanSystemAsset =>
@@ -650,8 +693,30 @@ function requestedAssets(recipe: CharacterAppearanceRecipe) {
 }
 
 async function getBase(): Promise<BaseMesh> {
-  if (!basePromise) basePromise = fetchMakeHumanText('3dobjs/base.obj').then(parseBaseObj);
+  if (!basePromise) {
+    basePromise = fetchMakeHumanText('3dobjs/base.obj').then(parseBaseObj);
+  }
   return basePromise;
+}
+
+async function getHighPolyEyes(): Promise<EyeData> {
+  if (!eyePromise) {
+    eyePromise = Promise.all([
+      fetchMakeHumanText('eyes/high-poly/high-poly.mhclo'),
+      fetchMakeHumanText('eyes/high-poly/high-poly.obj')
+    ]).then(([mhcloText, objText]) => {
+      const meta = parseMHCLO(mhcloText);
+      const obj = parseAccessoryOBJ(objText);
+      if (obj.maxFaceVertex >= meta.mappings.length) {
+        throw new Error('Несъвместими данни за високодетайлните очи');
+      }
+      return { meta, obj };
+    }).catch(error => {
+      eyePromise = null;
+      throw error;
+    });
+  }
+  return eyePromise;
 }
 
 async function getTarget(path: string): Promise<Target> {
@@ -700,6 +765,7 @@ function parseBaseObj(text: string): BaseMesh {
         const [v, t] = part.split('/');
         return [(+v) - 1, t ? (+t) - 1 : -1] as FaceRef;
       });
+
       const output = group === 'body'
         ? tris
         : group === 'helper-l-eye'
@@ -707,6 +773,7 @@ function parseBaseObj(text: string): BaseMesh {
           : group === 'helper-r-eye'
             ? eyeTris.right
             : null;
+
       if (output) {
         for (let i = 1; i < items.length - 1; i++) {
           output.push([items[0], items[i], items[i + 1]]);
@@ -748,6 +815,7 @@ async function weightedTargets(recipe: CharacterAppearanceRecipe) {
     target: await getTarget(`targets/macrodetails/caucasian-${sex}-young.target`),
     weight: 1 - oldWeight
   });
+
   if (oldWeight > .001) {
     result.push({
       target: await getTarget(`targets/macrodetails/caucasian-${sex}-old.target`),
@@ -800,11 +868,10 @@ function applyTargets(
   for (const entry of targets) {
     for (const [index, x, y, z] of entry.target) {
       const point = verts[index];
-      if (point) {
-        point[0] += x * entry.weight;
-        point[1] += y * entry.weight;
-        point[2] += z * entry.weight;
-      }
+      if (!point) continue;
+      point[0] += x * entry.weight;
+      point[1] += y * entry.weight;
+      point[2] += z * entry.weight;
     }
   }
   return verts;
@@ -912,6 +979,7 @@ async function getAccessoryData(spec: MakeHumanSystemAsset) {
     value = loadAccessoryData(spec);
     accessoryCache.set(spec.id, value);
   }
+
   try {
     return await value;
   } catch (error) {
@@ -1070,6 +1138,7 @@ function parseAccessoryOBJ(text: string): AccessoryObj {
         maxFaceVertex = Math.max(maxFaceVertex, vi);
         return [vi, ti] as [number, number];
       });
+
       for (let i = 1; i < parts.length - 1; i++) {
         tris.push([parts[0], parts[i], parts[i + 1]]);
       }
