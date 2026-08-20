@@ -38,6 +38,12 @@ export interface StreetNavigationGraph {
   nodes: StreetNavigationNode[];
   edges: StreetNavigationEdge[];
 }
+export interface StreetNavigationTarget {
+  position: StreetPosition;
+  edge: StreetNavigationEdge;
+  edgeProgress: number;
+  distanceFromRequested: number;
+}
 
 export interface StreetInteractionAnchor extends StreetPosition { radius: number; }
 interface StreetSpatialDefinition {
@@ -63,14 +69,14 @@ export const STREET_SPATIAL: Record<StreetSpatialSegmentId, StreetSpatialDefinit
     navigation: {
       snapRadius: 14,
       nodes: [
-        nav('north_west', 8, 42), nav('el_camino', 20, 42, 'entrance'), nav('north_mid', 35, 42), nav('apartments', 50, 42, 'entrance'), nav('north_east_mid', 65, 42), nav('mercado', 80, 42, 'entrance'), nav('north_east', 92, 42),
+        nav('north_west', 8, 42), nav('el_camino', 20, 42, 'entrance'), nav('north_mid', 35, 42), nav('apartments_crossing', 50, 42, 'crossing'), nav('north_east_mid', 65, 42), nav('mercado', 80, 42, 'entrance'), nav('north_east', 92, 42),
         nav('south_west', 8, 67), nav('south_mid_west', 28, 67), nav('crossing_south', 50, 67, 'crossing'), nav('south_mid_east', 72, 67), nav('south_east', 92, 67),
-        nav('crossing_north', 50, 42, 'crossing'), nav('west_exit', 4, 55, 'exit'), nav('east_exit', 96, 55, 'exit'), nav('service_alley', 90, 73, 'entrance')
+        nav('west_exit', 4, 55, 'exit'), nav('east_exit', 96, 55, 'exit'), nav('service_alley', 90, 73, 'entrance')
       ],
       edges: [
-        edge('north_west', 'el_camino'), edge('el_camino', 'north_mid'), edge('north_mid', 'apartments'), edge('apartments', 'north_east_mid'), edge('north_east_mid', 'mercado'), edge('mercado', 'north_east'),
+        edge('north_west', 'el_camino'), edge('el_camino', 'north_mid'), edge('north_mid', 'apartments_crossing'), edge('apartments_crossing', 'north_east_mid'), edge('north_east_mid', 'mercado'), edge('mercado', 'north_east'),
         edge('south_west', 'south_mid_west'), edge('south_mid_west', 'crossing_south'), edge('crossing_south', 'south_mid_east'), edge('south_mid_east', 'south_east'),
-        edge('apartments', 'crossing_north'), edge('crossing_north', 'crossing_south'), edge('west_exit', 'north_west'), edge('west_exit', 'south_west'), edge('east_exit', 'north_east'), edge('east_exit', 'south_east'), edge('south_east', 'service_alley')
+        edge('apartments_crossing', 'crossing_south'), edge('west_exit', 'north_west'), edge('west_exit', 'south_west'), edge('east_exit', 'north_east'), edge('east_exit', 'south_east'), edge('south_east', 'service_alley')
       ]
     }
   },
@@ -142,10 +148,10 @@ export function isStreetActionWithinReach(segmentId: StreetSpatialSegmentId, pos
   return anchor !== null && streetDistance(position, anchor) <= anchor.radius;
 }
 
-export function resolveStreetNavigationTarget(segmentId: StreetSpatialSegmentId, requested: StreetPosition): StreetNavigationNode | null {
+export function resolveStreetNavigationTarget(segmentId: StreetSpatialSegmentId, requested: StreetPosition): StreetNavigationTarget | null {
   const graph = STREET_SPATIAL[segmentId].navigation;
-  const nearest = nearestNode(graph.nodes, requested);
-  return nearest && streetDistance(nearest.position, requested) <= graph.snapRadius ? nearest : null;
+  const target = projectOntoGraph(graph, requested);
+  return target && target.distanceFromRequested <= graph.snapRadius ? target : null;
 }
 
 export function isStreetPositionWalkable(segmentId: StreetSpatialSegmentId, position: StreetPosition): boolean {
@@ -153,28 +159,61 @@ export function isStreetPositionWalkable(segmentId: StreetSpatialSegmentId, posi
 }
 
 export function clampStreetPosition(segmentId: StreetSpatialSegmentId, position: StreetPosition): StreetPosition {
-  const target = resolveStreetNavigationTarget(segmentId, position) ?? nearestNode(STREET_SPATIAL[segmentId].navigation.nodes, position);
-  return target ? { ...target.position } : getStreetSpawnPosition(segmentId);
+  return resolveStreetNavigationTarget(segmentId, position)?.position ?? getStreetSpawnPosition(segmentId);
 }
 
 export function getStreetRoute(segmentId: StreetSpatialSegmentId, start: StreetPosition, requested: StreetPosition): StreetMoveResult | null {
   const graph = STREET_SPATIAL[segmentId].navigation;
-  const startNode = nearestNode(graph.nodes, start);
-  const targetNode = resolveStreetNavigationTarget(segmentId, requested);
-  if (!startNode || !targetNode) return null;
+  const startTarget = projectOntoGraph(graph, start);
+  const target = resolveStreetNavigationTarget(segmentId, requested);
+  if (!startTarget || !target) return null;
 
-  const nodeIds = shortestPath(graph, startNode.id, targetNode.id);
-  if (!nodeIds) return null;
   const nodeById = new Map(graph.nodes.map(node => [node.id, node]));
-  const route: StreetPosition[] = [];
-  if (streetDistance(start, startNode.position) > 0.25) route.push({ ...start });
-  for (const id of nodeIds) {
-    const node = nodeById.get(id);
-    if (!node) continue;
-    const previous = route[route.length - 1];
-    if (!previous || streetDistance(previous, node.position) > 0.25) route.push({ ...node.position });
+  const candidates: RouteCandidate[] = [];
+  const startOffset = streetDistance(start, startTarget.position);
+
+  if (sameEdge(startTarget.edge, target.edge)) {
+    const edgeLength = navigationEdgeLength(nodeById, startTarget.edge);
+    if (edgeLength !== null) {
+      candidates.push({
+        distance: startOffset + Math.abs(startTarget.edgeProgress - target.edgeProgress) * edgeLength,
+        nodeIds: [],
+        direct: true
+      });
+    }
   }
-  if (!route.length) route.push({ ...targetNode.position });
+
+  const startEndpoints = [startTarget.edge.from, startTarget.edge.to];
+  const targetEndpoints = [target.edge.from, target.edge.to];
+  for (const startEndpoint of startEndpoints) {
+    const startNode = nodeById.get(startEndpoint);
+    if (!startNode) continue;
+    for (const targetEndpoint of targetEndpoints) {
+      const targetNode = nodeById.get(targetEndpoint);
+      if (!targetNode) continue;
+      const base = shortestPath(graph, startEndpoint, targetEndpoint);
+      if (!base) continue;
+      candidates.push({
+        distance: startOffset + streetDistance(startTarget.position, startNode.position) + base.distance + streetDistance(targetNode.position, target.position),
+        nodeIds: base.nodeIds,
+        direct: false
+      });
+    }
+  }
+
+  const best = candidates.sort((a, b) => a.distance - b.distance)[0];
+  if (!best) return null;
+
+  const route: StreetPosition[] = [];
+  pushDistinct(route, start);
+  pushDistinct(route, startTarget.position);
+  if (!best.direct) {
+    for (const id of best.nodeIds) {
+      const node = nodeById.get(id);
+      if (node) pushDistinct(route, node.position);
+    }
+  }
+  pushDistinct(route, target.position);
 
   let distance = 0;
   for (let index = 1; index < route.length; index += 1) distance += streetDistance(route[index - 1]!, route[index]!);
@@ -182,24 +221,64 @@ export function getStreetRoute(segmentId: StreetSpatialSegmentId, start: StreetP
   return {
     segmentId,
     requestedPosition: { ...requested },
-    position: { ...targetNode.position },
+    position: { ...target.position },
     route,
     distance
   };
 }
 
-function nearestNode(nodes: StreetNavigationNode[], position: StreetPosition): StreetNavigationNode | null {
-  let best: StreetNavigationNode | null = null;
-  let bestDistance = Number.POSITIVE_INFINITY;
-  for (const node of nodes) {
-    const distance = streetDistance(node.position, position);
-    if (distance < bestDistance) { best = node; bestDistance = distance; }
+interface RouteCandidate {
+  distance: number;
+  nodeIds: string[];
+  direct: boolean;
+}
+
+function projectOntoGraph(graph: StreetNavigationGraph, requested: StreetPosition): StreetNavigationTarget | null {
+  const nodeById = new Map(graph.nodes.map(node => [node.id, node]));
+  let best: StreetNavigationTarget | null = null;
+  for (const connection of graph.edges) {
+    const from = nodeById.get(connection.from);
+    const to = nodeById.get(connection.to);
+    if (!from || !to) continue;
+    const projection = projectOntoSegment(requested, from.position, to.position);
+    const distanceFromRequested = streetDistance(requested, projection.position);
+    if (!best || distanceFromRequested < best.distanceFromRequested) {
+      best = { position: projection.position, edge: connection, edgeProgress: projection.progress, distanceFromRequested };
+    }
   }
   return best;
 }
 
-function shortestPath(graph: StreetNavigationGraph, startId: string, targetId: string): string[] | null {
-  if (startId === targetId) return [startId];
+function projectOntoSegment(point: StreetPosition, from: StreetPosition, to: StreetPosition) {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const lengthSquared = dx * dx + dy * dy;
+  if (lengthSquared === 0) return { position: { ...from }, progress: 0 };
+  const raw = ((point.x - from.x) * dx + (point.y - from.y) * dy) / lengthSquared;
+  const progress = Math.max(0, Math.min(1, raw));
+  return {
+    position: { x: from.x + dx * progress, y: from.y + dy * progress },
+    progress
+  };
+}
+
+function sameEdge(a: StreetNavigationEdge, b: StreetNavigationEdge) {
+  return (a.from === b.from && a.to === b.to) || (a.from === b.to && a.to === b.from);
+}
+
+function navigationEdgeLength(nodeById: Map<string, StreetNavigationNode>, connection: StreetNavigationEdge) {
+  const from = nodeById.get(connection.from);
+  const to = nodeById.get(connection.to);
+  return from && to ? streetDistance(from.position, to.position) : null;
+}
+
+function pushDistinct(route: StreetPosition[], position: StreetPosition) {
+  const previous = route[route.length - 1];
+  if (!previous || streetDistance(previous, position) > 0.25) route.push({ ...position });
+}
+
+function shortestPath(graph: StreetNavigationGraph, startId: string, targetId: string): { nodeIds: string[]; distance: number } | null {
+  if (startId === targetId) return { nodeIds: [startId], distance: 0 };
   const nodeById = new Map(graph.nodes.map(node => [node.id, node]));
   const adjacency = new Map<string, Array<{ id: string; weight: number }>>();
   for (const node of graph.nodes) adjacency.set(node.id, []);
@@ -237,14 +316,15 @@ function shortestPath(graph: StreetNavigationGraph, startId: string, targetId: s
     }
   }
 
-  if (!previous.has(targetId)) return null;
-  const path = [targetId];
+  const total = distances.get(targetId) ?? Number.POSITIVE_INFINITY;
+  if (!Number.isFinite(total)) return null;
+  const nodeIds = [targetId];
   let cursor = targetId;
   while (cursor !== startId) {
     const parent = previous.get(cursor);
     if (!parent) return null;
-    path.push(parent);
+    nodeIds.push(parent);
     cursor = parent;
   }
-  return path.reverse();
+  return { nodeIds: nodeIds.reverse(), distance: total };
 }
