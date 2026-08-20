@@ -7,21 +7,27 @@ type StatKey = 'health' | 'energy' | 'satiety' | 'hydration' | 'stress';
 type WidgetKey = StatKey | 'policeHeat' | 'location' | 'cash';
 type HudPreset = 'dorado' | 'compact' | 'minimal' | 'dynamic';
 type HudAnchor = 'bottom-left' | 'bottom-center' | 'top-left';
+type HudColor = 'semantic' | 'gold' | 'emerald' | 'cyan' | 'violet' | 'rose';
+type HudShape = 'rounded' | 'circle' | 'hex';
 
 interface HudPreferences {
   preset: HudPreset;
   anchor: HudAnchor;
+  color: HudColor;
+  shape: HudShape;
   scale: number;
   opacity: number;
   showValues: boolean;
   widgets: Record<WidgetKey, boolean>;
 }
 
-const STORAGE_KEY = 'sd_hud_settings_v3';
+const STORAGE_KEY = 'sd_hud_settings_v4';
 
 const DEFAULT_PREFERENCES: HudPreferences = {
   preset: 'dorado',
   anchor: 'bottom-left',
+  color: 'semantic',
+  shape: 'rounded',
   scale: 1,
   opacity: 0.98,
   showValues: true,
@@ -69,13 +75,15 @@ export function Hud({ state, location, worldMode = false }: { state: HudState; l
     ? {
         customize: 'Настрой HUD', close: 'Затвори', title: 'HUD настройки', subtitle: 'Персонален изглед, запазен на това устройство.',
         preset: 'Изглед', scale: 'Размер', opacity: 'Прозрачност', values: 'Покажи стойности', widgets: 'Елементи', position: 'Позиция',
-        reset: 'Върни по подразбиране', dorado: 'Dorado', compact: 'Компактен', minimal: 'Минимален', dynamic: 'Динамичен',
+        color: 'Цветова тема', shape: 'Форма', semantic: 'По статус', gold: 'Dorado Gold', emerald: 'Emerald', cyan: 'Cyan', violet: 'Violet', rose: 'Rose',
+        rounded: 'Заоблен', circle: 'Кръгъл', hex: 'Hex', reset: 'Върни по подразбиране', dorado: 'Dorado', compact: 'Компактен', minimal: 'Минимален', dynamic: 'Динамичен',
         bottomLeft: 'Долу ляво', bottomCenter: 'Долу център', topLeft: 'Горе ляво', cash: 'Пари', location: 'Локация'
       }
     : {
         customize: 'Customize HUD', close: 'Close', title: 'HUD settings', subtitle: 'Personal layout saved on this device.',
         preset: 'Preset', scale: 'Scale', opacity: 'Opacity', values: 'Show values', widgets: 'Widgets', position: 'Position',
-        reset: 'Reset defaults', dorado: 'Dorado', compact: 'Compact', minimal: 'Minimal', dynamic: 'Dynamic',
+        color: 'Color theme', shape: 'Shape', semantic: 'By status', gold: 'Dorado Gold', emerald: 'Emerald', cyan: 'Cyan', violet: 'Violet', rose: 'Rose',
+        rounded: 'Rounded', circle: 'Circle', hex: 'Hex', reset: 'Reset defaults', dorado: 'Dorado', compact: 'Compact', minimal: 'Minimal', dynamic: 'Dynamic',
         bottomLeft: 'Bottom left', bottomCenter: 'Bottom center', topLeft: 'Top left', cash: 'Cash', location: 'Location'
       };
 
@@ -125,7 +133,7 @@ export function Hud({ state, location, worldMode = false }: { state: HudState; l
   const policeVisible = preferences.widgets.policeHeat && state.policeHeat > 0;
 
   return (
-    <div className={`player-hud ${worldMode ? 'player-hud-world' : ''} hud-anchor-${preferences.anchor} hud-preset-${preferences.preset}`}>
+    <div className={`player-hud ${worldMode ? 'player-hud-world' : ''} hud-anchor-${preferences.anchor} hud-preset-${preferences.preset} hud-color-${preferences.color} hud-shape-${preferences.shape}`}>
       <div className="player-hud-frame" style={frameStyle}>
         <div className="hud-main-row">
           {preferences.widgets.location && (
@@ -216,6 +224,28 @@ export function Hud({ state, location, worldMode = false }: { state: HudState; l
           </div>
 
           <div className="hud-editor-section">
+            <label>{copy.color}</label>
+            <div className="hud-color-grid">
+              {(['semantic', 'gold', 'emerald', 'cyan', 'violet', 'rose'] as HudColor[]).map(color => (
+                <button key={color} className={`${preferences.color === color ? 'hud-choice-active' : ''} hud-color-choice hud-color-choice-${color}`} onClick={() => patch('color', color)}>
+                  <i /><span>{copy[color]}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="hud-editor-section">
+            <label>{copy.shape}</label>
+            <div className="hud-shape-grid">
+              {(['rounded', 'circle', 'hex'] as HudShape[]).map(shape => (
+                <button key={shape} className={`${preferences.shape === shape ? 'hud-choice-active' : ''} hud-shape-choice hud-shape-choice-${shape}`} onClick={() => patch('shape', shape)}>
+                  <i /><span>{copy[shape]}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="hud-editor-section">
             <label>{copy.position}</label>
             <div className="hud-anchor-grid">
               {([
@@ -276,9 +306,13 @@ function readPreferences(): HudPreferences {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_PREFERENCES;
     const parsed = JSON.parse(raw) as Partial<HudPreferences>;
+    const color: HudColor = ['semantic', 'gold', 'emerald', 'cyan', 'violet', 'rose'].includes(parsed.color ?? '') ? parsed.color as HudColor : 'semantic';
+    const shape: HudShape = ['rounded', 'circle', 'hex'].includes(parsed.shape ?? '') ? parsed.shape as HudShape : 'rounded';
     return {
       ...DEFAULT_PREFERENCES,
       ...parsed,
+      color,
+      shape,
       widgets: { ...DEFAULT_PREFERENCES.widgets, ...(parsed.widgets ?? {}) }
     };
   } catch {
