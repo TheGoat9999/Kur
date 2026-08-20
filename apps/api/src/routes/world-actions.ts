@@ -2,10 +2,10 @@ import { Router } from 'express';
 import { WorldActionRequestSchema, WorldActionResultSchema } from '@sol-dorado/contracts';
 import {
   StreetMoveRequestSchema,
-  StreetPositionResultSchema,
+  StreetMoveResultSchema,
+  getStreetRoute,
   getStreetSpawnPosition,
-  isStreetActionWithinReach,
-  isStreetPositionWalkable
+  isStreetActionWithinReach
 } from '@sol-dorado/contracts/world-position';
 import type { AppServices } from '../types.js';
 import { applyWorldAction, getActionAvailability, STREET_SEGMENTS } from '../domain/actions.js';
@@ -38,15 +38,14 @@ export function worldActionRoutes(services: AppServices) {
     try {
       await client.query('BEGIN');
       const progress = await lockStreetProgress(client, playerId);
-      if (!isStreetPositionWalkable(progress.currentSegmentId, parsed.data)) {
-        throw new WorldActionCommandError('world_position_blocked', 409);
-      }
+      const movement = getStreetRoute(progress.currentSegmentId, progress.position, parsed.data);
+      if (!movement) throw new WorldActionCommandError('world_position_blocked', 409);
       await client.query(
         'UPDATE player_street_state SET position_x = $2, position_y = $3, updated_at = now() WHERE player_id = $1',
-        [playerId, parsed.data.x, parsed.data.y]
+        [playerId, movement.position.x, movement.position.y]
       );
       await client.query('COMMIT');
-      response.json(StreetPositionResultSchema.parse({ segmentId: progress.currentSegmentId, position: parsed.data }));
+      response.json(StreetMoveResultSchema.parse(movement));
     } catch (error) {
       await client.query('ROLLBACK');
       if (error instanceof WorldActionCommandError) return response.status(error.status).json({ error: error.code, ...error.details });
