@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sol Dorado Character Creation v1.3.2 — Hair Route Fix</title>
+<style>
+:root{--bg:#080d11;--panel:#10181d;--panel2:#151f25;--line:#2a3942;--txt:#edf2f4;--muted:#8fa0aa;--gold:#d6a34c;--good:#63c98d;--bad:#df7169;--blue:#68a9d6;--sidebarW:78px}
+*{box-sizing:border-box}html,body{min-height:100%}body{margin:0;background:radial-gradient(circle at 80% 0,#17232a 0,#080d11 38%);color:var(--txt);font:14px/1.35 system-ui,-apple-system,Segoe UI,sans-serif;overflow-x:hidden}button{font:inherit;cursor:pointer}.app{min-height:100dvh}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebarW);background:#0b1115;border-right:1px solid var(--line);z-index:50;padding:10px 7px;overflow-y:auto}.sidebar .brand{height:50px;display:grid;place-items:center;color:var(--gold);font-weight:900;letter-spacing:.1em}.sidebar .nav{display:grid;place-items:center;gap:3px;width:100%;border:0;background:transparent;color:#84959e;padding:10px 3px;border-radius:9px;margin:2px 0;text-align:center;font-size:10px}.sidebar .nav i{display:block;font-style:normal;font-size:20px;line-height:1.1}.sidebar .nav.on,.sidebar .nav:hover{background:#182229;color:#fff}.sidebarBackdrop{display:none}
+.header{position:sticky;top:0;z-index:40;margin-left:var(--sidebarW);min-height:64px;padding:8px 14px;background:#080d11f2;border-bottom:1px solid var(--line);backdrop-filter:blur(12px);display:flex;align-items:center;gap:12px}.headerTitle{min-width:190px}.headerTitle h1{font-size:16px;margin:0}.headerTitle small{display:block;color:var(--muted);white-space:nowrap}.mobileMenu{display:none}.hud{margin-left:auto;display:flex;align-items:center;justify-content:flex-end;gap:5px;flex-wrap:nowrap;min-width:0}.hudItem{display:flex;align-items:center;gap:4px;white-space:nowrap;padding:5px 7px;border:1px solid var(--line);border-radius:8px;background:#10181d;font-size:10px;color:#a7b4bb}.hudItem b{color:#f0f4f5}.hudItem.money b{color:#e0b15c}
+main{margin-left:var(--sidebarW);padding:17px;max-width:1280px}.ey{font-size:10px;font-weight:850;color:var(--gold);letter-spacing:.13em}.muted{color:var(--muted)}h1{font-size:28px;margin:5px 0 7px}h2{margin:4px 0 7px}.pageIntro{margin-bottom:12px}.pageIntro p{margin:0;max-width:850px;line-height:1.5}.gate{display:inline-flex;gap:6px;align-items:center;margin-top:10px;padding:6px 9px;border:1px solid #59472b;border-radius:999px;background:#1a160f;color:#dfb866;font-size:10px;font-weight:800;letter-spacing:.04em}
+.testGrid{display:grid;grid-template-columns:minmax(360px,.95fr) minmax(420px,1.05fr);gap:12px;align-items:start}.card{border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.previewCard{position:sticky;top:81px;overflow:hidden;border:1px solid #34444d;border-radius:16px;background:#0c1317;box-shadow:0 18px 45px #0005}.previewTop{display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid var(--line);background:#10181d}.previewTop .grow{flex:1;min-width:0}.previewTop b,.previewTop small{display:block}.previewTop b{font-size:14px}.previewTop small{color:var(--muted);font-size:10px;margin-top:2px}.sourceBadge{padding:5px 8px;border-radius:999px;border:1px solid #4f5e65;background:#091115;color:#9cafb7;font-size:9px;font-weight:850;white-space:nowrap}.sourceBadge.live{border-color:#4f8060;color:#7ed39c}.sourceBadge.bad{border-color:#8b4b47;color:#e48c84}
+.stage{position:relative;height:720px;overflow:hidden;background:linear-gradient(180deg,#202a2f 0%,#172025 50%,#0e1519 100%);touch-action:none}.stage:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 49.85%,#ffffff09 50%,transparent 50.15%),linear-gradient(0deg,transparent 49.85%,#ffffff08 50%,transparent 50.15%)}.stage:after{content:"HUMAN BASE TEST · NO ART FILTER";position:absolute;left:12px;bottom:10px;color:#87969c;font-size:9px;letter-spacing:.17em;pointer-events:none}.stage canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block}.loading{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:26px;background:#0b1216f2;transition:opacity .2s}.loading.hide{opacity:0;pointer-events:none}.spinner{width:32px;height:32px;border:3px solid #ffffff18;border-top-color:var(--gold);border-radius:50%;animation:spin .85s linear infinite;margin-bottom:10px}@keyframes spin{to{transform:rotate(360deg)}}.loading b{font-size:15px}.loading small{display:block;max-width:360px;color:var(--muted);line-height:1.45;margin-top:5px}.loadBar{width:min(280px,78%);height:4px;background:#222d33;border-radius:10px;overflow:hidden;margin-top:14px}.loadBar i{display:block;width:5%;height:100%;background:var(--gold);transition:width .2s}.modelMeta{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px;border-top:1px solid var(--line);background:#0b1216}.metaCell{padding:8px;border:1px solid #2b3941;border-radius:9px;background:#10181d;min-width:0}.metaCell small,.metaCell b{display:block}.metaCell small{font-size:8px;color:#788991;text-transform:uppercase;letter-spacing:.08em}.metaCell b{font-size:10px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.panel{overflow:hidden}.panelHead{padding:15px;border-bottom:1px solid var(--line);background:linear-gradient(90deg,#121d23,#0e171c)}.panelHead h2{font-size:19px;margin:0}.panelHead p{margin:4px 0 0;color:var(--muted);font-size:12px}.panelBody{padding:15px}.section{margin-bottom:18px}.section:last-child{margin-bottom:0}.sectionTitle{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}.sectionTitle b{font-size:12px}.sectionTitle small{color:var(--muted);font-size:9px}.choiceGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.choice{min-height:72px;position:relative;border:1px solid #33434c;border-radius:11px;background:#0e171c;color:#dfe6e9;padding:10px;text-align:left}.choice strong,.choice span{display:block}.choice strong{font-size:12px}.choice span{font-size:9px;color:#82949d;margin-top:4px}.choice.on{border-color:#a57c3b;background:linear-gradient(145deg,#241d12,#131b1f);box-shadow:inset 0 0 0 1px #d6a34c2e}.choice.on:after{content:"✓";position:absolute;right:8px;top:7px;color:#e6b85e;font-weight:900}.btnRow{display:flex;gap:7px;flex-wrap:wrap}.btn{border:1px solid #394952;background:#131d23;color:#fff;border-radius:9px;padding:9px 11px}.btn.on{border-color:#a57c3b;background:#241d12;color:#f0c46e}.btn.primary{background:var(--gold);border-color:var(--gold);color:#171109;font-weight:850}.btn:active,.choice:active{transform:scale(.99)}
+.notice{padding:10px 11px;border-left:3px solid var(--blue);background:#0d171c;border-radius:8px;color:#bac5ca;font-size:11px;line-height:1.5}.notice b{color:#eef2f3}.notice.good{border-color:var(--good)}.notice.bad{border-color:var(--bad)}.diagnostics{display:grid;gap:6px}.diag{display:grid;grid-template-columns:125px 1fr;gap:8px;padding:8px 0;border-bottom:1px solid #ffffff0b;font-size:11px}.diag:last-child{border-bottom:0}.diag span{color:var(--muted)}.diag b{word-break:break-word}.gateList{display:grid;gap:7px}.gateRow{display:flex;gap:9px;align-items:flex-start;padding:9px;border:1px solid #2c3a42;border-radius:9px;background:#0c151a}.gateDot{width:8px;height:8px;flex:0 0 auto;margin-top:4px;border-radius:50%;background:#58666d}.gateRow.ready .gateDot{background:var(--good)}.gateRow b{font-size:11px;display:block}.gateRow small{display:block;color:var(--muted);font-size:9px;margin-top:2px}.footerNote{padding:11px 15px;border-top:1px solid var(--line);background:#0d151a;color:#788990;font-size:9px;line-height:1.45}
+
+.faceTabs{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}.faceTabs::-webkit-scrollbar{display:none}.faceTabs .btn{flex:0 0 auto}.faceGroupLabel{display:flex;justify-content:space-between;gap:8px;align-items:center;margin:2px 0 8px;color:#8799a2;font-size:9px}.faceGroupLabel b{color:#dfe7ea;font-size:10px}.faceGroupLabel span{white-space:nowrap}.faceRangeHint{padding:7px 9px;border:1px solid #25343c;border-radius:8px;background:#0a1318;color:#7f9199;font-size:9px;line-height:1.4;margin-bottom:8px}.morphRow.faceMorph{border-color:#31434c}.morphRow.faceMorph .valuePill{color:#8fd4ad}.btn.flash{border-color:#4f8060;color:#8bd2a5}
+@media(max-width:980px){.testGrid{grid-template-columns:minmax(320px,.88fr) minmax(390px,1.12fr)}.stage{height:650px}}
+@media(max-width:760px){:root{--sidebarW:0px}.sidebar{left:0;top:0;bottom:0;width:238px;transform:translateX(-102%);transition:transform .18s ease;padding:76px 10px 14px;box-shadow:18px 0 40px #0008}.sidebar.open{transform:translateX(0)}.sidebar .brand{display:none}.sidebar .nav{display:flex;align-items:center;justify-content:flex-start;gap:12px;padding:12px 13px;margin:4px 0;text-align:left;font-size:14px}.sidebar .nav i{display:inline-block;width:25px;font-size:19px;text-align:center}.sidebarBackdrop{position:fixed;inset:0;background:#0008;z-index:45;display:none}.sidebarBackdrop.on{display:block}.header{margin-left:0;min-height:0;padding:8px 9px 7px;display:grid;grid-template-columns:42px minmax(0,1fr);gap:7px 9px;align-items:center}.mobileMenu{display:grid;place-items:center;width:42px;height:42px;border:1px solid var(--line);border-radius:10px;background:#111a20;color:#fff;font-size:21px;grid-column:1;grid-row:1}.headerTitle{grid-column:2;grid-row:1;min-width:0}.headerTitle h1{font-size:17px}.headerTitle small{font-size:10px;overflow:hidden;text-overflow:ellipsis}.hud{grid-column:1/-1;grid-row:2;margin-left:0;width:100%;overflow-x:auto;overflow-y:hidden;justify-content:flex-start;padding:1px 0 2px;scrollbar-width:none}.hud::-webkit-scrollbar{display:none}.hudItem{flex:0 0 auto;padding:5px 7px;font-size:10px}main{margin-left:0;padding:13px 11px 24px}.pageIntro h1{font-size:24px}.pageIntro p{font-size:12px}.testGrid{grid-template-columns:1fr}.previewCard{position:relative;top:auto}.stage{height:600px}.panelBody{padding:12px}}
+@media(max-width:430px){.stage{height:555px}.modelMeta{padding:8px}.metaCell{padding:7px}.pageIntro{margin-bottom:9px}.diag{grid-template-columns:105px 1fr}.choice{min-height:67px}}
+
+.stageTools{position:absolute;right:10px;top:10px;z-index:4;display:grid;gap:6px}.stageTool{width:38px;height:38px;border:1px solid #53646d;border-radius:10px;background:#0b1216d9;color:#f3f6f7;font-size:17px;display:grid;place-items:center;box-shadow:0 7px 18px #0004;backdrop-filter:blur(9px)}.stageTool:active{transform:scale(.96)}.cameraReadout{position:absolute;left:10px;top:10px;z-index:4;padding:7px 9px;border:1px solid #43545d;border-radius:9px;background:#0b1216d9;color:#bdc9ce;font-size:9px;font-weight:800;letter-spacing:.05em;backdrop-filter:blur(9px);pointer-events:none}.cameraReadout b{color:#fff}.sliderList{display:grid;gap:9px}.morphRow{padding:10px 11px;border:1px solid #2d3c44;border-radius:11px;background:#0c151a}.morphHead{display:flex;align-items:center;gap:10px;margin-bottom:8px}.morphHead b{font-size:11px}.morphHead small{margin-left:auto;color:#7f919a;font-size:8px;text-align:right}.valuePill{min-width:46px;padding:4px 6px;border:1px solid #465760;border-radius:999px;background:#111d23;color:#edc16c;font-size:9px;font-weight:850;text-align:center}.rangeLine{display:grid;grid-template-columns:52px 1fr 52px;align-items:center;gap:8px}.rangeLine span{font-size:8px;color:#73858e}.rangeLine span:last-child{text-align:right}.morphRange{width:100%;height:30px;margin:0;accent-color:var(--gold);cursor:pointer}.morphRange:disabled{opacity:.45;cursor:wait}.morphStatus{display:flex;align-items:center;gap:7px;margin-top:8px;color:#7f929b;font-size:9px}.morphStatus i{width:7px;height:7px;border-radius:50%;background:#5d6e76}.morphStatus.busy i{background:#d6a34c;box-shadow:0 0 0 3px #d6a34c1a}.morphStatus.ready i{background:var(--good)}.cameraGuide{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:9px}.guideCell{padding:8px;border:1px solid #2b3941;border-radius:9px;background:#0d171c}.guideCell b{display:block;font-size:9px}.guideCell small{display:block;color:#7f9199;font-size:8px;margin-top:2px;line-height:1.35}.compactNote{margin-top:8px;color:#7e9098;font-size:9px;line-height:1.45}.sectionActions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.btn.dangerLite{border-color:#654541;color:#e7a49e}.btn.goodLite{border-color:#3e664e;color:#8bd2a5}.disabledNote{opacity:.55}.stage:after{content:"DRAG ORBIT · PINCH / WHEEL ZOOM · TWO-FINGER PAN"}.stage.cameraBusy{cursor:grabbing}.stage:not(.cameraBusy){cursor:grab}
+@media(max-width:760px){.stageTools{right:8px;top:8px}.stageTool{width:40px;height:40px}.cameraReadout{left:8px;top:8px}.morphRow{padding:10px}.rangeLine{grid-template-columns:45px 1fr 45px}.cameraGuide{grid-template-columns:1fr 1fr}}
+
+
+/* v1.1.1 — persistent creator workspace */
+:root{--headerH:74px}
+.workspaceNav{display:flex;gap:6px;margin-top:10px;overflow-x:auto;scrollbar-width:none}.workspaceNav::-webkit-scrollbar{display:none}.workspaceTab{flex:0 0 auto;border:1px solid #344650;background:#0b1419;color:#93a5ad;border-radius:999px;padding:7px 11px;font-size:10px;font-weight:800}.workspaceTab.on{border-color:#a57c3b;background:#241d12;color:#f0c46e}.panelHeadCopy{min-width:0}
+@media(min-width:761px){.workspaceNav{margin-top:12px}.workspaceTab{padding:8px 12px}}
+@media(max-width:760px){
+  html,body,.app{height:100dvh;min-height:0;overflow:hidden}
+  .header{position:relative;top:auto}
+  main{height:calc(100dvh - var(--headerH));min-height:0;overflow:hidden;padding:8px 8px 8px}
+  .pageIntro{display:none}
+  .testGrid{height:100%;min-height:0;display:grid;grid-template-columns:1fr;grid-template-rows:minmax(255px,46dvh) minmax(0,1fr);gap:8px;overflow:hidden}
+  .previewCard{position:relative;top:auto;height:100%;min-height:0;display:flex;flex-direction:column;border-radius:14px}
+  .previewTop{flex:0 0 auto;padding:7px 9px}.previewTop b{font-size:12px}.previewTop small{font-size:9px}.sourceBadge{font-size:8px;padding:4px 7px}
+  .stage{height:auto!important;min-height:0;flex:1 1 auto}
+  .modelMeta{display:none}
+  .cameraReadout{font-size:8px;padding:6px 7px;max-width:72%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .stageTools{gap:5px}.stageTool{width:36px;height:36px;font-size:16px}
+  .panel{height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden;border-radius:14px}
+  .panelHead{flex:0 0 auto;padding:7px 8px 8px;border-bottom:1px solid var(--line)}
+  .panelHeadCopy{display:none}
+  .workspaceNav{margin-top:0;padding:0 1px;gap:5px}.workspaceTab{padding:7px 11px;font-size:9px}
+  .panelBody{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:10px;scrollbar-width:thin;scroll-padding-top:5px}
+  .panelBody>.section{margin-bottom:14px}
+  .footerNote{display:none}
+  .sectionTitle{margin-bottom:7px}.sectionTitle b{font-size:11px}.sectionTitle small{font-size:8px}
+  .notice{font-size:10px;padding:8px 9px}.compactNote{font-size:8px}.morphRow{padding:8px 9px}.morphHead{margin-bottom:5px}.morphRange{height:26px}.sliderList{gap:7px}
+  .choice{min-height:58px;padding:8px}.choice strong{font-size:11px}
+  .cameraGuide{display:none}
+  #cameraSection .sectionTitle{margin-bottom:6px}
+  #cameraSection .btn{padding:7px 9px;font-size:10px}
+  #baseSelect{margin-bottom:12px}
+  #surfaceSection{padding-bottom:4px}
+}
+@media(max-width:430px){
+  .testGrid{grid-template-rows:minmax(235px,44dvh) minmax(0,1fr)}
+  .workspaceTab{padding:7px 10px}
+  .stage:after{font-size:7px;left:8px;bottom:6px}
+}
+
+/* v1.3.1 — hair & grooming + hardened remote MHCLO asset loader */
+.profileBar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:9px;padding-top:9px;border-top:1px solid #ffffff12}.profileBarState{display:flex;align-items:center;gap:7px;min-width:0;color:#899aa2;font-size:9px}.profileBarState i{width:7px;height:7px;border-radius:50%;background:#697a82;flex:0 0 auto}.profileBarState.saved i{background:var(--good)}.profileBarState.editing i{background:var(--gold)}.profileBarState span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.profileBarActions{display:flex;gap:5px;flex:0 0 auto}.btn.mini{padding:6px 8px;border-radius:8px;font-size:9px}.coreMorph .valuePill{color:#82c8e7;min-width:58px}.appearancePalette{margin-top:12px;padding:10px 11px;border:1px solid #2d3c44;border-radius:11px;background:#0c151a}.paletteHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}.paletteHead b{font-size:11px}.paletteHead span{font-size:9px;color:var(--muted)}.swatches{display:flex;gap:8px;overflow-x:auto;padding:2px 1px 4px;scrollbar-width:none}.swatches::-webkit-scrollbar{display:none}.swatch{width:34px;height:34px;flex:0 0 34px;border-radius:50%;border:2px solid #26343c;box-shadow:inset 0 0 0 2px #ffffff10,0 3px 9px #0004;position:relative}.swatch.on{border-color:var(--gold);box-shadow:0 0 0 2px #d6a34c30,0 3px 9px #0005}.swatch.on:after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:13px;font-weight:900;text-shadow:0 1px 3px #000}.myCharacterPanel[hidden]{display:none!important}.profileHead{display:flex;align-items:center;justify-content:space-between;gap:10px}.savedBadge{padding:6px 9px;border:1px solid #3f704f;border-radius:999px;color:#86d4a2;background:#0f1c15;font-size:9px;font-weight:900;letter-spacing:.08em}.profileBody{display:grid;gap:13px}.profileHero{display:flex;align-items:center;gap:12px;padding:13px;border:1px solid #34444d;border-radius:13px;background:linear-gradient(145deg,#101b20,#0b1317)}.profileMonogram{width:50px;height:50px;display:grid;place-items:center;border-radius:50%;background:#211b11;border:1px solid #7f6131;color:#e9ba62;font-weight:900;letter-spacing:.08em}.profileHero small{display:block;color:#788a93;font-size:8px;letter-spacing:.12em}.profileHero h2{margin:3px 0;font-size:18px}.profileStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.profileStat{padding:10px;border:1px solid #2b3941;border-radius:10px;background:#0c151a;min-width:0}.profileStat small,.profileStat b{display:block}.profileStat small{font-size:8px;color:#788a93;text-transform:uppercase;letter-spacing:.08em}.profileStat b{font-size:11px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.profileSavedMeta{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid #ffffff0c;border-bottom:1px solid #ffffff0c;font-size:10px}.profileSavedMeta span{color:var(--muted)}.profileActions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.profileActions .btn{min-height:42px}
+
+/* v1.3 asset library */
+.assetRail{display:flex;gap:8px;overflow-x:auto;padding:2px 1px 7px;scroll-snap-type:x proximity;scrollbar-width:none}.assetRail::-webkit-scrollbar{display:none}.assetCard{position:relative;flex:0 0 92px;width:92px;min-height:116px;padding:7px;border:1px solid #2d3b43;border-radius:12px;background:#0c151a;color:#cad3d7;text-align:left;scroll-snap-align:start;overflow:hidden}.assetCard:hover{border-color:#4c626e}.assetCard.on{border-color:#a77c3a;background:#18150f;box-shadow:0 0 0 1px #d6a34c22}.assetThumb{height:72px;border-radius:8px;background:radial-gradient(circle at 50% 38%,#26333a,#11191e 72%);display:grid;place-items:center;overflow:hidden}.assetThumb img{width:100%;height:100%;object-fit:cover;display:block}.assetThumb.bald{font-size:31px;color:#a9b4ba}.assetCard strong{display:block;margin-top:7px;font-size:9px;line-height:1.15}.assetCard small{display:block;margin-top:2px;color:#72858e;font-size:7px;text-transform:uppercase;letter-spacing:.08em}.assetCard .assetCheck{display:none;position:absolute;right:6px;top:6px;width:18px;height:18px;border-radius:50%;place-items:center;background:#d5a24a;color:#15110b;font-size:10px;font-weight:900}.assetCard.on .assetCheck{display:grid}.hairStatus{margin-top:8px}.groomGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.groomMini{border:1px solid #2d3b43;border-radius:11px;background:#0c151a;padding:10px}.groomMini b{display:block;font-size:10px}.groomMini span{display:block;color:#7c8e97;font-size:8px;margin-top:3px}.licenseLine{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;color:#71838c;font-size:8px}.licenseLine b{color:#9aabb3}.profileStat.hairStat b{color:#d8b673}.assetSkeleton{height:72px;border-radius:8px;background:linear-gradient(100deg,#172126 20%,#223039 35%,#172126 50%);background-size:220% 100%;animation:hairShimmer 1.2s linear infinite}@keyframes hairShimmer{to{background-position:-220% 0}}
+@media(max-width:760px){.assetCard{flex-basis:84px;width:84px;min-height:108px}.assetThumb{height:64px}.groomGrid{grid-template-columns:1fr}.licenseLine{font-size:7px}}
+
+@media(max-width:760px){.profileBar{margin-top:6px;padding-top:6px}.profileBarState{font-size:8px}.btn.mini{padding:6px 7px}.profileStats{grid-template-columns:repeat(2,minmax(0,1fr))}.profileBody{overflow-y:auto}.profileHead p{display:none}.profileHead{padding:9px 10px}.profileActions{grid-template-columns:1fr}.appearancePalette{padding:9px}.swatch{width:32px;height:32px;flex-basis:32px}}
+
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+</head>
+<body>
+<div class="app">
+<nav class="sidebar" id="sidebar">
+  <div class="brand">SD</div>
+  <button class="nav on" data-nav="overview"><i>◉</i>Creator</button>
+  <button class="nav" data-nav="bodyCustomize"><i>◫</i>Body</button>
+  <button class="nav" data-nav="coreAppearance"><i>◐</i>Appearance</button>
+  <button class="nav" data-nav="hairCustomize"><i>✦</i>Hair</button>
+  <button class="nav" data-nav="faceCustomize"><i>◉</i>Face</button>
+  <button class="nav" id="myCharacterNav"><i>♙</i>My Character</button>
+  <button class="nav" data-nav="cameraSection"><i>⌕</i>Camera</button>
+  <button class="nav" data-nav="surfaceSection"><i>◐</i>Surface</button>
+  <button class="nav" data-nav="diagnostics"><i>⚙</i>Diagnostics</button>
+</nav>
+<header class="header">
+  <button class="mobileMenu" id="menuBtn" aria-label="Open navigation">☰</button>
+  <div class="headerTitle"><h1>SOL DORADO</h1><small id="headerSubtitle">Character Creation v1.3.2 · Hair Route Fix</small></div>
+  <div class="hud" aria-label="Player HUD">
+    <span class="hudItem" title="Health">❤️ <b>100</b></span>
+    <span class="hudItem" title="Energy">⚡ <b>82</b></span>
+    <span class="hudItem" title="Satiety">🍗 <b>71</b></span>
+    <span class="hudItem" title="Hydration">💧 <b>77</b></span>
+    <span class="hudItem" title="Stress">🧠 <b>14</b></span>
+    <span class="hudItem money" title="Cash">💵 <b>$4,200</b></span>
+  </div>
+</header>
+<div class="sidebarBackdrop" id="sidebarBackdrop"></div>
+<main>
+  <div class="pageIntro" id="overview">
+    <div class="ey">CHARACTER SYSTEM · HAIR + GROOMING</div>
+    <h1>Character creator + grooming library</h1>
+    <p class="muted">v1.3.1 keeps the accepted creator and saved-character flow, then hardens the MakeHuman hair asset routes for local/mobile browser loading.</p>
+    <div class="gate">v1.3.1 · HAIR LOADER FIX</div>
+  </div>
+
+  <div class="testGrid">
+    <section class="previewCard" aria-label="Live character preview">
+      <div class="previewTop"><div class="grow"><b id="previewTitle">Male character base</b><small id="previewSub">MakeHuman HM08 · live measurement targets</small></div><span class="sourceBadge" id="sourceBadge">LOADING</span></div>
+      <div class="stage" id="stage">
+        <canvas id="humanCanvas" aria-label="Live WebGL character creator"></canvas>
+        <div class="cameraReadout" id="cameraReadout">VIEW <b>FULL BODY</b> · ZOOM <b id="zoomReadout">100%</b></div>
+        <div class="stageTools" aria-label="Camera shortcuts">
+          <button class="stageTool" id="zoomInBtn" aria-label="Zoom in" title="Zoom in">＋</button>
+          <button class="stageTool" id="zoomOutBtn" aria-label="Zoom out" title="Zoom out">−</button>
+          <button class="stageTool" id="frontBtn" aria-label="Face front" title="Face front">↺</button>
+          <button class="stageTool" id="resetCameraBtn" aria-label="Reset camera" title="Reset camera">⌂</button>
+        </div>
+        <div class="loading" id="loading"><div class="spinner"></div><b id="loadingTitle">Starting character base…</b><small id="loadingSub">Loading Three.js and the pinned CC0 MakeHuman source mesh.</small><div class="loadBar"><i id="loadBar"></i></div></div>
+      </div>
+      <div class="modelMeta"><div class="metaCell"><small>Source</small><b>MakeHuman HM08</b></div><div class="metaCell"><small>Render</small><b id="metaRender">Neutral coverage</b></div><div class="metaCell"><small>Camera</small><b id="metaView">Full body</b></div></div>
+    </section>
+
+    <section class="card panel" id="creatorPanel">
+      <div class="panelHead"><div class="panelHeadCopy"><div class="ey">CREATOR v1.3.1</div><h2>Human customization</h2><p>Body, face and grooming edits update the same live HM08 character.</p></div><div class="workspaceNav" id="workspaceNav" aria-label="Creator sections">
+          <button class="workspaceTab on" data-workspace="body">Body</button>
+          <button class="workspaceTab" data-workspace="appearance">Appearance</button>
+          <button class="workspaceTab" data-workspace="hair">Hair</button>
+          <button class="workspaceTab" data-workspace="structure">Face</button>
+          <button class="workspaceTab" data-workspace="eyes">Eyes</button>
+          <button class="workspaceTab" data-workspace="nose">Nose</button>
+          <button class="workspaceTab" data-workspace="mouth">Mouth</button>
+        </div><div class="profileBar"><div class="profileBarState"><i></i><span id="draftStatus">Draft · not saved as a character</span></div><div class="profileBarActions"><button class="btn mini" id="cancelEditBtn" hidden>Cancel</button><button class="btn mini" id="openCharacterBtn" hidden>My Character</button><button class="btn mini primary" id="saveCharacterBtn">Save Character</button></div></div></div>
+      <div class="panelBody">
+        <div class="section" id="baseSelect"><div class="sectionTitle"><b>Human base</b><small>Adult MakeHuman macro foundation</small></div><div class="choiceGrid">
+          <button class="choice on" data-body="male"><strong>Male base</strong><span>Adult HM08 male foundation</span></button>
+          <button class="choice" data-body="female"><strong>Female base</strong><span>Adult HM08 female foundation</span></button>
+        </div></div>
+
+        <div class="section" id="coreAppearance"><div class="sectionTitle"><b>Core appearance</b><small>Stature, build, age and color</small></div>
+          <div class="notice good"><b>One persistent character recipe.</b> Age, weight and muscle use MakeHuman macro target data; height changes the character's physical stature in the viewer. Skin and iris colors stay attached to the same saved appearance state.</div>
+          <div class="sliderList coreSliderList" style="margin-top:10px">
+            <div class="morphRow coreMorph"><div class="morphHead"><b>Height</b><span class="valuePill" id="coreValue_height">178 cm</span></div><div class="rangeLine"><span>Short</span><input class="morphRange" type="range" min="-100" max="100" step="1" value="0" data-core="height" aria-label="Height"><span>Tall</span></div></div>
+            <div class="morphRow coreMorph"><div class="morphHead"><b>Weight / body fat</b><span class="valuePill" id="coreValue_weight">0</span></div><div class="rangeLine"><span>Lean</span><input class="morphRange" type="range" min="-100" max="100" step="1" value="0" data-core="weight" aria-label="Weight and body fat"><span>Heavy</span></div></div>
+            <div class="morphRow coreMorph"><div class="morphHead"><b>Muscle</b><span class="valuePill" id="coreValue_muscle">0</span></div><div class="rangeLine"><span>Soft</span><input class="morphRange" type="range" min="-100" max="100" step="1" value="0" data-core="muscle" aria-label="Muscle"><span>Muscular</span></div></div>
+            <div class="morphRow coreMorph"><div class="morphHead"><b>Age</b><span class="valuePill" id="coreValue_age">28</span></div><div class="rangeLine"><span>18</span><input class="morphRange" type="range" min="18" max="70" step="1" value="28" data-core="age" aria-label="Age"><span>70</span></div></div>
+          </div>
+          <div class="appearancePalette"><div class="paletteHead"><b>Skin tone</b><span id="skinToneLabel">Warm medium</span></div><div class="swatches" id="skinSwatches" aria-label="Skin tone"></div></div>
+          <div class="appearancePalette"><div class="paletteHead"><b>Eye color</b><span id="eyeColorLabel">Brown</span></div><div class="swatches" id="eyeSwatches" aria-label="Eye color"></div></div>
+          <div class="sectionActions"><button class="btn dangerLite" id="resetCoreBtn">Reset core appearance</button></div>
+        </div>
+
+        <div class="section" id="hairCustomize"><div class="sectionTitle"><b>Hair & grooming</b><small>CC0 MakeHuman system assets</small></div>
+          <div class="notice good"><b>Real fitted hair geometry.</b> Selecting a style loads the original MakeHuman OBJ + MHCLO mapping and refits every hair vertex to the same deformed HM08 head. No procedural helmet-hair fallback is used.</div>
+          <div class="paletteHead" style="margin-top:11px"><b>Haircut</b><span id="hairStyleLabel">Bald</span></div>
+          <div class="assetRail" id="hairRail" aria-label="Haircuts"></div>
+          <div class="morphStatus hairStatus" id="hairAssetStatus"><i></i><span id="hairAssetStatusText">Choose a haircut to load it on demand.</span></div>
+          <div class="appearancePalette"><div class="paletteHead"><b>Hair color</b><span id="hairColorLabel">Dark brown</span></div><div class="swatches" id="hairColorSwatches" aria-label="Hair color"></div></div>
+          <div class="groomGrid"><div class="groomMini"><b>Eyebrows</b><span>Grooming registry is prepared for the system eyebrow library. Mesh/texture fitting comes after the hair acceptance pass.</span></div><div class="groomMini"><b>Facial hair</b><span>Beard and moustache slots are reserved for the CC0 Bodyparts 05 pack after haircut fitting is validated.</span></div></div>
+          <div class="sectionActions"><button class="btn dangerLite" id="resetGroomingBtn">Reset grooming</button></div>
+          <div class="licenseLine"><span>Starter library</span><b>10 system hairstyles + Bald · CC0</b></div>
+        </div>
+
+        <div class="section" id="cameraSection"><div class="sectionTitle"><b>Inspection camera</b><small>Touch-first controls</small></div><div class="btnRow">
+          <button class="btn on" data-view="full">Full body</button><button class="btn" data-view="upper">Upper body</button><button class="btn" data-view="face">Face</button><button class="btn" data-view="hands">Hands</button><button class="btn" data-view="feet">Feet</button>
+        </div>
+        <div class="cameraGuide">
+          <div class="guideCell"><b>One finger / mouse drag</b><small>Orbit horizontally and tilt the inspection camera.</small></div>
+          <div class="guideCell"><b>Pinch / mouse wheel</b><small>Continuous zoom with sensible min/max limits.</small></div>
+          <div class="guideCell"><b>Two-finger drag</b><small>Pan the inspection target up/down or sideways.</small></div>
+          <div class="guideCell"><b>Front / Home</b><small>Front resets rotation; Home restores full-body framing.</small></div>
+        </div></div>
+
+        <div class="section" id="bodyCustomize"><div class="sectionTitle"><b>Body measurements</b><small>−100 to +100 · neutral = 0</small></div>
+          <div class="notice good"><b>These are real MakeHuman vertex targets.</b> The sliders deform the same accepted HM08 topology instead of scaling body parts as separate objects.</div>
+          <div class="morphStatus" id="morphStatus"><i></i><span id="morphStatusText">Measurement targets load on demand.</span></div>
+          <div class="sliderList" id="morphList" style="margin-top:10px"></div>
+          <div class="sectionActions"><button class="btn dangerLite" id="resetBodyBtn">Reset body measurements</button></div>
+          <div class="compactNote">Body measurements from v1.0 remain unchanged. Native MakeHuman helper-eye geometry stays attached to the same deformed vertex field, so eye-related face targets move the lids and eye helpers together.</div>
+        </div>
+
+        <div class="section" id="faceCustomize"><div class="sectionTitle"><b>Face creator</b><small>Real MakeHuman face targets</small></div>
+          <div class="notice good"><b>Same topology, local facial targets.</b> Editing the face changes HM08 vertices directly; the native eye helpers rebuild from the same deformed source instead of floating as separate guessed geometry.</div>
+          <div class="faceTabs" id="faceTabs" style="margin-top:10px">
+            <button class="btn on" data-face-group="structure">Structure</button>
+            <button class="btn" data-face-group="eyes">Eyes</button>
+            <button class="btn" data-face-group="nose">Nose</button>
+            <button class="btn" data-face-group="mouth">Mouth</button>
+          </div>
+          <div class="morphStatus" id="faceMorphStatus"><i></i><span id="faceMorphStatusText">Face targets load on demand.</span></div>
+          <div class="sliderList" id="faceMorphList" style="margin-top:10px"></div>
+          <div class="sectionActions"><button class="btn" id="randomFaceBtn">Subtle randomize</button><button class="btn dangerLite" id="resetFaceBtn">Reset face</button></div>
+          <div class="compactNote">v1.1 intentionally exposes a curated set rather than every MakeHuman target. Slider extremes are slightly damped to keep the creator inside believable human ranges.</div>
+        </div>
+
+        <div class="section" id="surfaceSection"><div class="sectionTitle"><b>Surface check</b><small>Inspection only</small></div><div class="btnRow"><button class="btn on" data-surface="coverage">Natural skin</button><button class="btn" data-surface="clay">Clay anatomy</button></div></div>
+
+        <div class="section"><div class="sectionTitle"><b>v1.3.1 acceptance gate</b><small>What this build must prove</small></div><div class="gateList">
+          <div class="gateRow ready" id="gateLoad"><i class="gateDot"></i><div><b>Accepted human foundation preserved</b><small>Same HM08 anatomy that passed v0.9.</small></div></div>
+          <div class="gateRow" id="gateCamera"><i class="gateDot"></i><div><b>Camera is usable on Android</b><small>Orbit, tilt, pinch zoom, pan and presets should not lose the character.</small></div></div>
+          <div class="gateRow" id="gateMorph"><i class="gateDot"></i><div><b>Body targets remain credible</b><small>Existing body customization must not regress.</small></div></div>
+          <div class="gateRow" id="gateFace"><i class="gateDot"></i><div><b>Face sculpting stays human</b><small>Structure, eyes, nose and mouth must remain coherent from front and profile views.</small></div></div>
+          <div class="gateRow" id="gateHair"><i class="gateDot"></i><div><b>Hair fits the deformed head</b><small>Selected MHCLO hair must stay attached through face/body changes and saved-character reloads.</small></div></div>
+        </div></div>
+
+        <div class="section" id="diagnostics"><div class="sectionTitle"><b>Diagnostics</b><small>Useful while targets are still external prototype data</small></div><div class="diagnostics">
+          <div class="diag"><span>Geometry</span><b id="diagGeometry">Waiting…</b></div>
+          <div class="diag"><span>Base target</span><b id="diagTarget">Waiting…</b></div>
+          <div class="diag"><span>Morph cache</span><b id="diagMorphs">0 targets cached</b></div>
+          <div class="diag"><span>Hair assets</span><b id="diagAssets">0 cached</b></div>
+          <div class="diag"><span>Source route</span><b id="diagRoute">Waiting…</b></div>
+          <div class="diag"><span>Build time</span><b id="diagTime">Waiting…</b></div>
+          <div class="diag"><span>Renderer</span><b id="diagRenderer">Waiting…</b></div>
+        </div><div class="btnRow" style="margin-top:10px"><button class="btn" id="reloadBtn">Reload source</button></div></div>
+      </div>
+      <div class="footerNote">Prototype source: MakeHuman HM08 basemesh, targets and CC0 system hair assets. v1.3.1 keeps the browser-side MHCLO refit pipeline and adds a jsDelivr-first route plus explicit per-asset diagnostics.</div>
+    </section>
+
+    <section class="card panel myCharacterPanel" id="myCharacterPanel" hidden>
+      <div class="panelHead profileHead"><div><div class="ey">MY CHARACTER</div><h2>Saved character</h2><p>This preview is rebuilt from the saved appearance recipe, not a screenshot.</p></div><span class="savedBadge">SAVED</span></div>
+      <div class="panelBody profileBody">
+        <div class="profileHero"><div class="profileMonogram" id="profileMonogram">SD</div><div><small>ACTIVE CHARACTER</small><h2 id="profileDisplayName">My Character</h2><div class="muted" id="profileIdText">No saved profile</div></div></div>
+        <div class="profileStats">
+          <div class="profileStat"><small>Base</small><b id="profileSex">—</b></div>
+          <div class="profileStat"><small>Age</small><b id="profileAge">—</b></div>
+          <div class="profileStat"><small>Height</small><b id="profileHeight">—</b></div>
+          <div class="profileStat"><small>Build</small><b id="profileBuild">—</b></div>
+          <div class="profileStat"><small>Skin</small><b id="profileSkin">—</b></div>
+          <div class="profileStat"><small>Eyes</small><b id="profileEyes">—</b></div>
+          <div class="profileStat hairStat"><small>Hair</small><b id="profileHair">—</b></div>
+        </div>
+        <div class="notice good"><b>Saved appearance and grooming are isolated from the draft.</b> Opening My Character renders the saved recipe. Edit Appearance creates an editable draft; Cancel discards those edits and leaves this saved profile unchanged.</div>
+        <div class="profileSavedMeta"><span>Last saved</span><b id="profileSavedAt">—</b></div>
+        <div class="profileActions"><button class="btn primary" id="editSavedBtn">Edit Appearance</button><button class="btn" id="backToDraftBtn">Back to Creator Draft</button></div>
+      </div>
+    </section>
+  </div>
+</main>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+const $=id=>document.getElementById(id), $$=s=>Array.from(document.querySelectorAll(s));
+const COMMIT='a8bc2d54ff0ac92e78ff71431b1023eda42bf482';
+const ROOT=`makehuman/data`;
+const ROUTES=[
+  path=>`https://cdn.jsdelivr.net/gh/makehumancommunity/makehuman@${COMMIT}/${ROOT}/${path}`,
+  path=>`https://raw.githubusercontent.com/makehumancommunity/makehuman/${COMMIT}/${ROOT}/${path}`
+];
+const SOURCE={base:'3dobjs/base.obj',young:{male:'targets/macrodetails/caucasian-male-young.target',female:'targets/macrodetails/caucasian-female-young.target'},old:{male:'targets/macrodetails/caucasian-male-old.target',female:'targets/macrodetails/caucasian-female-old.target'}};
+const MACRO_ROOT='targets/macrodetails/';
+const MEASURE_ROOT='targets/measure/';
+const MORPHS=[
+  {key:'shoulders',label:'Shoulder width',min:'Narrow',max:'Broad',dec:['measure-shoulder-dist-decr.target'],inc:['measure-shoulder-dist-incr.target']},
+  {key:'chest',label:'Chest circumference',min:'Narrow',max:'Full',dec:['measure-bust-circ-decr.target'],inc:['measure-bust-circ-incr.target']},
+  {key:'waist',label:'Waist circumference',min:'Slim',max:'Broad',dec:['measure-waist-circ-decr.target'],inc:['measure-waist-circ-incr.target']},
+  {key:'hips',label:'Hip circumference',min:'Narrow',max:'Broad',dec:['measure-hips-circ-decr.target'],inc:['measure-hips-circ-incr.target']},
+  {key:'upperArms',label:'Upper-arm circumference',min:'Slim',max:'Thick',dec:['measure-upperarm-circ-decr.target'],inc:['measure-upperarm-circ-incr.target']},
+  {key:'thighs',label:'Thigh circumference',min:'Slim',max:'Thick',dec:['measure-thigh-circ-decr.target'],inc:['measure-thigh-circ-incr.target']},
+  {key:'calves',label:'Calf circumference',min:'Slim',max:'Thick',dec:['measure-calf-circ-decr.target'],inc:['measure-calf-circ-incr.target']},
+  {key:'armLength',label:'Arm length',min:'Short',max:'Long',dec:['measure-upperarm-length-decr.target','measure-lowerarm-length-decr.target'],inc:['measure-upperarm-length-incr.target','measure-lowerarm-length-incr.target']},
+  {key:'legLength',label:'Leg length',min:'Short',max:'Long',dec:['measure-upperleg-height-decr.target','measure-lowerleg-height-decr.target'],inc:['measure-upperleg-height-incr.target','measure-lowerleg-height-incr.target']},
+  {key:'torsoLength',label:'Torso length',min:'Short',max:'Long',dec:['measure-napetowaist-dist-decr.target'],inc:['measure-napetowaist-dist-incr.target']},
+  {key:'neck',label:'Neck circumference',min:'Slim',max:'Thick',dec:['measure-neck-circ-decr.target'],inc:['measure-neck-circ-incr.target']}
+];
+const FACE_MORPHS=[
+  {key:'cheekbones',group:'structure',label:'Cheekbone prominence',min:'Soft',max:'Defined',gain:.82,dec:['targets/cheek/l-cheek-bones-decr.target','targets/cheek/r-cheek-bones-decr.target'],inc:['targets/cheek/l-cheek-bones-incr.target','targets/cheek/r-cheek-bones-incr.target']},
+  {key:'cheekVolume',group:'structure',label:'Cheek volume',min:'Lean',max:'Full',gain:.78,dec:['targets/cheek/l-cheek-volume-decr.target','targets/cheek/r-cheek-volume-decr.target'],inc:['targets/cheek/l-cheek-volume-incr.target','targets/cheek/r-cheek-volume-incr.target']},
+  {key:'chinWidth',group:'structure',label:'Chin width',min:'Narrow',max:'Wide',gain:.82,dec:['targets/chin/chin-width-decr.target'],inc:['targets/chin/chin-width-incr.target']},
+  {key:'chinHeight',group:'structure',label:'Chin height',min:'Short',max:'Tall',gain:.78,dec:['targets/chin/chin-height-decr.target'],inc:['targets/chin/chin-height-incr.target']},
+  {key:'chinProjection',group:'structure',label:'Chin projection',min:'Recessed',max:'Prominent',gain:.72,dec:['targets/chin/chin-prominent-decr.target'],inc:['targets/chin/chin-prominent-incr.target']},
+  {key:'eyeSize',group:'eyes',label:'Eye size',min:'Small',max:'Large',gain:.72,dec:['targets/eyes/l-eye-scale-decr.target','targets/eyes/r-eye-scale-decr.target'],inc:['targets/eyes/l-eye-scale-incr.target','targets/eyes/r-eye-scale-incr.target']},
+  {key:'eyeSpacing',group:'eyes',label:'Eye spacing',min:'Closer',max:'Wider',gain:.7,dec:['targets/eyes/l-eye-trans-in.target','targets/eyes/r-eye-trans-in.target'],inc:['targets/eyes/l-eye-trans-out.target','targets/eyes/r-eye-trans-out.target']},
+  {key:'eyeHeight',group:'eyes',label:'Eye position',min:'Lower',max:'Higher',gain:.62,dec:['targets/eyes/l-eye-trans-down.target','targets/eyes/r-eye-trans-down.target'],inc:['targets/eyes/l-eye-trans-up.target','targets/eyes/r-eye-trans-up.target']},
+  {key:'noseWidth',group:'nose',label:'Nose width',min:'Narrow',max:'Wide',gain:.78,dec:['targets/nose/nose-scale-horiz-decr.target'],inc:['targets/nose/nose-scale-horiz-incr.target']},
+  {key:'noseLength',group:'nose',label:'Nose length',min:'Short',max:'Long',gain:.72,dec:['targets/nose/nose-scale-vert-decr.target'],inc:['targets/nose/nose-scale-vert-incr.target']},
+  {key:'noseProjection',group:'nose',label:'Nose projection',min:'Flat',max:'Projected',gain:.72,dec:['targets/nose/nose-scale-depth-decr.target'],inc:['targets/nose/nose-scale-depth-incr.target']},
+  {key:'nostrilWidth',group:'nose',label:'Nostril width',min:'Narrow',max:'Wide',gain:.68,dec:['targets/nose/nose-nostrils-width-decr.target'],inc:['targets/nose/nose-nostrils-width-incr.target']},
+  {key:'mouthWidth',group:'mouth',label:'Mouth width',min:'Narrow',max:'Wide',gain:.72,dec:['targets/mouth/mouth-scale-horiz-decr.target'],inc:['targets/mouth/mouth-scale-horiz-incr.target']},
+  {key:'mouthProjection',group:'mouth',label:'Mouth projection',min:'Recessed',max:'Forward',gain:.62,dec:['targets/mouth/mouth-scale-depth-decr.target'],inc:['targets/mouth/mouth-scale-depth-incr.target']},
+  {key:'upperLip',group:'mouth',label:'Upper-lip volume',min:'Thin',max:'Full',gain:.72,dec:['targets/mouth/mouth-upperlip-volume-decr.target'],inc:['targets/mouth/mouth-upperlip-volume-incr.target']},
+  {key:'lowerLip',group:'mouth',label:'Lower-lip volume',min:'Thin',max:'Full',gain:.72,dec:['targets/mouth/mouth-lowerlip-volume-decr.target'],inc:['targets/mouth/mouth-lowerlip-volume-incr.target']}
+];
+const MORPH_BY_KEY=Object.fromEntries(MORPHS.map(m=>[m.key,m]));
+const FACE_BY_KEY=Object.fromEntries(FACE_MORPHS.map(m=>[m.key,m]));
+const defaultMorphs=Object.fromEntries(MORPHS.map(m=>[m.key,0]));
+const defaultFaceMorphs=Object.fromEntries(FACE_MORPHS.map(m=>[m.key,0]));
+const SKIN_TONES=[
+  {name:'Light neutral',hex:'#c9967d'},{name:'Light warm',hex:'#bd856d'},{name:'Warm medium',hex:'#aa715b'},{name:'Medium neutral',hex:'#97614e'},
+  {name:'Medium deep',hex:'#7d4d3d'},{name:'Deep warm',hex:'#633b2f'},{name:'Deep neutral',hex:'#4c2f29'},{name:'Dark',hex:'#38231f'}
+];
+const EYE_COLORS=[
+  {name:'Dark brown',hex:'#38261d'},{name:'Brown',hex:'#5d4938'},{name:'Hazel',hex:'#7a653d'},{name:'Amber',hex:'#8b652d'},
+  {name:'Green',hex:'#4f6951'},{name:'Blue',hex:'#4b6f86'},{name:'Gray',hex:'#69767b'}
+];
+const HAIR_STYLES=[
+  {id:'bald',name:'Bald',category:'None'},
+  {id:'short01',name:'Short 01',category:'Short'},
+  {id:'short02',name:'Short 02',category:'Short'},
+  {id:'short03',name:'Short 03',category:'Short'},
+  {id:'short04',name:'Short 04',category:'Short'},
+  {id:'afro01',name:'Afro',category:'Textured'},
+  {id:'bob01',name:'Bob 01',category:'Medium'},
+  {id:'bob02',name:'Bob 02',category:'Medium'},
+  {id:'braid01',name:'Braid',category:'Braided'},
+  {id:'ponytail01',name:'Ponytail',category:'Tied'},
+  {id:'long01',name:'Long 01',category:'Long'}
+];
+const HAIR_BY_ID=Object.fromEntries(HAIR_STYLES.map(x=>[x.id,x]));
+const HAIR_COLORS=[
+  {name:'Black',hex:'#151311'},{name:'Soft black',hex:'#27211d'},{name:'Dark brown',hex:'#3c2b22'},{name:'Brown',hex:'#644334'},
+  {name:'Auburn',hex:'#754032'},{name:'Copper',hex:'#9a5d3a'},{name:'Blonde',hex:'#b89a65'},{name:'Platinum',hex:'#d0c8b5'},{name:'Gray',hex:'#777b7d'}
+];
+const defaultAppearance={height:0,weight:0,muscle:0,age:28,skinTone:2,eyeColor:1};
+const defaultGrooming={hairStyle:'bald',hairColor:2};
+const HAIR_ASSET_ROUTES=[
+  {name:'raw GitHub · canonical',url:(id,file)=>`https://raw.githubusercontent.com/makehumancommunity/makehuman-assets/refs/heads/master/base/hair/${id}/${file}`},
+  {name:'jsDelivr',url:(id,file)=>`https://cdn.jsdelivr.net/gh/makehumancommunity/makehuman-assets@master/base/hair/${id}/${file}`},
+  {name:'Tuxfamily mirror',url:(id,file)=>`https://free.downloads.tuxfamily.net/makehuman/assets/1.1/base/hair/${id}/${file}`}
+];
+const DRAFT_STORAGE='sd_character_v132_draft';
+const PROFILE_STORAGE='sd_character_profile_v1';
+const LEGACY_STORAGE='sd_character_v131_draft';
+const deepClone=o=>JSON.parse(JSON.stringify(o));
+const normalizeState=input=>{
+  const x=input||{};
+  const out={body:x.body==='female'?'female':'male',view:x.view||'full',surface:x.surface==='clay'?'clay':'coverage',morphs:{...defaultMorphs,...(x.morphs||{})},faceMorphs:{...defaultFaceMorphs,...(x.faceMorphs||{})},faceGroup:['structure','eyes','nose','mouth'].includes(x.faceGroup)?x.faceGroup:'structure',appearance:{...defaultAppearance,...(x.appearance||{})},grooming:{...defaultGrooming,...(x.grooming||{})},camera:x.camera||null};
+  out.appearance.height=Math.max(-100,Math.min(100,Number(out.appearance.height)||0));
+  out.appearance.weight=Math.max(-100,Math.min(100,Number(out.appearance.weight)||0));
+  out.appearance.muscle=Math.max(-100,Math.min(100,Number(out.appearance.muscle)||0));
+  out.appearance.age=Math.max(18,Math.min(70,Math.round(Number(out.appearance.age)||28)));
+  out.appearance.skinTone=Math.max(0,Math.min(SKIN_TONES.length-1,Math.round(Number(out.appearance.skinTone)||0)));
+  out.appearance.eyeColor=Math.max(0,Math.min(EYE_COLORS.length-1,Math.round(Number(out.appearance.eyeColor)||0)));
+  if(!HAIR_BY_ID[out.grooming.hairStyle])out.grooming.hairStyle='bald';
+  out.grooming.hairColor=Math.max(0,Math.min(HAIR_COLORS.length-1,Math.round(Number(out.grooming.hairColor)||0)));
+  return out
+};
+let draftState=normalizeState(null),savedProfile=null;
+try{
+  const draft=JSON.parse(localStorage.getItem(DRAFT_STORAGE)||'null');
+  const legacy=JSON.parse(localStorage.getItem(LEGACY_STORAGE)||'null');
+  const v12=JSON.parse(localStorage.getItem('sd_character_v12_draft')||'null');
+  const v111=JSON.parse(localStorage.getItem('sd_character_v111_sticky_creator')||'null');
+  const v11=JSON.parse(localStorage.getItem('sd_character_v11_face_creator')||'null');
+  draftState=normalizeState(draft||legacy||v12||v111||v11||null);
+  savedProfile=JSON.parse(localStorage.getItem(PROFILE_STORAGE)||'null');
+}catch{}
+let state=draftState,currentScreen='creator',draftBeforeProfileView=null,editingExisting=false;
+function save(){if(currentScreen!=='creator')return;draftState=state;try{localStorage.setItem(DRAFT_STORAGE,JSON.stringify(draftState))}catch{}updateProfileBar()}
+function makeRecipe(src=state){const x=normalizeState(src);return {body:x.body,view:'full',surface:'coverage',morphs:{...x.morphs},faceMorphs:{...x.faceMorphs},faceGroup:x.faceGroup,appearance:{...x.appearance},grooming:{...x.grooming},camera:null}}
+function heightCm(src=state){const base=src.body==='female'?165:178;const span=src.body==='female'?13:14;return Math.round(base+(Number(src.appearance?.height||0)/100)*span)}
+function buildLabel(src=state){const w=Number(src.appearance?.weight||0),m=Number(src.appearance?.muscle||0);if(m>45&&w<35)return'Athletic';if(m>45)return'Powerful';if(w>45)return'Heavy';if(w<-45)return'Lean';if(m<-40)return'Soft';return'Average'}
+function characterId(){return 'char_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7)}
+function saveCharacterProfile(){
+  const now=new Date().toISOString(),existing=savedProfile;
+  savedProfile={schema:2,id:existing?.id||characterId(),createdAt:existing?.createdAt||now,updatedAt:now,recipe:makeRecipe(state)};
+  try{localStorage.setItem(PROFILE_STORAGE,JSON.stringify(savedProfile))}catch{}
+  editingExisting=false;updateProfileBar();openMyCharacter(true)
+}
+function progress(p,title,sub){$('loadBar').style.width=Math.max(5,Math.min(100,p))+'%';if(title)$('loadingTitle').textContent=title;if(sub)$('loadingSub').textContent=sub}
+function showError(err){$('sourceBadge').className='sourceBadge bad';$('sourceBadge').textContent='SOURCE ERROR';$('loading').classList.remove('hide');$('loadingTitle').textContent='Character source could not load';$('loadingSub').textContent=(err?.message||String(err))+' — the accepted human base is not replaced by a fallback avatar.';$('diagRoute').textContent='Failed';console.error('[Sol Dorado v1.3.2]',err)}
+function closeSidebar(){$('sidebar').classList.remove('open');$('sidebarBackdrop').classList.remove('on');document.body.style.overflow=''}
+function openSidebar(){$('sidebar').classList.add('open');$('sidebarBackdrop').classList.add('on');if(innerWidth<=760)document.body.style.overflow='hidden'}
+$('menuBtn').addEventListener('click',()=>$('sidebar').classList.contains('open')?closeSidebar():openSidebar());$('sidebarBackdrop').addEventListener('click',closeSidebar);document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSidebar()});window.addEventListener('resize',()=>{if(innerWidth>760)closeSidebar()});
+$$('[data-nav]').forEach(b=>b.addEventListener('click',()=>{showCreatorScreen(true);focusControlSection(b.dataset.nav);closeSidebar()}));
+
+async function fetchText(path,label){let last;for(let i=0;i<ROUTES.length;i++){const url=ROUTES[i](path);try{const r=await fetch(url,{mode:'cors',cache:'force-cache'});if(!r.ok)throw new Error(`${label}: HTTP ${r.status}`);const text=await r.text();if(text.length<40)throw new Error(`${label}: source response was unexpectedly small`);$('diagRoute').textContent=i===0?'jsDelivr · pinned MakeHuman commit':'raw GitHub · pinned MakeHuman commit';return text}catch(e){last=e;console.warn('[Sol Dorado] source route failed',url,e)}}throw last||new Error(`${label} could not be fetched`)}
+
+async function fetchHairText(id,file,label){
+  const failures=[];
+  for(const route of HAIR_ASSET_ROUTES){
+    const url=route.url(id,file);
+    try{
+      const r=await fetch(url,{cache:'no-store',credentials:'omit',redirect:'follow'});
+      if(!r.ok)throw new Error(`HTTP ${r.status}`);
+      const text=await r.text();
+      if(text.length<20)throw new Error('empty response');
+      const head=text.slice(0,180).toLowerCase();
+      if(head.includes('<!doctype html')||head.includes('<html'))throw new Error('HTML returned instead of asset text');
+      if(head.includes('version https://git-lfs.github.com/spec/v1'))throw new Error('Git LFS pointer returned instead of asset data');
+      return {text,url,route:route.name};
+    }catch(e){
+      failures.push(`${route.name}: ${e?.message||e}`);
+      console.warn('[Sol Dorado] hair route failed',url,e);
+    }
+  }
+  throw new Error(`${label} failed — ${failures.join(' · ')}`);
+}
+function parseMHCLO(text){
+  const out={name:'',objFile:'',materialFile:'',scales:[null,null,null],mappings:[],tags:[]};let mode='';
+  for(const raw of text.split(/\r?\n/)){const line=raw.trim();if(!line||line.startsWith('#'))continue;const a=line.split(/\s+/),key=a[0];
+    if(key==='name'){out.name=a.slice(1).join(' ');mode=''}
+    else if(key==='tag'){out.tags.push(a.slice(1).join(' '));mode=''}
+    else if(key==='obj_file'){out.objFile=a[1];mode=''}
+    else if(key==='material'){out.materialFile=a[1];mode=''}
+    else if(key==='x_scale'||key==='y_scale'||key==='z_scale'){const dim=key[0]==='x'?0:key[0]==='y'?1:2;out.scales[dim]=[+a[1],+a[2],+a[3]];mode=''}
+    else if(key==='verts'){mode='verts'}
+    else if(key==='weights'||key==='delete_verts'){mode=key}
+    else if(mode==='verts'&&/^-?\d+$/.test(key)){
+      if(a.length===1)out.mappings.push({v:[+a[0],0,0],w:[1,0,0],o:[0,0,0]});
+      else if(a.length>=6)out.mappings.push({v:[+a[0],+a[1],+a[2]],w:[+a[3],+a[4],+a[5]],o:[+(a[6]||0),+(a[7]||0),+(a[8]||0)]});
+    }
+  }
+  if(!out.objFile||out.mappings.length<20)throw new Error(`Hair MHCLO parse failed (${out.mappings.length} mappings)`);return out
+}
+function parseAccessoryOBJ(text){
+  const verts=[],uvs=[],tris=[];let maxFaceVertex=-1;
+  for(const raw of text.split(/\r?\n/)){if(raw.startsWith('v ')){const a=raw.trim().split(/\s+/);verts.push([+a[1],+a[2],+a[3]])}else if(raw.startsWith('vt ')){const a=raw.trim().split(/\s+/);uvs.push([+a[1],+a[2]])}else if(raw.startsWith('f ')){const parts=raw.trim().split(/\s+/).slice(1).map(x=>{const q=x.split('/');let vi=+q[0],ti=q[1]?+q[1]:0;vi=vi<0?verts.length+vi:vi-1;ti=ti<0?uvs.length+ti:ti-1;maxFaceVertex=Math.max(maxFaceVertex,vi);return[vi,ti]});for(let i=1;i<parts.length-1;i++)tris.push([parts[0],parts[i],parts[i+1]])}}
+  if(verts.length<20||tris.length<20)throw new Error(`Hair OBJ parse failed (${verts.length} vertices, ${tris.length} triangles)`);return{verts,uvs,tris,maxFaceVertex}
+}
+function parseMHMAT(text){const out={diffuseTexture:'',opacity:1,transparent:true,backfaceCull:false};for(const raw of text.split(/\r?\n/)){const a=raw.trim().split(/\s+/),k=a[0];if(k==='diffuseTexture')out.diffuseTexture=a.slice(1).join(' ');else if(k==='opacity')out.opacity=+a[1];else if(k==='transparent')out.transparent=(a[1]||'').toLowerCase()==='true';else if(k==='backfaceCull')out.backfaceCull=(a[1]||'').toLowerCase()==='true'}return out}
+function fitMHCLO(mapping,deformed,scales){
+  const scale=[1,1,1];for(let d=0;d<3;d++){const q=scales[d];if(q&&deformed[q[0]]&&deformed[q[1]]&&Math.abs(q[2])>.000001)scale[d]=Math.abs(deformed[q[0]][d]-deformed[q[1]][d])/Math.abs(q[2])}
+  return mapping.map(m=>{const p=[0,0,0];for(let k=0;k<3;k++){const b=deformed[m.v[k]];if(!b)continue;p[0]+=b[0]*m.w[k];p[1]+=b[1]*m.w[k];p[2]+=b[2]*m.w[k]}p[0]+=m.o[0]*scale[0];p[1]+=m.o[1]*scale[1];p[2]+=m.o[2]*scale[2];return p})
+}
+function buildAccessoryGeometry(obj,fitted){
+  const pos=[],uv=[],idx=[],map=new Map();
+  for(const tri of obj.tris){if(tri.some(([vi])=>!fitted[vi]))continue;for(const [vi,ti] of tri){const key=vi+'/'+ti;let oi=map.get(key);if(oi===undefined){oi=map.size;map.set(key,oi);const p=fitted[vi],t=obj.uvs[ti]||[0,0];pos.push(p[0],p[1],p[2]);uv.push(t[0],t[1])}idx.push(oi)}}
+  if(pos.length<60)throw new Error('Hair geometry mapping produced too few vertices');const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();g.computeBoundingBox();g.computeBoundingSphere();return g
+}
+
+function parseBaseOBJ(text){
+  const verts=[],uvs=[],tris=[],eyeTris={left:[],right:[]};let group='';
+  for(const raw of text.split(/\r?\n/)){
+    if(raw.startsWith('v ')){const a=raw.trim().split(/\s+/);verts.push([+a[1],+a[2],+a[3]])}
+    else if(raw.startsWith('vt ')){const a=raw.trim().split(/\s+/);uvs.push([+a[1],+a[2]])}
+    else if(raw.startsWith('g ')){group=raw.slice(2).trim()}
+    else if(raw.startsWith('f ')){
+      const items=raw.trim().split(/\s+/).slice(1).map(s=>{const [v,t]=s.split('/');return[(+v)-1,t?(+t)-1:-1]});
+      const out=group==='body'?tris:group==='helper-l-eye'?eyeTris.left:group==='helper-r-eye'?eyeTris.right:null;
+      if(out)for(let i=1;i<items.length-1;i++)out.push([items[0],items[i],items[i+1]])
+    }
+  }
+  if(verts.length<10000||tris.length<10000)throw new Error(`MakeHuman OBJ parse failed (${verts.length} vertices, ${tris.length} triangles)`);
+  if(eyeTris.left.length<40||eyeTris.right.length<40)throw new Error(`MakeHuman native eye helpers were not found (${eyeTris.left.length}/${eyeTris.right.length} triangles)`);
+  return {verts,uvs,tris,eyeTris};
+}
+function parseTarget(text,label='target'){
+  const d=[];for(const raw of text.split(/\r?\n/)){const s=raw.trim();if(!s||s[0]==='#')continue;const a=s.split(/\s+/);if(a.length>=4){const row=[+a[0],+a[1],+a[2],+a[3]];if(row.every(Number.isFinite))d.push(row)}}
+  if(d.length<8)throw new Error(`${label} parse failed (${d.length} deltas)`);return d
+}
+function buildGeometry(base,weightedTargets){
+  const v=base.verts.map(p=>p.slice());
+  for(const entry of weightedTargets){const w=entry.weight;if(!w)continue;for(const [i,x,y,z] of entry.data){if(v[i]){v[i][0]+=x*w;v[i][1]+=y*w;v[i][2]+=z*w}}}
+  const vn=v.map(()=>[0,0,0]);
+  for(const tri of base.tris){const a=v[tri[0][0]],b=v[tri[1][0]],c=v[tri[2][0]];const ab=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],ac=[c[0]-a[0],c[1]-a[1],c[2]-a[2]];const n=[ab[1]*ac[2]-ab[2]*ac[1],ab[2]*ac[0]-ab[0]*ac[2],ab[0]*ac[1]-ab[1]*ac[0]];for(const [vi] of tri){vn[vi][0]+=n[0];vn[vi][1]+=n[1];vn[vi][2]+=n[2]}}
+  for(const n of vn){const l=Math.hypot(n[0],n[1],n[2])||1;n[0]/=l;n[1]/=l;n[2]/=l}
+  const pos=[],uv=[],nor=[],idx=[],map=new Map();
+  for(const tri of base.tris){for(const [vi,ti] of tri){const key=vi+'/'+ti;let oi=map.get(key);if(oi===undefined){oi=map.size;map.set(key,oi);const p=v[vi],t=base.uvs[ti]||[0,0],n=vn[vi];pos.push(p[0],p[1],p[2]);uv.push(t[0],t[1]);nor.push(n[0],n[1],n[2])}idx.push(oi)}}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));g.setIndex(idx);g.computeBoundingBox();g.computeBoundingSphere();return {geometry:g,deformed:v}
+}
+
+function buildAuxGeometry(deformed,tris){
+  const pos=[],idx=[],map=new Map();
+  for(const tri of tris){
+    for(const [vi] of tri){
+      let oi=map.get(vi);
+      if(oi===undefined){
+        oi=map.size;map.set(vi,oi);
+        const p=deformed[vi];pos.push(p[0],p[1],p[2]);
+      }
+      idx.push(oi)
+    }
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setIndex(idx);
+  g.computeVertexNormals();g.computeBoundingBox();g.computeBoundingSphere();
+  return g
+}
+
+const VIEW_PRESETS={
+  full:{label:'FULL BODY',targetX:0,targetY:1.02,distance:4.42,pitch:0},
+  upper:{label:'UPPER BODY',targetX:0,targetY:1.42,distance:2.62,pitch:0},
+  face:{label:'FACE',targetX:0,targetY:1.73,distance:1.38,pitch:0},
+  hands:{label:'HANDS',targetX:0,targetY:1.13,distance:2.18,pitch:-.02},
+  feet:{label:'FEET',targetX:0,targetY:.22,distance:1.75,pitch:.04}
+};
+
+class CharacterViewer{
+  constructor(canvas){
+    this.canvas=canvas;this.stage=$('stage');this.scene=new THREE.Scene();this.scene.background=new THREE.Color(0x182126);this.camera=new THREE.PerspectiveCamera(28,1,.01,50);this.renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});this.renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.75));this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.02;this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+    this.root=new THREE.Group();this.scene.add(this.root);this.model=null;this.base=null;this.deformed=null;this.targetCache=new Map();this.hairCache=new Map();this.textureCache=new Map();this.hairSeq=0;this.surface=state.surface||'coverage';this.view=state.view||'full';this.rebuildSeq=0;this.pointerMap=new Map();this.pinchBase=null;this.cameraState=state.camera||{...VIEW_PRESETS[this.view],yaw:0};
+    if(!Number.isFinite(this.cameraState.yaw))this.cameraState.yaw=0;
+    this.initLights();this.initFloor();this.observe();this.bindCamera();this.applyCamera(false);this.animate();
+  }
+  initLights(){this.scene.add(new THREE.HemisphereLight(0xd9e1e4,0x263038,1.15));const key=new THREE.DirectionalLight(0xffe0c7,3.0);key.position.set(3.8,5.7,5.4);key.castShadow=true;key.shadow.mapSize.set(1536,1536);this.scene.add(key);const fill=new THREE.DirectionalLight(0xbdd7e4,1.25);fill.position.set(-4,3.5,3);this.scene.add(fill);const rim=new THREE.DirectionalLight(0xffd0b8,1.0);rim.position.set(-1.5,4,-4);this.scene.add(rim)}
+  initFloor(){const m=new THREE.MeshStandardMaterial({color:0x242e33,roughness:.92,metalness:0});const f=new THREE.Mesh(new THREE.CircleGeometry(3.2,64),m);f.rotation.x=-Math.PI/2;f.receiveShadow=true;this.scene.add(f);this.floor=f}
+  observe(){const p=this.canvas.parentElement;const go=()=>{const w=Math.max(1,p.clientWidth),h=Math.max(1,p.clientHeight);this.renderer.setSize(w,h,false);this.camera.aspect=w/h;this.camera.updateProjectionMatrix()};go();this.ro=new ResizeObserver(go);this.ro.observe(p)}
+  clampCamera(){const c=this.cameraState;c.distance=Math.max(.58,Math.min(6.5,c.distance));c.pitch=Math.max(-.34,Math.min(.34,c.pitch||0));c.targetX=Math.max(-.7,Math.min(.7,c.targetX||0));c.targetY=Math.max(.08,Math.min(1.95,c.targetY||1.02));if(!Number.isFinite(c.yaw))c.yaw=0}
+  applyCamera(persist=true){this.clampCamera();const c=this.cameraState;const horizontal=Math.cos(c.pitch)*c.distance;this.camera.position.set(c.targetX,c.targetY+Math.sin(c.pitch)*c.distance,horizontal);this.camera.lookAt(c.targetX,c.targetY,0);this.root.rotation.y=c.yaw;this.updateCameraUI();if(persist){state.camera={...c};save()}}
+  bindCamera(){
+    const canvas=this.canvas;
+    const point=e=>({x:e.clientX,y:e.clientY});
+    const recalcPinch=()=>{if(this.pointerMap.size!==2){this.pinchBase=null;return}const a=[...this.pointerMap.values()];this.pinchBase={dist:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),cx:(a[0].x+a[1].x)/2,cy:(a[0].y+a[1].y)/2}}
+    canvas.addEventListener('pointerdown',e=>{this.pointerMap.set(e.pointerId,point(e));canvas.setPointerCapture?.(e.pointerId);this.stage.classList.add('cameraBusy');recalcPinch()});
+    canvas.addEventListener('pointermove',e=>{if(!this.pointerMap.has(e.pointerId))return;const old=this.pointerMap.get(e.pointerId);const before=this.pinchBase;this.pointerMap.set(e.pointerId,point(e));if(this.pointerMap.size===1){const dx=e.clientX-old.x,dy=e.clientY-old.y;this.cameraState.yaw+=dx*.008;this.cameraState.pitch+=dy*.0045;this.applyCamera(false);this.markCameraUsed()}else if(this.pointerMap.size===2){const a=[...this.pointerMap.values()];const dist=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)||1,cx=(a[0].x+a[1].x)/2,cy=(a[0].y+a[1].y)/2;if(before&&before.dist>2){this.cameraState.distance*=before.dist/dist;const panScale=this.cameraState.distance*.0019;this.cameraState.targetX-=(cx-before.cx)*panScale;this.cameraState.targetY+=(cy-before.cy)*panScale;this.applyCamera(false);this.markCameraUsed()}this.pinchBase={dist,cx,cy}}});
+    const end=e=>{this.pointerMap.delete(e.pointerId);recalcPinch();if(!this.pointerMap.size){this.stage.classList.remove('cameraBusy');state.camera={...this.cameraState};save()}};canvas.addEventListener('pointerup',end);canvas.addEventListener('pointercancel',end);
+    canvas.addEventListener('wheel',e=>{e.preventDefault();this.cameraState.distance*=Math.exp(e.deltaY*.00115);this.applyCamera();this.markCameraUsed()},{passive:false});
+  }
+  markCameraUsed(){$('gateCamera').classList.add('ready')}
+  zoomBy(factor){this.cameraState.distance*=factor;this.applyCamera();this.markCameraUsed()}
+  front(){this.cameraState.yaw=0;this.applyCamera();this.markCameraUsed()}
+  resetCamera(){this.setView('full',true)}
+  setView(v,resetYaw=false){const p=VIEW_PRESETS[v]||VIEW_PRESETS.full;this.view=v;state.view=v;this.cameraState={...this.cameraState,...p,yaw:resetYaw?0:(this.cameraState.yaw||0)};this.applyCamera();this.updateUI()}
+  updateCameraUI(){const c=this.cameraState,p=VIEW_PRESETS[this.view]||VIEW_PRESETS.full;const pct=Math.round((p.distance/c.distance)*100);$('zoomReadout').textContent=Math.max(20,Math.min(600,pct))+'%';$('cameraReadout').firstChild.nodeValue='VIEW ';$('cameraReadout').querySelector('b').textContent=p.label;$('metaView').textContent=(p.label.charAt(0)+p.label.slice(1).toLowerCase())+' · '+Math.max(20,Math.min(600,pct))+'%'}
+  async boot(body){const t0=performance.now();progress(10,'Loading MakeHuman HM08…','Fetching the pinned CC0 basemesh.');const baseText=await fetchText(SOURCE.base,'HM08 basemesh');progress(40,'Parsing human topology…','Preserving the accepted HM08 body surface.');this.base=parseBaseOBJ(baseText);progress(55,'Loading human base…',`Applying the ${body} adult macro foundation.`);await this.rebuild(true);$('diagTime').textContent=Math.round(performance.now()-t0)+' ms first build';$('diagRenderer').textContent=this.renderer.capabilities.isWebGL2?'WebGL 2 · Three.js r160':'WebGL · Three.js r160';this.prefetchMorphTargets()}
+  async getTarget(path,label=path){if(this.targetCache.has(path))return await this.targetCache.get(path);const promise=(async()=>{const txt=await fetchText(path,label);const d=parseTarget(txt,label);this.updateMorphCacheDiag();return d})();this.targetCache.set(path,promise);try{const d=await promise;this.targetCache.set(path,d);this.updateMorphCacheDiag();return d}catch(e){this.targetCache.delete(path);throw e}}
+  updateMorphCacheDiag(){let body=0,face=0;for(const [k,v] of this.targetCache){if(!Array.isArray(v))continue;if(k.startsWith(MEASURE_ROOT))body++;else if(k.startsWith('targets/')&&!k.includes('/macrodetails/'))face++}$('diagMorphs').textContent=`${body} body · ${face} face targets cached`}
+  async prefetchMorphTargets(){const paths=[...new Set(MORPHS.flatMap(m=>[...m.dec,...m.inc]).map(f=>MEASURE_ROOT+f))];let done=0,failed=0;for(const path of paths){try{await this.getTarget(path,'MakeHuman measurement target')}catch(e){failed++;console.warn('[Sol Dorado] background morph prefetch failed',path,e)}done++;if(done%3===0||done===paths.length){const complete=done===paths.length;$('morphStatus').className='morphStatus '+(complete&&failed===0?'ready':'busy');$('morphStatusText').textContent=complete?(failed?`${paths.length-failed}/${paths.length} body targets ready · ${failed} will retry on demand.`:'All body measurement targets cached for live editing.'):`Preparing body targets… ${done}/${paths.length}`}}}
+  async collectWeightedTargets(){
+    const out=[],sex=state.body,a=state.appearance||defaultAppearance,age=Math.max(18,Math.min(70,Number(a.age)||28));
+    const oldWeight=Math.max(0,Math.min(1,(age-32)/38)),youngWeight=1-oldWeight;
+    const young=await this.getTarget(SOURCE.young[sex],`${sex} young macro target`);if(youngWeight>.001)out.push({data:young,weight:youngWeight});
+    if(oldWeight>.001){const old=await this.getTarget(SOURCE.old[sex],`${sex} old macro target`);out.push({data:old,weight:oldWeight})}
+    const weightRaw=Number(a.weight||0);if(Math.abs(weightRaw)>.001){const edge=weightRaw>0?'maxweight':'minweight';const path=`${MACRO_ROOT}universal-${sex}-young-averagemuscle-${edge}.target`;out.push({data:await this.getTarget(path,'MakeHuman weight macro'),weight:(Math.abs(weightRaw)/100)*.82})}
+    const muscleRaw=Number(a.muscle||0);if(Math.abs(muscleRaw)>.001){const edge=muscleRaw>0?'maxmuscle':'minmuscle';const path=`${MACRO_ROOT}universal-${sex}-young-${edge}-averageweight.target`;out.push({data:await this.getTarget(path,'MakeHuman muscle macro'),weight:(Math.abs(muscleRaw)/100)*.78})}
+    for(const m of MORPHS){const raw=Number(state.morphs[m.key]||0);if(Math.abs(raw)<.001)continue;const files=raw>0?m.inc:m.dec,weight=Math.abs(raw)/100;for(const f of files){out.push({data:await this.getTarget(MEASURE_ROOT+f,m.label),weight})}}
+    for(const m of FACE_MORPHS){const raw=Number(state.faceMorphs[m.key]||0);if(Math.abs(raw)<.001)continue;const files=raw>0?m.inc:m.dec,weight=(Math.abs(raw)/100)*(m.gain||1);for(const path of files){out.push({data:await this.getTarget(path,m.label),weight})}}
+    return out
+  }
+  clearModel(){if(this.model){this.root.remove(this.model);this.model.geometry.dispose();this.model.material.dispose();this.model=null}this.root.children.filter(o=>o.userData.eyePart||o.userData.assetKind).forEach(o=>{this.root.remove(o);o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>m?.dispose());else o.material?.dispose()})}
+  async rebuild(showLoader=false){if(!this.base)throw new Error('Base topology is not loaded');const seq=++this.rebuildSeq;if(showLoader){$('loading').classList.remove('hide');progress(62,'Building character geometry…','Applying active MakeHuman body, face and grooming state.')}const t0=performance.now();const targets=await this.collectWeightedTargets();if(seq!==this.rebuildSeq)return;const built=buildGeometry(this.base,targets);if(seq!==this.rebuildSeq)return;const oldYaw=this.cameraState.yaw;this.deformed=built.deformed;this.clearModel();this.model=new THREE.Mesh(built.geometry,this.makeMaterial());this.model.castShadow=true;this.root.add(this.model);this.normalize();this.addEyes();this.applySurface(this.surface);await this.addHair(false);if(seq!==this.rebuildSeq)return;this.cameraState.yaw=oldYaw;this.applyCamera(false);$('sourceBadge').className='sourceBadge live';$('sourceBadge').textContent='HM08 · LIVE';$('previewTitle').textContent=(state.body==='male'?'Male':'Female')+' character base';$('previewSub').textContent='MakeHuman HM08 · appearance + body + face + grooming';$('diagGeometry').textContent=`${this.base.verts.length.toLocaleString()} source verts · ${this.base.tris.length.toLocaleString()} body triangles`;$('diagTarget').textContent=`${targets[0].data.length.toLocaleString()} ${state.body} base deltas · ${targets.length-1} active edit passes`;$('diagTime').textContent=Math.round(performance.now()-t0)+' ms last rebuild';if(showLoader)$('loading').classList.add('hide');$('gateMorph').classList.toggle('ready',Object.values(state.morphs).some(v=>Math.abs(Number(v)||0)>0));$('gateFace').classList.toggle('ready',Object.values(state.faceMorphs).some(v=>Math.abs(Number(v)||0)>0));$('gateHair').classList.toggle('ready',(state.grooming?.hairStyle||'bald')!=='bald');this.updateUI()}
+  normalize(){this.model.geometry.computeBoundingBox();const b=this.model.geometry.boundingBox,s=new THREE.Vector3(),c=new THREE.Vector3();b.getSize(s);b.getCenter(c);const stature=1+(Number(state.appearance?.height||0)/100)*.085;this.scale=(2.02*stature)/Math.max(s.y,.001);this.model.scale.setScalar(this.scale);this.model.position.set(-c.x*this.scale,-b.min.y*this.scale,-c.z*this.scale);this.model.updateMatrixWorld(true);this.floor.position.y=-.008}
+  makeMaterial(){return new THREE.MeshPhysicalMaterial({color:0xffffff,roughness:.64,metalness:0,sheen:.08,sheenColor:new THREE.Color(0xffd9c5),clearcoat:0,vertexColors:true})}
+  applyCoverageColors(mode){if(!this.model)return;const g=this.model.geometry,p=g.getAttribute('position');const tone=SKIN_TONES[state.appearance?.skinTone]||SKIN_TONES[2],skin=new THREE.Color(tone.hex),clay=new THREE.Color(0xa9a39d);const base=mode==='clay'?clay:skin;const colors=new Float32Array(p.count*3);for(let i=0;i<p.count;i++){colors[i*3]=base.r;colors[i*3+1]=base.g;colors[i*3+2]=base.b}g.setAttribute('color',new THREE.BufferAttribute(colors,3));g.attributes.color.needsUpdate=true}
+  applySurface(mode){if(mode!=='coverage'&&mode!=='clay')mode='coverage';this.surface=mode;state.surface=mode;save();if(!this.model)return;this.applyCoverageColors(mode);this.model.material.wireframe=false;this.model.material.roughness=mode==='clay'?.78:.64;this.model.material.sheen=mode==='clay'?0:.08;this.updateUI()}
+  addEyes(){
+    // Use MakeHuman's native helper-eye meshes. These are authored around the HM08 eye
+    // joints and receive the same macro/measurement target deltas as the face, so there
+    // is no guessed landmark position and no synthetic globe floating in front of the lids.
+    const eyeDefs=[
+      {tris:this.base.eyeTris.left,key:'L'},
+      {tris:this.base.eyeTris.right,key:'R'}
+    ];
+    const whiteMat=new THREE.MeshPhysicalMaterial({color:0xf1eee8,roughness:.38,metalness:0,clearcoat:.12,clearcoatRoughness:.22});
+    const limbalMat=new THREE.MeshStandardMaterial({color:0x332a25,roughness:.72,side:THREE.DoubleSide});
+    const irisMat=new THREE.MeshPhysicalMaterial({color:new THREE.Color((EYE_COLORS[state.appearance?.eyeColor]||EYE_COLORS[1]).hex),roughness:.42,metalness:0,clearcoat:.08,side:THREE.DoubleSide});
+    const pupilMat=new THREE.MeshStandardMaterial({color:0x090909,roughness:.7,side:THREE.DoubleSide});
+    const highlightMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.62,depthWrite:false});
+    for(const def of eyeDefs){
+      const g=buildAuxGeometry(this.deformed,def.tris);
+      const eye=new THREE.Mesh(g,whiteMat.clone());
+      eye.userData.eyePart=true;eye.userData.eyeGlobe=true;this.root.add(eye);
+
+      const b=g.boundingBox,c=new THREE.Vector3();b.getCenter(c);
+      const size=new THREE.Vector3();b.getSize(size);
+      // +Z is the forward direction of the HM08 face. Put iris elements on the actual
+      // native eye surface, not in front of the facial landmark mesh.
+      const frontZ=b.max.z+.0012;
+      const irisR=Math.max(.025,Math.min(.052,Math.min(size.x,size.y)*.145));
+      const ring=new THREE.Mesh(new THREE.CircleGeometry(irisR*1.08,42),limbalMat.clone());
+      ring.position.set(c.x,c.y,frontZ);ring.userData.eyePart=true;this.root.add(ring);
+      const iris=new THREE.Mesh(new THREE.CircleGeometry(irisR,42),irisMat.clone());
+      iris.position.set(c.x,c.y,frontZ+.0008);iris.userData.eyePart=true;iris.userData.eyeIris=true;this.root.add(iris);
+      const pupil=new THREE.Mesh(new THREE.CircleGeometry(irisR*.39,36),pupilMat.clone());
+      pupil.position.set(c.x,c.y,frontZ+.0016);pupil.userData.eyePart=true;this.root.add(pupil);
+      const hi=new THREE.Mesh(new THREE.CircleGeometry(irisR*.13,20),highlightMat.clone());
+      hi.position.set(c.x-irisR*.22,c.y+irisR*.24,frontZ+.0024);hi.userData.eyePart=true;this.root.add(hi);
+    }
+    this.syncEyeTransform()
+  }
+  syncEyeTransform(){for(const o of this.root.children.filter(x=>x.userData.eyePart)){o.scale.multiplyScalar(this.scale);o.position.set(o.position.x*this.scale+this.model.position.x,o.position.y*this.scale+this.model.position.y,o.position.z*this.scale+this.model.position.z)}}
+  removeHair(){for(const o of this.root.children.filter(x=>x.userData.assetKind==='hair')){this.root.remove(o);o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>m?.dispose());else o.material?.dispose()}}
+  async getHairAsset(id){if(this.hairCache.has(id))return await this.hairCache.get(id);const promise=(async()=>{const mh=await fetchHairText(id,`${id}.mhclo`,`${id} MHCLO`),meta=parseMHCLO(mh.text);const objSource=await fetchHairText(id,meta.objFile||`${id}.obj`,`${id} OBJ`),obj=parseAccessoryOBJ(objSource.text);if(obj.maxFaceVertex>=meta.mappings.length)throw new Error(`${id}: MHCLO/OBJ mismatch — face vertex ${obj.maxFaceVertex+1}, mappings ${meta.mappings.length}`);let mat={diffuseTexture:'',opacity:1,transparent:true,backfaceCull:false};if(meta.materialFile){try{const m=await fetchHairText(id,meta.materialFile,`${id} material`);mat=parseMHMAT(m.text)}catch(e){console.warn('[Sol Dorado] hair material fallback',id,e)}}const data={id,meta,obj,material:mat,route:mh.url,routeName:mh.route,objRouteName:objSource.route};this.hairCache.set(id,data);this.updateHairDiag();return data})();this.hairCache.set(id,promise);try{return await promise}catch(e){this.hairCache.delete(id);this.updateHairDiag();throw e}}
+  updateHairDiag(){let n=0;for(const v of this.hairCache.values())if(v&&typeof v==='object'&&!('then'in v))n++;if($('diagAssets'))$('diagAssets').textContent=`${n} cached`}
+  async getHairTexture(id,file){if(!file)return null;const key=id+'/'+file;if(this.textureCache.has(key))return await this.textureCache.get(key);const urls=HAIR_ASSET_ROUTES.map(r=>({name:r.name,url:r.url(id,file)}));const promise=new Promise((resolve,reject)=>{const loader=new THREE.TextureLoader();loader.setCrossOrigin?.('anonymous');let i=0;const fails=[];const next=()=>{if(i>=urls.length){reject(new Error(`${id} texture could not load — ${fails.join(' · ')}`));return}const item=urls[i++];loader.load(item.url,t=>{t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;resolve(t)},undefined,()=>{fails.push(item.name);next()})};next()});this.textureCache.set(key,promise);try{const t=await promise;this.textureCache.set(key,t);return t}catch(e){this.textureCache.delete(key);throw e}}
+  syncAccessoryTransform(o){if(!this.model)return;o.scale.setScalar(this.scale);o.position.copy(this.model.position)}
+  async addHair(showStatus=true){const style=state.grooming?.hairStyle||'bald',seq=++this.hairSeq;this.removeHair();if(style==='bald'){if(showStatus&&$('hairAssetStatusText')){$('hairAssetStatus').className='morphStatus ready';$('hairAssetStatusText').textContent='Bald style active — no mesh loaded.'}this.updateHairDiag();return}if(showStatus&&$('hairAssetStatusText')){$('hairAssetStatus').className='morphStatus busy';$('hairAssetStatusText').textContent=`Loading ${HAIR_BY_ID[style]?.name||style}…`}try{const data=await this.getHairAsset(style);if(seq!==this.hairSeq||style!==(state.grooming?.hairStyle||'bald'))return;const fitted=fitMHCLO(data.meta.mappings,this.deformed,data.meta.scales),g=buildAccessoryGeometry(data.obj,fitted);let tex=null;if(data.material.diffuseTexture){try{tex=await this.getHairTexture(style,data.material.diffuseTexture)}catch(e){console.warn('[Sol Dorado] texture load fallback',style,e)}}if(seq!==this.hairSeq){g.dispose();return}const hc=HAIR_COLORS[state.grooming?.hairColor]||HAIR_COLORS[2],material=new THREE.MeshStandardMaterial({color:new THREE.Color(hc.hex),map:tex,roughness:.72,metalness:0,transparent:true,alphaTest:.12,opacity:Number.isFinite(data.material.opacity)?data.material.opacity:1,side:data.material.backfaceCull?THREE.FrontSide:THREE.DoubleSide,depthWrite:true});const mesh=new THREE.Mesh(g,material);mesh.castShadow=true;mesh.userData.assetKind='hair';mesh.userData.assetId=style;this.root.add(mesh);this.syncAccessoryTransform(mesh);$('gateHair').classList.add('ready');if(showStatus&&$('hairAssetStatusText')){$('hairAssetStatus').className='morphStatus ready';$('hairAssetStatusText').textContent=`${HAIR_BY_ID[style]?.name||style} fitted to HM08 · ${data.routeName||'asset route'}.`}this.updateHairDiag()}catch(e){if(showStatus&&$('hairAssetStatusText')){$('hairAssetStatus').className='morphStatus';$('hairAssetStatusText').textContent=`${HAIR_BY_ID[style]?.name||style} failed: ${e?.message||e}`}console.error('[Sol Dorado] hair asset failed',style,e)}}
+  updateHairColor(){const c=new THREE.Color((HAIR_COLORS[state.grooming?.hairColor]||HAIR_COLORS[2]).hex);for(const o of this.root.children){if(o.userData.assetKind==='hair'&&o.material?.color)o.material.color.copy(c)}}
+  updateUI(){$$('[data-body]').forEach(b=>b.classList.toggle('on',b.dataset.body===state.body));$$('[data-view]').forEach(b=>b.classList.toggle('on',b.dataset.view===this.view));$$('[data-surface]').forEach(b=>b.classList.toggle('on',b.dataset.surface===this.surface));$('metaRender').textContent=this.surface==='clay'?'Studio clay':'Natural skin';this.updateCameraUI();updateMorphUI();updateFaceUI();updateCoreUI();updateGroomingUI()}
+  updateEyeColor(){const color=new THREE.Color((EYE_COLORS[state.appearance?.eyeColor]||EYE_COLORS[1]).hex);for(const o of this.root.children){if(o.userData.eyeIris&&o.material?.color)o.material.color.copy(color)}}
+  animate(){requestAnimationFrame(()=>this.animate());this.renderer.render(this.scene,this.camera)}
+}
+
+function renderCoreControls(){
+  $('skinSwatches').innerHTML=SKIN_TONES.map((x,i)=>`<button class="swatch" data-skin-tone="${i}" style="background:${x.hex}" aria-label="${x.name}" title="${x.name}"></button>`).join('');
+  $('eyeSwatches').innerHTML=EYE_COLORS.map((x,i)=>`<button class="swatch" data-eye-color="${i}" style="background:${x.hex}" aria-label="${x.name}" title="${x.name}"></button>`).join('');
+  $$('[data-core]').forEach(input=>input.addEventListener('input',()=>queueCore(input.dataset.core,+input.value)));
+  $$('[data-skin-tone]').forEach(b=>b.addEventListener('click',()=>{state.appearance.skinTone=+b.dataset.skinTone;save();viewer?.applySurface(state.surface);updateCoreUI()}));
+  $$('[data-eye-color]').forEach(b=>b.addEventListener('click',()=>{state.appearance.eyeColor=+b.dataset.eyeColor;save();viewer?.updateEyeColor();updateCoreUI()}));
+  updateCoreUI()
+}
+function updateCoreUI(){
+  if(!$('coreValue_height'))return;const a=state.appearance||defaultAppearance;
+  for(const key of ['height','weight','muscle','age']){const input=document.querySelector(`[data-core="${key}"]`);if(input&&+input.value!==+a[key])input.value=a[key]}
+  $('coreValue_height').textContent=heightCm(state)+' cm';
+  for(const key of ['weight','muscle']){const v=Math.round(Number(a[key]||0));$(`coreValue_${key}`).textContent=(v>0?'+':'')+v}
+  $('coreValue_age').textContent=Math.round(Number(a.age)||28);
+  $$('[data-skin-tone]').forEach(b=>b.classList.toggle('on',+b.dataset.skinTone===+a.skinTone));$$('[data-eye-color]').forEach(b=>b.classList.toggle('on',+b.dataset.eyeColor===+a.eyeColor));
+  $('skinToneLabel').textContent=(SKIN_TONES[a.skinTone]||SKIN_TONES[2]).name;$('eyeColorLabel').textContent=(EYE_COLORS[a.eyeColor]||EYE_COLORS[1]).name
+}
+let coreTimer=0,coreSeq=0;
+async function queueCore(key,value){
+  if(key==='age')state.appearance.age=Math.max(18,Math.min(70,Math.round(value)));else state.appearance[key]=Math.max(-100,Math.min(100,value));save();updateCoreUI();
+  const seq=++coreSeq;clearTimeout(coreTimer);coreTimer=setTimeout(async()=>{try{if(seq!==coreSeq)return;await viewer.rebuild(false);if(seq!==coreSeq)return;updateCoreUI()}catch(e){showError(e)}},65)
+}
+
+function renderGroomingControls(){
+  $('hairRail').innerHTML=HAIR_STYLES.map(x=>x.id==='bald'?`<button class="assetCard" data-hair-style="bald"><span class="assetCheck">✓</span><span class="assetThumb bald">◯</span><strong>Bald</strong><small>None</small></button>`:`<button class="assetCard" data-hair-style="${x.id}"><span class="assetCheck">✓</span><span class="assetThumb"><img src="https://static.makehumancommunity.org/assets/assetpacks/${x.id}.png" alt="" loading="lazy"></span><strong>${x.name}</strong><small>${x.category}</small></button>`).join('');
+  $('hairColorSwatches').innerHTML=HAIR_COLORS.map((x,i)=>`<button class="swatch" data-hair-color="${i}" style="background:${x.hex}" aria-label="${x.name}" title="${x.name}"></button>`).join('');
+  $$('[data-hair-style]').forEach(b=>b.addEventListener('click',async()=>{state.grooming.hairStyle=b.dataset.hairStyle;save();updateGroomingUI();viewer?.setView('face',false);await viewer?.addHair(true)}));
+  $$('[data-hair-color]').forEach(b=>b.addEventListener('click',()=>{state.grooming.hairColor=+b.dataset.hairColor;save();viewer?.updateHairColor();updateGroomingUI()}));updateGroomingUI()
+}
+function updateGroomingUI(){if(!$('hairRail'))return;const g=state.grooming||defaultGrooming,style=HAIR_BY_ID[g.hairStyle]||HAIR_BY_ID.bald,color=HAIR_COLORS[g.hairColor]||HAIR_COLORS[2];$$('[data-hair-style]').forEach(b=>b.classList.toggle('on',b.dataset.hairStyle===style.id));$$('[data-hair-color]').forEach(b=>b.classList.toggle('on',+b.dataset.hairColor===+g.hairColor));$('hairStyleLabel').textContent=style.name;$('hairColorLabel').textContent=color.name}
+
+function renderMorphControls(){const list=$('morphList');list.innerHTML=MORPHS.map(m=>`<div class="morphRow"><div class="morphHead"><b>${m.label}</b><span class="valuePill" id="value_${m.key}">0</span></div><div class="rangeLine"><span>${m.min}</span><input class="morphRange" type="range" min="-100" max="100" step="1" value="0" data-morph="${m.key}" aria-label="${m.label}"><span>${m.max}</span></div></div>`).join('');$$('[data-morph]').forEach(input=>{input.addEventListener('pointerdown',()=>viewer?.prefetchMorphKey(input.dataset.morph));input.addEventListener('input',()=>queueMorph(input.dataset.morph,+input.value))})}
+function updateMorphUI(){for(const m of MORPHS){const v=Math.round(Number(state.morphs[m.key]||0));const input=document.querySelector(`[data-morph="${m.key}"]`),pill=$(`value_${m.key}`);if(input&&+input.value!==v)input.value=v;if(pill)pill.textContent=(v>0?'+':'')+v}}
+function renderFaceControls(){
+  const list=$('faceMorphList'),group=state.faceGroup||'structure';
+  const names={structure:['Facial structure','Cheeks and chin'],eyes:['Eyes','Shape and placement'],nose:['Nose','Width, length and projection'],mouth:['Mouth','Width, projection and lip volume']};
+  const visible=FACE_MORPHS.filter(m=>m.group===group);
+  list.innerHTML=`<div class="faceGroupLabel"><b>${names[group][0]}</b><span>${names[group][1]}</span></div><div class="faceRangeHint">Use smaller adjustments first. The slider range is damped before applying the underlying MakeHuman target so ±100 stays useful without immediately pushing the face into caricature.</div>`+visible.map(m=>`<div class="morphRow faceMorph"><div class="morphHead"><b>${m.label}</b><span class="valuePill" id="faceValue_${m.key}">0</span></div><div class="rangeLine"><span>${m.min}</span><input class="morphRange" type="range" min="-100" max="100" step="1" value="0" data-face-morph="${m.key}" aria-label="${m.label}"><span>${m.max}</span></div></div>`).join('');
+  $$('[data-face-morph]').forEach(input=>{input.addEventListener('pointerdown',()=>viewer?.prefetchFaceMorphKey(input.dataset.faceMorph));input.addEventListener('input',()=>queueFaceMorph(input.dataset.faceMorph,+input.value))});
+  updateFaceUI();
+}
+function updateFaceUI(){
+  $$('[data-face-group]').forEach(b=>b.classList.toggle('on',b.dataset.faceGroup===state.faceGroup));
+  for(const m of FACE_MORPHS){const v=Math.round(Number(state.faceMorphs[m.key]||0));const input=document.querySelector(`[data-face-morph="${m.key}"]`),pill=$(`faceValue_${m.key}`);if(input&&+input.value!==v)input.value=v;if(pill)pill.textContent=(v>0?'+':'')+v}
+}
+
+let morphTimer=0,morphSeq=0;
+async function queueMorph(key,value){state.morphs[key]=Math.max(-100,Math.min(100,value));save();updateMorphUI();const seq=++morphSeq;$('morphStatus').className='morphStatus busy';$('morphStatusText').textContent=`Applying ${MORPH_BY_KEY[key].label.toLowerCase()}…`;clearTimeout(morphTimer);morphTimer=setTimeout(async()=>{try{await viewer.prefetchMorphKey(key);if(seq!==morphSeq)return;await viewer.rebuild(false);if(seq!==morphSeq)return;$('morphStatus').className='morphStatus ready';$('morphStatusText').textContent='Live body measurements applied.'}catch(e){$('morphStatus').className='morphStatus';$('morphStatusText').textContent='A measurement target failed to load. See diagnostics.';console.error(e)}},55)}
+CharacterViewer.prototype.prefetchMorphKey=async function(key){const m=MORPH_BY_KEY[key];if(!m)return;const paths=[...m.dec,...m.inc].map(f=>MEASURE_ROOT+f);await Promise.all(paths.map(path=>this.getTarget(path,m.label)))};
+CharacterViewer.prototype.prefetchFaceMorphKey=async function(key){const m=FACE_BY_KEY[key];if(!m)return;await Promise.all([...m.dec,...m.inc].map(path=>this.getTarget(path,m.label)))};
+let faceMorphTimer=0,faceMorphSeq=0;
+async function queueFaceMorph(key,value){
+  const m=FACE_BY_KEY[key];if(!m)return;
+  state.faceMorphs[key]=Math.max(-100,Math.min(100,value));save();updateFaceUI();
+  const seq=++faceMorphSeq;$('faceMorphStatus').className='morphStatus busy';$('faceMorphStatusText').textContent=`Applying ${m.label.toLowerCase()}…`;
+  clearTimeout(faceMorphTimer);faceMorphTimer=setTimeout(async()=>{try{await viewer.prefetchFaceMorphKey(key);if(seq!==faceMorphSeq)return;await viewer.rebuild(false);if(seq!==faceMorphSeq)return;$('faceMorphStatus').className='morphStatus ready';$('faceMorphStatusText').textContent='Live face targets applied.'}catch(e){$('faceMorphStatus').className='morphStatus';$('faceMorphStatusText').textContent=`${m.label} target failed to load. See diagnostics.`;console.error(e)}},55)
+}
+
+
+function syncHeaderHeight(){
+  const header=document.querySelector('.header');
+  if(header)document.documentElement.style.setProperty('--headerH',Math.ceil(header.getBoundingClientRect().height)+'px');
+}
+function scrollPanelTo(el,behavior='smooth'){
+  if(!el)return;
+  const panelBody=document.querySelector('.panelBody');
+  if(innerWidth<=760&&panelBody){
+    const delta=el.getBoundingClientRect().top-panelBody.getBoundingClientRect().top;
+    panelBody.scrollTo({top:panelBody.scrollTop+delta-4,behavior});
+  }else el.scrollIntoView({behavior,block:'start'});
+}
+function setWorkspaceActive(key){
+  $$('[data-workspace]').forEach(b=>b.classList.toggle('on',b.dataset.workspace===key));
+}
+function activateFaceGroup(group,doScroll=false){
+  if(!['structure','eyes','nose','mouth'].includes(group))group='structure';
+  state.faceGroup=group;save();renderFaceControls();viewer?.setView('face',false);setWorkspaceActive(group);
+  if(doScroll)scrollPanelTo($('faceCustomize'));
+}
+function focusControlSection(id){
+  if(id==='overview'){setWorkspaceActive('body');scrollPanelTo($('baseSelect'));return}
+  if(id==='bodyCustomize'){setWorkspaceActive('body');viewer?.setView('full',false)}
+  else if(id==='coreAppearance'){setWorkspaceActive('appearance');viewer?.setView('full',false)}
+  else if(id==='hairCustomize'){setWorkspaceActive('hair');viewer?.setView('face',false)}
+  else if(id==='faceCustomize'){setWorkspaceActive(state.faceGroup||'structure');viewer?.setView('face',false)}
+  scrollPanelTo($(id));
+}
+$$('[data-workspace]').forEach(b=>b.addEventListener('click',()=>{
+  const key=b.dataset.workspace;
+  if(key==='body'){setWorkspaceActive('body');viewer?.setView('full',false);scrollPanelTo($('bodyCustomize'));return}
+  if(key==='appearance'){setWorkspaceActive('appearance');viewer?.setView('full',false);scrollPanelTo($('coreAppearance'));return}
+  if(key==='hair'){setWorkspaceActive('hair');viewer?.setView('face',false);scrollPanelTo($('hairCustomize'));return}
+  activateFaceGroup(key,true);
+}));
+window.addEventListener('resize',syncHeaderHeight);
+window.addEventListener('orientationchange',()=>setTimeout(syncHeaderHeight,80));
+requestAnimationFrame(syncHeaderHeight);
+
+
+function updateProfileBar(){
+  if(!$('draftStatus'))return;const has=!!savedProfile,bar=document.querySelector('.profileBarState');
+  bar.classList.toggle('saved',has&&!editingExisting);bar.classList.toggle('editing',editingExisting);
+  $('draftStatus').textContent=editingExisting?'Editing saved character · changes are still a draft':has?'Draft workspace · saved character available':'Draft · not saved as a character';
+  $('saveCharacterBtn').textContent=has?'Save Changes':'Save Character';$('openCharacterBtn').hidden=!has;$('cancelEditBtn').hidden=!editingExisting
+}
+function setNavScreen(which){
+  $$('.sidebar .nav').forEach(b=>b.classList.remove('on'));if(which==='character')$('myCharacterNav')?.classList.add('on');else document.querySelector('[data-nav="overview"]')?.classList.add('on')
+}
+async function showCreatorScreen(restoreDraft=true){
+  if(currentScreen==='character'&&restoreDraft&&draftBeforeProfileView){state=draftBeforeProfileView;draftState=state;draftBeforeProfileView=null}
+  currentScreen='creator';$('creatorPanel').hidden=false;$('myCharacterPanel').hidden=true;$('headerSubtitle').textContent='Character Creation v1.3.2 · Hair Route Fix';setNavScreen('creator');updateProfileBar();
+  if(viewer?.base){viewer.surface=state.surface||'coverage';viewer.view=state.view||'full';viewer.cameraState=state.camera||{...VIEW_PRESETS[viewer.view],yaw:0};await viewer.rebuild(false);viewer.setView(state.view||'full',false)}
+}
+function updateProfileUI(){
+  if(!savedProfile)return;const r=normalizeState(savedProfile.recipe),a=r.appearance;
+  $('profileDisplayName').textContent='My Character';$('profileIdText').textContent=savedProfile.id;$('profileSex').textContent=r.body==='female'?'Female':'Male';$('profileAge').textContent=a.age+' yrs';$('profileHeight').textContent=heightCm(r)+' cm';$('profileBuild').textContent=buildLabel(r);$('profileSkin').textContent=(SKIN_TONES[a.skinTone]||SKIN_TONES[2]).name;$('profileEyes').textContent=(EYE_COLORS[a.eyeColor]||EYE_COLORS[1]).name;const hs=HAIR_BY_ID[r.grooming?.hairStyle]||HAIR_BY_ID.bald;$('profileHair').textContent=hs.name;
+  const d=new Date(savedProfile.updatedAt);$('profileSavedAt').textContent=Number.isNaN(d.getTime())?savedProfile.updatedAt:d.toLocaleString();$('profileMonogram').textContent=r.body==='female'?'SD':'SD'
+}
+async function openMyCharacter(afterSave=false){
+  if(!savedProfile){showCreatorScreen(false);scrollPanelTo($('coreAppearance'));return}
+  if(currentScreen==='creator'&&!afterSave)draftBeforeProfileView=state;
+  currentScreen='character';state=normalizeState(savedProfile.recipe);$('creatorPanel').hidden=true;$('myCharacterPanel').hidden=false;$('headerSubtitle').textContent='My Character · Saved Profile';setNavScreen('character');updateProfileUI();closeSidebar();
+  if(viewer?.base){viewer.surface='coverage';viewer.view='full';viewer.cameraState={...VIEW_PRESETS.full,yaw:0};await viewer.rebuild(false);viewer.setView('full',true)}
+}
+async function editSavedCharacter(){
+  if(!savedProfile)return;editingExisting=true;state=normalizeState(savedProfile.recipe);draftState=state;currentScreen='creator';draftBeforeProfileView=null;save();$('creatorPanel').hidden=false;$('myCharacterPanel').hidden=true;$('headerSubtitle').textContent='Character Creation v1.3.1 · Editing Saved Character';setNavScreen('creator');updateProfileBar();
+  if(viewer?.base){viewer.surface=state.surface;viewer.view='full';viewer.cameraState={...VIEW_PRESETS.full,yaw:0};await viewer.rebuild(false);viewer.setView('full',true)}
+  setWorkspaceActive('appearance');scrollPanelTo($('coreAppearance'),'auto')
+}
+async function cancelSavedEdit(){
+  if(!savedProfile)return;editingExisting=false;state=normalizeState(savedProfile.recipe);draftState=state;try{localStorage.setItem(DRAFT_STORAGE,JSON.stringify(draftState))}catch{}await openMyCharacter(true)
+}
+
+let viewer;
+async function start(){try{syncHeaderHeight();renderMorphControls();renderFaceControls();renderCoreControls();renderGroomingControls();updateProfileBar();setWorkspaceActive(state.view==='face'?(state.faceGroup||'structure'):'body');const hadSavedCamera=!!state.camera;viewer=new CharacterViewer($('humanCanvas'));await viewer.boot(state.body);if(hadSavedCamera){viewer.view=state.view||'full';viewer.applyCamera(false);viewer.updateUI()}else viewer.setView(state.view||'full',false);viewer.applySurface(state.surface||'coverage');$('loading').classList.add('hide')}catch(e){showError(e)}}
+async function setBody(body){if(body===state.body&&viewer?.model)return;state.body=body;save();updateCoreUI();$$('[data-body]').forEach(b=>b.classList.toggle('on',b.dataset.body===body));$('loading').classList.remove('hide');progress(56,'Switching human base…',`Rebuilding the ${body} character with your current measurements.`);try{await viewer.rebuild(true)}catch(e){showError(e)}}
+$$('[data-body]').forEach(b=>b.addEventListener('click',()=>setBody(b.dataset.body)));
+$$('[data-view]').forEach(b=>b.addEventListener('click',()=>viewer?.setView(b.dataset.view,false)));
+$$('[data-face-group]').forEach(b=>b.addEventListener('click',()=>{activateFaceGroup(b.dataset.faceGroup,true)}));
+$$('[data-surface]').forEach(b=>b.addEventListener('click',()=>viewer?.applySurface(b.dataset.surface)));
+$('zoomInBtn').addEventListener('click',()=>viewer?.zoomBy(.84));$('zoomOutBtn').addEventListener('click',()=>viewer?.zoomBy(1.19));$('frontBtn').addEventListener('click',()=>viewer?.front());$('resetCameraBtn').addEventListener('click',()=>viewer?.resetCamera());
+$('resetBodyBtn').addEventListener('click',async()=>{for(const k of Object.keys(state.morphs))state.morphs[k]=0;save();updateMorphUI();$('morphStatus').className='morphStatus busy';$('morphStatusText').textContent='Resetting body measurements…';try{await viewer.rebuild(false);$('morphStatus').className='morphStatus ready';$('morphStatusText').textContent='Body measurements reset to neutral.'}catch(e){showError(e)}});
+$('resetFaceBtn').addEventListener('click',async()=>{for(const k of Object.keys(state.faceMorphs))state.faceMorphs[k]=0;save();renderFaceControls();$('faceMorphStatus').className='morphStatus busy';$('faceMorphStatusText').textContent='Resetting face…';try{await viewer.rebuild(false);viewer.setView('face',false);$('faceMorphStatus').className='morphStatus ready';$('faceMorphStatusText').textContent='Face reset to neutral.'}catch(e){showError(e)}});
+$('randomFaceBtn').addEventListener('click',async()=>{for(const m of FACE_MORPHS){const span=m.group==='eyes'?24:34;state.faceMorphs[m.key]=Math.round((Math.random()*2-1)*span)}save();renderFaceControls();$('faceMorphStatus').className='morphStatus busy';$('faceMorphStatusText').textContent='Building a restrained face variation…';try{const active=FACE_MORPHS.filter(m=>Math.abs(state.faceMorphs[m.key])>0);for(const m of active)await viewer.prefetchFaceMorphKey(m.key);await viewer.rebuild(false);viewer.setView('face',false);$('faceMorphStatus').className='morphStatus ready';$('faceMorphStatusText').textContent='Subtle randomized face applied.'}catch(e){showError(e)}});
+
+$('resetGroomingBtn').addEventListener('click',async()=>{state.grooming={...defaultGrooming};save();updateGroomingUI();try{await viewer.addHair(true)}catch(e){console.error(e)}});
+$('resetCoreBtn').addEventListener('click',async()=>{state.appearance={...defaultAppearance};save();updateCoreUI();try{await viewer.rebuild(false)}catch(e){showError(e)}});
+$('saveCharacterBtn').addEventListener('click',saveCharacterProfile);$('openCharacterBtn').addEventListener('click',()=>openMyCharacter(false));$('myCharacterNav').addEventListener('click',()=>openMyCharacter(false));$('editSavedBtn').addEventListener('click',editSavedCharacter);$('backToDraftBtn').addEventListener('click',()=>showCreatorScreen(true));$('cancelEditBtn').addEventListener('click',cancelSavedEdit);
+$('reloadBtn').addEventListener('click',()=>location.reload());
+window.addEventListener('keydown',e=>{if(e.key==='+'||e.key==='=')viewer?.zoomBy(.88);else if(e.key==='-')viewer?.zoomBy(1.14);else if(e.key==='0')viewer?.resetCamera()});
+start();
+</script>
+</body></html>

@@ -1,15 +1,50 @@
 # SOL DORADO
 
-SOL DORADO is a browser/mobile persistent role-playing game inspired by urban role-play and classic browser progression games. It is an independent game, not a FiveM, QBCore, Qbox, or GTA mod.
+SOL DORADO is a persistent browser/mobile urban RPG. It is an independent game, not a FiveM, GTA, QBCore or Qbox mod.
 
-## Target stack
+This repository is the real MVP implementation. The accepted standalone HTML prototypes are retained under `prototypes/` as product and regression references; production code lives in the workspace packages.
 
-- React
-- Tailwind CSS
-- Node.js
+## Stack
+
+- React 19 + TypeScript + Vite
+- Tailwind CSS 4
+- Node.js + Express 5
 - PostgreSQL
 - Redis
+- npm workspaces
 
-## Current phase
+## Workspace
 
-The project is moving from standalone HTML/CSS/JavaScript prototypes toward a unified MVP with a real frontend, backend, persistence, and shared game systems.
+```text
+apps/web              React game client
+apps/api              Node.js API and database migrations
+packages/contracts    Shared API schemas and game contracts
+prototypes             Accepted standalone HTML references
+docs                   Architecture and prototype migration map
+```
+
+## Start locally
+
+Requirements: Node.js 24+, PostgreSQL 16+ and Redis 7+.
+
+```bash
+cp .env.example .env
+npm install
+npm run db:migrate
+npm run db:seed
+npm run dev
+```
+
+The web client runs at `http://localhost:5173`; the API runs at `http://localhost:3001`.
+
+## Current vertical slice
+
+- Canonical SOL DORADO desktop/mobile shell and HUD
+- Redis-backed development session and presence
+- PostgreSQL-backed character identity, vitals, cash and location
+- One playable Las Palmas district screen
+- Server-authoritative walking, legal shift and petty-crime actions
+- Idempotent action requests and persistent action log
+- Bootstrap endpoint returning one authoritative player snapshot
+
+The next merge step is inventory + finance, because the first world actions already produce money, items and police heat.
