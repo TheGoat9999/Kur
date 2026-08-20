@@ -43,7 +43,9 @@ export function StreetScene({ street, position, moving, selectedObjectId, busy, 
 
   function approachSelected() {
     if (!selected) return;
-    const anchor = getStreetActionAnchor(street.currentSegmentId, selected.actions[0]);
+    const firstAction = selected.actions[0];
+    if (!firstAction) return;
+    const anchor = getStreetActionAnchor(street.currentSegmentId, firstAction);
     if (anchor) onMove({ x: anchor.x, y: anchor.y });
   }
 

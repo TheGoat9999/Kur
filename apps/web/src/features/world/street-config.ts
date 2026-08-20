@@ -102,8 +102,10 @@ function object(
   icon: GameIconName,
   actions: WorldActionId[]
 ): StreetObjectDefinition {
-  const anchor = getStreetActionAnchor(segmentId, actions[0]);
-  if (!anchor) throw new Error(`Missing street anchor for ${segmentId}:${actions[0]}`);
+  const firstAction = actions[0];
+  if (!firstAction) throw new Error(`Street object ${segmentId}:${id} has no actions`);
+  const anchor = getStreetActionAnchor(segmentId, firstAction);
+  if (!anchor) throw new Error(`Missing street anchor for ${segmentId}:${firstAction}`);
   return {
     id, kind, importance, labelKey, detailKey, icon,
     x: anchor.x, y: anchor.y,
