@@ -161,7 +161,7 @@ export function WorldView({ state, onStateChange }: Props) {
   if (mapOpen && worldMap) return <section className="world-screen"><WorldMapView map={worldMap} travelBusy={mapTravelBusy} onClose={() => setMapOpen(false)} onTravel={segmentId => void travelFromMap(segmentId)} /></section>;
 
   return <section className="world-screen">
-    <StreetScene street={street} position={position} moving={moving} activeRoute={activeRoute} selectedObjectId={selectedObjectId} busy={busy} onMove={target => void move(target)} onSelectObject={objectId => setSelectedObjectId(objectId as StreetObjectId)} onAction={actionId => void act(actionId)} onCloseSelection={() => setSelectedObjectId(null)} />
+    <StreetScene street={street} position={position} moving={moving} activeRoute={activeRoute} characterRecipe={state.character?.recipe} selectedObjectId={selectedObjectId} busy={busy} onMove={target => void move(target)} onSelectObject={objectId => setSelectedObjectId(objectId as StreetObjectId)} onAction={actionId => void act(actionId)} onCloseSelection={() => setSelectedObjectId(null)} />
     <button type="button" className="world-map-launch" disabled={mapBusy} onClick={() => void openMap()}><GameIcon name="world" size={14} />{mapCopy.openMap}</button>
   </section>;
 }

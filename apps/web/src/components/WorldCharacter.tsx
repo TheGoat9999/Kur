@@ -21,8 +21,8 @@ const BOTTOM_COLORS = ['#263b45', '#32343c', '#40454b', '#353d34', '#292e3d'] as
 const HAIR_STYLES: WorldHairStyle[] = ['crop', 'short', 'long', 'bun', 'bald'];
 
 export function visualFromCharacterRecipe(recipe: CharacterRecipe | null | undefined): WorldCharacterVisual {
-  const appearance = recipe?.appearance ?? {};
-  const grooming = recipe?.grooming ?? {};
+  const appearance: Record<string, unknown> = recipe?.appearance ?? {};
+  const grooming: Record<string, unknown> = recipe?.grooming ?? {};
   const body = recipe?.body ?? 'male';
   const skinTone = numeric(appearance.skinTone, 2);
   const hairColor = numeric(grooming.hairColor, 1);

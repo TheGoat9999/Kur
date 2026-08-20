@@ -60,6 +60,21 @@ Deliverables:
 - Better parked vehicles, basic pedestrian movement and basic traffic presentation.
 - Scenery, contextual object, local destination and major institution POI tiers remain visually distinct.
 
+Current implementation pass:
+- The player street avatar is rendered from the active Character Recipe instead of the primitive circle/stick marker.
+- Character profile and street avatar now share the same reusable world-character renderer.
+- Named NPCs and deterministic ambient NPCs use the same renderer with authored population slots.
+- Ambient pedestrians can move along authored visual sidewalk paths without becoming POIs or blocking street interaction.
+- Reusable vehicle silhouettes and service variants exist; current scenes include parked civilian vehicles, delivery traffic and occasional taxi traffic without duplicating scarce institutional services.
+- The population layer is visual-only and `pointer-events: none`; navigation, POIs and authoritative gameplay remain unobstructed.
+
+Quality gate before Phase 4:
+- Player, NPCs and vehicles must be visually readable at desktop and mobile street scale and must not resemble primitive placeholder circles/rectangles.
+- Ambient population must make streets feel occupied without converting every person or vehicle into an interaction target.
+- Character movement, POI hit areas, street hover/click behaviour and contextual interaction UI must remain unobstructed by the visual population layer.
+- Vehicle and NPC density should vary by street archetype rather than appearing uniformly on every street.
+- Do not proceed to Mobility v0.1 until the World Visual pass is manually accepted.
+
 Exit criteria: player/NPC/vehicle representations are reusable game-world entities rather than primitive decorative shapes.
 
 ## Phase 4 — Mobility v0.1
