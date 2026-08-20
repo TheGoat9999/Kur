@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import type {
   WorldDistrict,
   WorldMapGeometry,
@@ -14,27 +14,33 @@ import { useI18n } from '../../i18n';
 import { worldMapCopy } from './world-map-copy';
 import './world-map.css';
 
-type MapLevel = 'region' | 'settlement' | 'zone' | 'district' | 'street';
+type MapLevel = 'region' | 'settlement' | 'zone' | 'district';
 
-export function WorldMapView({ map, onClose }: { map: WorldMapState; onClose: () => void }) {
+interface Props {
+  map: WorldMapState;
+  travelBusy: boolean;
+  onClose: () => void;
+  onTravel: (segmentId: string) => void;
+}
+
+export function WorldMapView({ map, travelBusy, onClose, onTravel }: Props) {
   const { locale } = useI18n();
   const copy = worldMapCopy(locale);
   const [level, setLevel] = useState<MapLevel>('region');
   const [settlementId, setSettlementId] = useState(map.current.settlementId);
   const [zoneId, setZoneId] = useState(map.current.zoneId);
   const [districtId, setDistrictId] = useState(map.current.districtId);
-  const [streetId, setStreetId] = useState(map.current.streetId);
   const [selectedSegmentId, setSelectedSegmentId] = useState(map.current.segmentId);
 
   const region = map.regions.find(item => item.id === map.current.regionId) ?? map.regions[0];
   const settlement = map.settlements.find(item => item.id === settlementId);
   const zone = map.zones.find(item => item.id === zoneId);
   const district = map.districts.find(item => item.id === districtId);
-  const street = map.streets.find(item => item.id === streetId);
   const selectedSegment = map.segments.find(item => item.id === selectedSegmentId);
-
-  const levelName = level === 'region' ? copy.region : level === 'settlement' ? copy.settlement : level === 'zone' ? copy.zone : level === 'district' ? copy.district : copy.street;
-  const subtitle = level === 'region' ? region?.name : level === 'settlement' ? settlement?.name : level === 'zone' ? zone?.name : level === 'district' ? district?.name : street?.name;
+  const selectedStreet = selectedSegment ? map.streets.find(item => item.id === selectedSegment.streetId) : undefined;
+  const connection = selectedSegment ? walkingConnection(map, map.current.segmentId, selectedSegment.id) : undefined;
+  const isCurrent = selectedSegment?.id === map.current.segmentId;
+  const canTravel = Boolean(selectedSegment?.playable && !isCurrent && connection);
 
   function enterSettlement(item: WorldSettlement) {
     setSettlementId(item.id);
@@ -56,131 +62,278 @@ export function WorldMapView({ map, onClose }: { map: WorldMapState; onClose: ()
 
   function enterDistrict(item: WorldDistrict) {
     setDistrictId(item.id);
-    const nextStreet = map.streets.find(candidate => candidate.districtId === item.id);
-    if (nextStreet) setStreetId(nextStreet.id);
+    const streetIds = new Set(map.streets.filter(candidate => candidate.districtId === item.id).map(candidate => candidate.id));
+    const currentBelongsHere = map.segments.some(candidate => candidate.id === map.current.segmentId && streetIds.has(candidate.streetId));
+    const nextSegment = currentBelongsHere
+      ? map.segments.find(candidate => candidate.id === map.current.segmentId)
+      : map.segments.find(candidate => streetIds.has(candidate.streetId));
+    if (nextSegment) setSelectedSegmentId(nextSegment.id);
     setLevel('district');
   }
 
-  function enterStreet(item: WorldStreet) {
-    setStreetId(item.id);
-    const nextSegment = map.segments.find(candidate => candidate.streetId === item.id);
-    if (nextSegment) setSelectedSegmentId(nextSegment.id);
-    setLevel('street');
+  function focusCurrent() {
+    setSettlementId(map.current.settlementId);
+    setZoneId(map.current.zoneId);
+    setDistrictId(map.current.districtId);
+    setSelectedSegmentId(map.current.segmentId);
+    setLevel('district');
   }
 
-  const layer = useMemo(() => {
-    if (level === 'region') return <SettlementLayer map={map} regionId={region?.id ?? ''} currentId={map.current.settlementId} onEnter={enterSettlement} />;
-    if (level === 'settlement') return <ZoneLayer map={map} settlementId={settlementId} currentId={map.current.zoneId} onEnter={enterZone} />;
-    if (level === 'zone') return <DistrictLayer map={map} zoneId={zoneId} currentId={map.current.districtId} onEnter={enterDistrict} />;
-    if (level === 'district') return <StreetLayer map={map} districtId={districtId} currentId={map.current.streetId} onEnter={enterStreet} emptyLabel={copy.noStreets} />;
-    return <SegmentLayer map={map} streetId={streetId} currentId={map.current.segmentId} selectedId={selectedSegmentId} onSelect={setSelectedSegmentId} />;
-  }, [copy.noStreets, districtId, level, map, region?.id, selectedSegmentId, settlementId, streetId, zoneId]);
+  const title = level === 'region'
+    ? region?.name ?? copy.map
+    : level === 'settlement'
+      ? settlement?.name ?? copy.settlement
+      : level === 'zone'
+        ? zone?.name ?? copy.zone
+        : district?.name ?? copy.district;
 
   return (
     <div className="world-map-shell">
-      <div className="world-map-toolbar">
+      <header className="world-map-toolbar">
         <div className="world-map-heading">
-          <span>{levelName}</span>
-          <b>{subtitle ?? copy.map}</b>
-          <small>{copy.hierarchyHint}</small>
+          <span>{levelLabel(level, copy)}</span>
+          <b>{title}</b>
+          <small>{level === 'district' ? copy.streetHint : copy.hierarchyHint}</small>
         </div>
         <div className="world-map-actions">
-          <button type="button" className="world-map-current-button" onClick={() => {
-            setSettlementId(map.current.settlementId); setZoneId(map.current.zoneId); setDistrictId(map.current.districtId); setStreetId(map.current.streetId); setSelectedSegmentId(map.current.segmentId); setLevel('street');
-          }}><GameIcon name="map-pin" size={14} />{copy.current}</button>
-          <button type="button" className="world-map-close" onClick={onClose}><GameIcon name="x" size={16} />{copy.backToStreet}</button>
+          <button type="button" className="world-map-current-button" onClick={focusCurrent}>
+            <GameIcon name="map-pin" size={14} />{copy.current}
+          </button>
+          <button type="button" className="world-map-close" onClick={onClose}>
+            <GameIcon name="x" size={16} />{copy.backToStreet}
+          </button>
         </div>
-      </div>
+      </header>
 
-      <div className="world-map-breadcrumb" aria-label={copy.map}>
+      <nav className="world-map-breadcrumb" aria-label={copy.map}>
         <button onClick={() => setLevel('region')}>{region?.name ?? 'SOL DORADO'}</button>
         {level !== 'region' && settlement && <><i>›</i><button onClick={() => setLevel('settlement')}>{settlement.name}</button></>}
-        {['zone','district','street'].includes(level) && zone && <><i>›</i><button onClick={() => setLevel('zone')}>{zone.name}</button></>}
-        {['district','street'].includes(level) && district && <><i>›</i><button onClick={() => setLevel('district')}>{district.name}</button></>}
-        {level === 'street' && street && <><i>›</i><button>{street.name}</button></>}
-      </div>
+        {(['zone', 'district'] as MapLevel[]).includes(level) && zone && <><i>›</i><button onClick={() => setLevel('zone')}>{zone.name}</button></>}
+        {level === 'district' && district && <><i>›</i><button aria-current="page">{district.name}</button></>}
+      </nav>
 
       <div className={`world-map-canvas world-map-level-${level}`}>
-        <svg viewBox="0 0 100 100" role="img" aria-label={`${copy.map}: ${subtitle ?? ''}`}>
-          <defs>
-            <pattern id="map-grid" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M5 0H0V5" fill="none" stroke="currentColor" strokeWidth=".08" /></pattern>
-            <filter id="map-shadow"><feDropShadow dx="0" dy="1" stdDeviation="1.2" floodOpacity=".35" /></filter>
-          </defs>
-          <rect width="100" height="100" className="world-map-water" />
-          <rect width="100" height="100" className="world-map-grid" fill="url(#map-grid)" />
-          {level === 'region' && region?.geometry.polygon.length ? <polygon points={points(region.geometry)} className="world-map-region-land" /> : null}
-          {layer}
+        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" role="img" aria-label={`${copy.map}: ${title}`}>
+          <AtlasDefs />
+          {level === 'region' && region && <RegionBackdrop geometry={region.geometry} />}
+          {level === 'settlement' && settlement && <SettlementBackdrop settlement={settlement} />}
+          {level === 'zone' && zone && <ZoneBackdrop zone={zone} />}
+          {level === 'district' && district && <DistrictBackdrop district={district} />}
+
+          {level === 'region' && region && (
+            <SettlementLayer map={map} regionId={region.id} currentId={map.current.settlementId} onEnter={enterSettlement} />
+          )}
+          {level === 'settlement' && settlement && (
+            <ZoneLayer map={map} settlementId={settlement.id} currentId={map.current.zoneId} onEnter={enterZone} />
+          )}
+          {level === 'zone' && zone && (
+            <DistrictLayer map={map} zoneId={zone.id} currentId={map.current.districtId} onEnter={enterDistrict} />
+          )}
+          {level === 'district' && district && (
+            <DistrictStreetLayer map={map} districtId={district.id} selectedSegmentId={selectedSegmentId} onSelect={setSelectedSegmentId} emptyLabel={copy.noStreets} />
+          )}
         </svg>
-        <div className="world-map-legend">
-          <span><i className="legend-current" />{copy.current}</span>
-          <span><i className="legend-live" />{copy.playable}</span>
-          <span><i className="legend-planned" />{copy.planned}</span>
-        </div>
+
+        <div className="world-map-compass" aria-hidden="true"><span>N</span><i /></div>
+        <div className="world-map-scale" aria-hidden="true"><i /><span>{level === 'region' ? '25 km' : level === 'settlement' ? '5 km' : level === 'zone' ? '1 km' : '250 m'}</span></div>
       </div>
 
-      {level === 'street' && selectedSegment && (
-        <div className={`world-map-selection ${selectedSegment.id === map.current.segmentId ? 'world-map-selection-current' : ''}`}>
-          <div><span>{selectedSegment.playable ? copy.playable : copy.planned}</span><b>{selectedSegment.displayName}</b><small>{selectedSegment.id === map.current.segmentId ? copy.currentStreet : copy.routeLater}</small></div>
-          {selectedSegment.id === map.current.segmentId && <button onClick={onClose}>{copy.backToStreet}</button>}
-        </div>
+      {level === 'district' && selectedSegment && (
+        <footer className={`world-map-selection ${isCurrent ? 'world-map-selection-current' : ''}`}>
+          <div className="world-map-selection-main">
+            <span>{selectedSegment.playable ? copy.playable : copy.planned}</span>
+            <b>{selectedSegment.displayName}</b>
+            <small>
+              {isCurrent
+                ? copy.currentStreet
+                : canTravel
+                  ? copy.travelDetail.replace('{distance}', String(connection?.distanceMeters ?? 0))
+                  : selectedSegment.playable ? copy.noDirectRoute : copy.notAccessible}
+            </small>
+          </div>
+          <div className="world-map-selection-meta">
+            {selectedStreet && <span>{selectedStreet.name}</span>}
+            {connection && !isCurrent && <span>{connection.distanceMeters} m · {copy.walk}</span>}
+          </div>
+          {isCurrent ? (
+            <button className="world-map-primary-action" onClick={onClose}><GameIcon name="map-pin" size={14} />{copy.openStreet}</button>
+          ) : (
+            <button className="world-map-primary-action" disabled={!canTravel || travelBusy} onClick={() => onTravel(selectedSegment.id)}>
+              <GameIcon name="route" size={14} />{travelBusy ? copy.travelling : canTravel ? copy.travelHere : copy.unavailable}
+            </button>
+          )}
+        </footer>
       )}
     </div>
   );
 }
 
+function AtlasDefs() {
+  return <defs>
+    <linearGradient id="atlas-ocean" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#082832" /><stop offset="1" stopColor="#04181f" /></linearGradient>
+    <linearGradient id="atlas-land" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#36594f" /><stop offset=".55" stopColor="#294940" /><stop offset="1" stopColor="#203c37" /></linearGradient>
+    <linearGradient id="atlas-desert" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#8b7650" /><stop offset="1" stopColor="#65583e" /></linearGradient>
+    <linearGradient id="atlas-urban" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#344d4d" /><stop offset="1" stopColor="#283f41" /></linearGradient>
+    <pattern id="atlas-fields" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(18)"><rect width="5" height="5" fill="#667d49" /><path d="M0 1.1H5M0 3.6H5" stroke="#9a9b61" strokeWidth=".45" opacity=".42" /></pattern>
+    <pattern id="atlas-blocks" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(-8)"><rect width="7" height="7" fill="#263d40" /><path d="M.6.6H6.4V6.4H.6Z" fill="none" stroke="#607276" strokeWidth=".28" opacity=".42" /></pattern>
+    <filter id="atlas-shadow"><feDropShadow dx="0" dy=".7" stdDeviation=".8" floodColor="#02080a" floodOpacity=".45" /></filter>
+    <filter id="atlas-soft"><feGaussianBlur stdDeviation="1.8" /></filter>
+  </defs>;
+}
+
+function RegionBackdrop({ geometry }: { geometry: WorldMapGeometry }) {
+  return <>
+    <rect width="100" height="100" fill="url(#atlas-ocean)" />
+    <g className="atlas-wave-lines"><path d="M1 18C18 14 26 20 39 16S68 12 99 18" /><path d="M2 88C20 82 35 91 52 86S79 82 98 87" /></g>
+    <clipPath id="atlas-region-clip"><polygon points={points(geometry)} /></clipPath>
+    <polygon points={points(geometry)} fill="url(#atlas-land)" className="atlas-main-land" />
+    <g clipPath="url(#atlas-region-clip)">
+      <path className="atlas-terrain atlas-forest" d="M7 6C20 3 36 8 42 18L36 34 17 35 6 24Z" />
+      <path className="atlas-terrain atlas-desert" d="M59 46C72 39 91 44 98 57L94 84 72 90 58 75Z" />
+      <path className="atlas-terrain atlas-fields" d="M36 38L57 34 65 48 54 64 35 58Z" />
+      <path className="atlas-terrain atlas-city-glow" d="M11 38L54 31 65 61 53 86 17 88 8 68Z" />
+      <path className="atlas-river" d="M56 12C52 25 59 31 53 42S42 58 46 74" />
+      <g className="atlas-contours"><path d="M45 8C51 14 57 14 63 10"/><path d="M43 11C51 19 61 19 68 12"/><path d="M42 15C52 24 65 24 72 15"/><path d="M68 47C76 51 83 51 91 48"/><path d="M66 51C77 57 87 57 95 52"/></g>
+      <g className="atlas-mountains">
+        <Mountain x={48} y={12} /><Mountain x={55} y={16} /><Mountain x={62} y={13} /><Mountain x={67} y={19} /><Mountain x={73} y={16} />
+      </g>
+      <g className="atlas-highways"><path d="M28 22C39 34 47 48 75 67"/><path d="M38 63C56 55 66 39 75 23"/><path d="M29 59C46 65 62 68 76 67"/></g>
+    </g>
+    <polygon points={points(geometry)} className="atlas-coastline" />
+  </>;
+}
+
+function SettlementBackdrop({ settlement }: { settlement: WorldSettlement }) {
+  if (settlement.id === 'sol_dorado_city') return <>
+    <rect width="100" height="100" className="atlas-local-land" />
+    <path className="atlas-city-ocean" d="M0 0H12C10 18 15 31 10 46S12 78 18 100H0Z" />
+    <path className="atlas-harbor-water" d="M68 72C78 65 91 63 100 67V100H72C77 89 75 82 68 72Z" />
+    <path className="atlas-hills" d="M38 0H88L91 22 76 31 57 25 45 15Z" />
+    <path className="atlas-city-park" d="M19 52L35 47 41 61 32 71 17 66Z" />
+    <g className="atlas-city-arterials"><path d="M13 39C35 42 60 41 95 33"/><path d="M22 80C43 69 63 64 94 62"/><path d="M48 8C49 29 56 51 61 92"/></g>
+  </>;
+  if (settlement.kind === 'town' && settlement.id === 'mesa_roja') return <>
+    <rect width="100" height="100" className="atlas-desert-base" />
+    <path className="atlas-mesa" d="M8 35L27 20 46 25 53 42 37 54 16 51Z"/><path className="atlas-mesa atlas-mesa-two" d="M58 16L84 11 94 32 82 45 61 38Z"/>
+    <path className="atlas-dry-river" d="M4 78C28 66 35 71 52 61S76 52 99 57" />
+  </>;
+  if (settlement.id === 'puerto_cielo') return <>
+    <rect width="100" height="100" className="atlas-local-land atlas-coastal-land" />
+    <path className="atlas-city-ocean atlas-ocean-right" d="M82 0H100V100H70C78 82 80 63 76 45S80 15 82 0Z" />
+    <path className="atlas-forest-patch" d="M4 8L52 4 60 30 37 47 8 38Z" />
+    <g className="atlas-contours local"><path d="M15 17C29 9 43 12 56 20"/><path d="M11 23C29 14 47 18 62 27"/></g>
+  </>;
+  return <>
+    <rect width="100" height="100" fill="url(#atlas-fields)" />
+    <path className="atlas-village-green" d="M34 29L68 25 77 49 62 70 31 66 22 45Z" />
+    <g className="atlas-rural-roads"><path d="M2 57C27 52 50 51 98 43"/><path d="M48 2C47 25 51 55 58 98"/></g>
+  </>;
+}
+
+function ZoneBackdrop({ zone }: { zone: WorldZone }) {
+  return <>
+    <rect width="100" height="100" className={`atlas-zone-base atlas-zone-${zone.kind}`} />
+    {zone.kind === 'coastal' && <path className="atlas-city-ocean atlas-ocean-left-local" d="M0 0H17C13 22 18 43 12 61S14 84 21 100H0Z" />}
+    {zone.kind === 'suburban' && <><path className="atlas-hills" d="M0 0H100V29C77 20 59 32 41 24S15 19 0 31Z"/><g className="atlas-contours local"><path d="M9 14C30 5 58 9 86 17"/><path d="M5 21C31 12 62 17 94 24"/></g></>}
+    {zone.kind === 'desert' && <path className="atlas-mesa" d="M9 24L37 13 55 28 49 48 21 55 6 41Z" />}
+    {zone.kind === 'rural' && <rect x="3" y="3" width="94" height="94" fill="url(#atlas-fields)" opacity=".52" />}
+    <g className="atlas-zone-roads"><path d="M4 34C28 38 61 33 97 27"/><path d="M9 74C34 62 65 64 95 75"/><path d="M53 3C48 30 52 57 58 97"/></g>
+  </>;
+}
+
+function DistrictBackdrop({ district }: { district: WorldDistrict }) {
+  return <>
+    <rect width="100" height="100" className="atlas-district-base" />
+    <g className="atlas-building-blocks">
+      <path d="M8 12H35V31H8Z"/><path d="M48 10H71V31H48Z"/><path d="M76 10H94V31H76Z"/>
+      <path d="M7 62H34V88H7Z"/><path d="M49 62H68V88H49Z"/><path d="M75 75H94V91H75Z"/>
+    </g>
+    <path className="atlas-district-park" d="M74 36H94V63L84 69 73 60Z" />
+    <path className="atlas-service-ground" d="M47 35H66V49H47Z" />
+    <g className="atlas-minor-roads"><path d="M5 35H96"/><path d="M5 72H96"/><path d="M36 5V95"/></g>
+  </>;
+}
+
 function SettlementLayer({ map, regionId, currentId, onEnter }: { map: WorldMapState; regionId: string; currentId: string; onEnter: (item: WorldSettlement) => void }) {
-  return <>{map.settlements.filter(item => item.regionId === regionId).map(item => <Area key={item.id} geometry={item.geometry} name={item.name} current={item.id === currentId} onClick={() => onEnter(item)} />)}</>;
+  return <>{map.settlements.filter(item => item.regionId === regionId).map(item => (
+    <Area key={item.id} geometry={item.geometry} name={item.name} current={item.id === currentId} kind={item.kind} variant="settlement" onClick={() => onEnter(item)} />
+  ))}</>;
 }
+
 function ZoneLayer({ map, settlementId, currentId, onEnter }: { map: WorldMapState; settlementId: string; currentId: string; onEnter: (item: WorldZone) => void }) {
-  return <>{map.zones.filter(item => item.settlementId === settlementId).map(item => <Area key={item.id} geometry={item.geometry} name={item.name} current={item.id === currentId} onClick={() => onEnter(item)} />)}</>;
+  return <>{map.zones.filter(item => item.settlementId === settlementId).map(item => (
+    <Area key={item.id} geometry={item.geometry} name={item.name} current={item.id === currentId} kind={item.kind} variant="zone" onClick={() => onEnter(item)} />
+  ))}</>;
 }
+
 function DistrictLayer({ map, zoneId, currentId, onEnter }: { map: WorldMapState; zoneId: string; currentId: string; onEnter: (item: WorldDistrict) => void }) {
-  return <>{map.districts.filter(item => item.zoneId === zoneId).map(item => <Area key={item.id} geometry={item.geometry} name={item.name} current={item.id === currentId} onClick={() => onEnter(item)} />)}</>;
+  return <>{map.districts.filter(item => item.zoneId === zoneId).map(item => (
+    <Area key={item.id} geometry={item.geometry} name={item.name} current={item.id === currentId} kind={item.kind} variant="district" onClick={() => onEnter(item)} />
+  ))}</>;
 }
-function StreetLayer({ map, districtId, currentId, onEnter, emptyLabel }: { map: WorldMapState; districtId: string; currentId: string; onEnter: (item: WorldStreet) => void; emptyLabel: string }) {
+
+function DistrictStreetLayer({ map, districtId, selectedSegmentId, onSelect, emptyLabel }: { map: WorldMapState; districtId: string; selectedSegmentId: string; onSelect: (id: string) => void; emptyLabel: string }) {
   const streets = map.streets.filter(item => item.districtId === districtId);
   if (!streets.length) return <text x="50" y="50" textAnchor="middle" className="world-map-empty">{emptyLabel}</text>;
-  return <>{streets.map(item => <Road key={item.id} geometry={item.geometry} name={item.name} current={item.id === currentId} onClick={() => onEnter(item)} />)}</>;
-}
-function SegmentLayer({ map, streetId, currentId, selectedId, onSelect }: { map: WorldMapState; streetId: string; currentId: string; selectedId: string; onSelect: (id: string) => void }) {
-  const segments = map.segments.filter(item => item.streetId === streetId);
+  const streetIds = new Set(streets.map(item => item.id));
+  const segments = map.segments.filter(item => streetIds.has(item.streetId));
   const segmentIds = new Set(segments.map(item => item.id));
   const parcels = map.parcels.filter(item => segmentIds.has(item.segmentId));
   return <>
-    {segments.map(item => <Segment key={item.id} item={item} current={item.id === currentId} selected={item.id === selectedId} onClick={() => onSelect(item.id)} />)}
+    {streets.map(item => <StreetRoad key={item.id} street={item} current={item.id === map.current.streetId} />)}
+    {segments.map(item => <SegmentRoad key={item.id} item={item} current={item.id === map.current.segmentId} selected={item.id === selectedSegmentId} onClick={() => onSelect(item.id)} />)}
     {parcels.map(parcel => <ParcelMarker key={parcel.id} parcel={parcel} />)}
   </>;
 }
 
-function Area({ geometry, name, current, onClick }: { geometry: WorldMapGeometry; name: string; current: boolean; onClick: () => void }) {
-  return <g className={`world-map-area ${current ? 'world-map-current' : ''}`} onClick={onClick}>
+function Area({ geometry, name, current, kind, variant, onClick }: { geometry: WorldMapGeometry; name: string; current: boolean; kind: string; variant: 'settlement' | 'zone' | 'district'; onClick: () => void }) {
+  return <g className={`world-map-area world-map-area-${variant} world-map-kind-${kind} ${current ? 'world-map-current' : ''}`} onClick={onClick}>
     <polygon points={points(geometry)} />
-    <circle cx={geometry.center.x} cy={geometry.center.y} r="1.1" />
-    <text x={geometry.center.x} y={geometry.center.y - 2.3} textAnchor="middle">{name}</text>
+    <circle cx={geometry.center.x} cy={geometry.center.y} r={variant === 'settlement' ? 1.15 : .78} />
+    <text x={geometry.center.x} y={geometry.center.y - (variant === 'settlement' ? 2.1 : 1.7)} textAnchor="middle">{name}</text>
   </g>;
 }
-function Road({ geometry, name, current, onClick }: { geometry: WorldMapGeometry; name: string; current: boolean; onClick: () => void }) {
-  return <g className={`world-map-road ${current ? 'world-map-current' : ''}`} onClick={onClick}>
-    <path d={path(geometry)} className="world-map-road-hit" />
-    <path d={path(geometry)} className="world-map-road-line" />
-    <circle cx={geometry.center.x} cy={geometry.center.y} r="1.2" />
-    <text x={geometry.center.x} y={geometry.center.y - 2.2} textAnchor="middle">{name}</text>
+
+function StreetRoad({ street, current }: { street: WorldStreet; current: boolean }) {
+  return <g className={`world-map-street ${current ? 'world-map-street-current' : ''}`}>
+    <path d={path(street.geometry)} className="world-map-street-casing" />
+    <path d={path(street.geometry)} className="world-map-street-surface" />
+    <text x={street.geometry.center.x} y={street.geometry.center.y - 1.7} textAnchor="middle">{street.name}</text>
   </g>;
 }
-function Segment({ item, current, selected, onClick }: { item: WorldStreetSegment; current: boolean; selected: boolean; onClick: () => void }) {
+
+function SegmentRoad({ item, current, selected, onClick }: { item: WorldStreetSegment; current: boolean; selected: boolean; onClick: () => void }) {
   return <g className={`world-map-segment ${item.playable ? 'world-map-segment-live' : 'world-map-segment-planned'} ${current ? 'world-map-current' : ''} ${selected ? 'world-map-selected' : ''}`} onClick={onClick}>
     <path d={path(item.geometry)} className="world-map-segment-hit" />
-    <path d={path(item.geometry)} className="world-map-segment-line" />
-    <circle cx={item.geometry.center.x} cy={item.geometry.center.y} r={current ? 1.8 : 1.1} />
-    <text x={item.geometry.center.x} y={item.geometry.center.y - 2.4} textAnchor="middle">{item.displayName}</text>
+    <path d={path(item.geometry)} className="world-map-segment-focus" />
+    <circle cx={item.geometry.center.x} cy={item.geometry.center.y} r={current ? 1.35 : .9} />
   </g>;
 }
+
 function ParcelMarker({ parcel }: { parcel: WorldParcel }) {
   const service = parcel.serviceKey !== null;
-  return <g className={`world-map-parcel ${service ? 'world-map-parcel-service' : ''} ${parcel.playerOwnable ? 'world-map-parcel-ownable' : ''}`}>
-    <circle cx={parcel.geometry.center.x} cy={parcel.geometry.center.y} r="1.15" />
+  return <g className={`world-map-parcel world-map-parcel-${parcel.kind} ${service ? 'world-map-parcel-service' : ''} ${parcel.playerOwnable ? 'world-map-parcel-ownable' : ''}`}>
+    {parcel.geometry.polygon.length > 2 ? <polygon points={points(parcel.geometry)} /> : <circle cx={parcel.geometry.center.x} cy={parcel.geometry.center.y} r=".9" />}
     <title>{parcel.name}</title>
   </g>;
+}
+
+function Mountain({ x, y }: { x: number; y: number }) {
+  return <g transform={`translate(${x} ${y})`}><path d="M-3 3L0-3 3 3Z"/><path d="M-1.15-.7L0-3 1.1-.8 .35-.35 0-.7-.45-.25Z" className="snow"/></g>;
+}
+
+function walkingConnection(map: WorldMapState, from: string, to: string) {
+  return map.connections.find(item => item.modes.includes('walk') && (
+    (item.fromSegmentId === from && item.toSegmentId === to) ||
+    (item.bidirectional && item.fromSegmentId === to && item.toSegmentId === from)
+  ));
+}
+
+function levelLabel(level: MapLevel, copy: ReturnType<typeof worldMapCopy>) {
+  if (level === 'region') return copy.region;
+  if (level === 'settlement') return copy.settlement;
+  if (level === 'zone') return copy.zone;
+  return copy.district;
 }
 
 function points(geometry: WorldMapGeometry) { return geometry.polygon.map(point => `${point.x},${point.y}`).join(' '); }
