@@ -41,11 +41,88 @@ export const BootstrapStateSchema = z.object({
   location: PlayerLocationSchema
 });
 
-export const WorldActionIdSchema = z.enum([
-  'walk_market_street',
-  'work_delivery_shift',
-  'shoplift_corner_store'
+export const StreetSegmentIdSchema = z.enum([
+  'market_block_3',
+  'cypress_corner',
+  'mira_alley'
 ]);
+
+export const StreetObjectIdSchema = z.enum([
+  'corner_store',
+  'el_camino',
+  'cypress_apartments',
+  'service_alley',
+  'market_dumpster',
+  'maya_rojas',
+  'exit_market',
+  'exit_cypress',
+  'exit_alley'
+]);
+
+export const WorldActionIdSchema = z.enum([
+  'travel_market_block_3',
+  'travel_cypress_corner',
+  'travel_mira_alley',
+  'inspect_corner_store',
+  'enter_corner_store',
+  'shoplift_corner_store',
+  'speak_corner_clerk',
+  'deliver_el_camino',
+  'inspect_el_camino',
+  'enter_el_camino',
+  'inspect_apartment',
+  'enter_apartment',
+  'inspect_service_alley',
+  'search_dumpster',
+  'talk_maya',
+  'ask_maya_information'
+]);
+
+export const WorldNoticeIdSchema = z.enum([
+  'travel_market',
+  'travel_cypress',
+  'travel_alley',
+  'corner_inspected',
+  'corner_entered',
+  'shoplift_witnessed',
+  'shoplift_clean',
+  'clerk_spoken',
+  'delivery_complete',
+  'restaurant_inspected',
+  'restaurant_entered',
+  'apartment_inspected',
+  'alley_inspected',
+  'dumpster_salvage',
+  'maya_greeting',
+  'maya_tip'
+]);
+
+export const StreetActionAvailabilitySchema = z.enum([
+  'available',
+  'cooldown',
+  'locked',
+  'already_done',
+  'wrong_location'
+]);
+
+export const StreetActionStateSchema = z.object({
+  actionId: WorldActionIdSchema,
+  availability: StreetActionAvailabilitySchema,
+  cooldownEndsAt: z.iso.datetime().nullable()
+});
+
+export const StreetFlagsSchema = z.object({
+  cornerStoreAlerted: z.boolean(),
+  alleyTipKnown: z.boolean()
+});
+
+export const StreetStateSchema = z.object({
+  currentSegmentId: StreetSegmentIdSchema,
+  visitedSegmentIds: z.array(StreetSegmentIdSchema),
+  visibleObjectIds: z.array(StreetObjectIdSchema),
+  flags: StreetFlagsSchema,
+  actionStates: z.array(StreetActionStateSchema)
+});
 
 export const WorldActionRequestSchema = z.object({
   requestId: z.uuid(),
@@ -56,9 +133,14 @@ export const WorldActionRequestSchema = z.object({
 export const WorldActionResultSchema = z.object({
   requestId: z.uuid(),
   actionId: WorldActionIdSchema,
-  title: z.string(),
-  feedback: z.string(),
-  state: BootstrapStateSchema
+  noticeId: WorldNoticeIdSchema,
+  state: BootstrapStateSchema,
+  street: StreetStateSchema,
+  reward: z.object({
+    itemKey: z.string(),
+    displayName: z.string(),
+    quantity: z.number().int().positive()
+  }).optional()
 });
 
 export const DevSessionSchema = z.object({
@@ -193,7 +275,14 @@ export const FinanceMutationResultSchema = z.object({
 export type HudState = z.infer<typeof HudStateSchema>;
 export type CharacterRecipe = z.infer<typeof CharacterRecipeSchema>;
 export type BootstrapState = z.infer<typeof BootstrapStateSchema>;
+export type StreetSegmentId = z.infer<typeof StreetSegmentIdSchema>;
+export type StreetObjectId = z.infer<typeof StreetObjectIdSchema>;
 export type WorldActionId = z.infer<typeof WorldActionIdSchema>;
+export type WorldNoticeId = z.infer<typeof WorldNoticeIdSchema>;
+export type StreetActionAvailability = z.infer<typeof StreetActionAvailabilitySchema>;
+export type StreetActionState = z.infer<typeof StreetActionStateSchema>;
+export type StreetFlags = z.infer<typeof StreetFlagsSchema>;
+export type StreetState = z.infer<typeof StreetStateSchema>;
 export type WorldActionRequest = z.infer<typeof WorldActionRequestSchema>;
 export type WorldActionResult = z.infer<typeof WorldActionResultSchema>;
 export type InventoryContainerKey = z.infer<typeof InventoryContainerKeySchema>;
@@ -210,13 +299,21 @@ export type FinanceLedgerEntry = z.infer<typeof FinanceLedgerEntrySchema>;
 export type FinanceState = z.infer<typeof FinanceStateSchema>;
 export type FinanceMutationResult = z.infer<typeof FinanceMutationResultSchema>;
 
-export const WORLD_ACTIONS: ReadonlyArray<{
-  id: WorldActionId;
-  label: string;
-  kind: 'travel' | 'work' | 'crime';
-  description: string;
-}> = [
-  { id: 'walk_market_street', label: 'Walk to Market Street', kind: 'travel', description: 'Move through Las Palmas on foot.' },
-  { id: 'work_delivery_shift', label: 'Take delivery shift', kind: 'work', description: 'Earn cash, but spend energy and hydration.' },
-  { id: 'shoplift_corner_store', label: 'Shoplift corner store', kind: 'crime', description: 'Fast cash with stress and police risk.' }
+export const WORLD_ACTION_IDS: ReadonlyArray<WorldActionId> = [
+  'travel_market_block_3',
+  'travel_cypress_corner',
+  'travel_mira_alley',
+  'inspect_corner_store',
+  'enter_corner_store',
+  'shoplift_corner_store',
+  'speak_corner_clerk',
+  'deliver_el_camino',
+  'inspect_el_camino',
+  'enter_el_camino',
+  'inspect_apartment',
+  'enter_apartment',
+  'inspect_service_alley',
+  'search_dumpster',
+  'talk_maya',
+  'ask_maya_information'
 ];

@@ -13,7 +13,16 @@ const recipe = {
 const db = createDatabase(loadConfig());
 try {
   await db.query('INSERT INTO players (id) VALUES ($1) ON CONFLICT (id) DO NOTHING', [playerId]);
-  await db.query('INSERT INTO player_state (player_id) VALUES ($1) ON CONFLICT (player_id) DO NOTHING', [playerId]);
+  await db.query(`
+    INSERT INTO player_state (player_id, street_segment)
+    VALUES ($1, 'Market Street / Block 3')
+    ON CONFLICT (player_id) DO NOTHING
+  `, [playerId]);
+  await db.query(`
+    INSERT INTO player_street_state (player_id, current_segment_id, visited_segment_ids)
+    VALUES ($1, 'market_block_3', ARRAY['market_block_3']::text[])
+    ON CONFLICT (player_id) DO NOTHING
+  `, [playerId]);
   await db.query({
     text: `INSERT INTO characters (id, player_id, display_name, recipe, is_active) VALUES ($1, $2, $3, $4, true) ON CONFLICT (id) DO UPDATE SET recipe = EXCLUDED.recipe, updated_at = now()`,
     values: [characterId, playerId, 'My Character', recipe]

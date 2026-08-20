@@ -7,7 +7,7 @@ Mobile-specific work is deferred until the desktop browser game is functionally 
 | System | Regression-protected prototype functionality | Production status |
 | --- | --- | --- |
 | Shell and HUD | Desktop sidebar, sticky location context, one canonical HUD for Health, Energy, Satiety, Hydration, Stress, contextual Police Heat and Cash | Browser shell v3 live; BG/EN localization, language switch, glass controls and notification queue implemented |
-| World | Contextual district screen; see → interact → choice → consequence → state change → feedback; world hierarchy from settlement to street segment and physical access | One district and three server actions live |
+| World | Contextual district screen; see → interact → choice → consequence → state change → feedback; world hierarchy from settlement to street segment and physical access | Street interaction v0.1 live: three connected 2.5D segments, selectable POIs/exits/NPC, contextual actions, durable exploration and consequences, physical dumpster rewards, locked access and Redis cooldowns |
 | Character | MakeHuman HM08 male/female base, live Three.js preview, body/appearance/face/grooming controls, camera, diagnostics and saved character recipe | Recipe persisted; renderer and controls pending |
 | Inventory | Item instances in physical slot containers, capacity/weight, drag/drop, inspect, use, drop, external access based on current world/property/vehicle context | Core PostgreSQL/API/React slice in progress |
 | Finance | Branch/ATM/phone access, cash/checking/savings, internal and recipient transfers, ledger, limits, credit score, loans, DoradoX exchange and fictional crypto assets | Core PostgreSQL/API/React slice implemented; browser regression pending |

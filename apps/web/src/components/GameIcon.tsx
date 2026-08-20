@@ -7,7 +7,8 @@ export type GameIconName =
   | 'arrow-left-right' | 'mouse-pointer' | 'lock' | 'wifi' | 'coins'
   | 'wallet' | 'credit-card' | 'receipt' | 'chart' | 'smartphone' | 'banknote'
   | 'send' | 'arrow-down-left' | 'arrow-up-right' | 'check' | 'x' | 'sparkles'
-  | 'chevron-down' | 'languages' | 'info' | 'alert-triangle' | 'gift';
+  | 'chevron-down' | 'languages' | 'info' | 'alert-triangle' | 'gift'
+  | 'store' | 'trash' | 'eye' | 'message' | 'footprints' | 'door-open' | 'search' | 'arrow-right';
 
 const paths: Record<GameIconName, ReactNode> = {
   world: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" /></>,
@@ -51,6 +52,14 @@ const paths: Record<GameIconName, ReactNode> = {
   , info: <><circle cx="12" cy="12" r="9" /><path d="M12 11v6M12 7h.01" /></>
   , 'alert-triangle': <><path d="M10.3 3.6 2.4 17.4A2 2 0 0 0 4.1 20h15.8a2 2 0 0 0 1.7-2.6L13.7 3.6a2 2 0 0 0-3.4 0Z" /><path d="M12 9v4M12 17h.01" /></>
   , gift: <><rect x="3" y="8" width="18" height="13" rx="2" /><path d="M12 8v13M3 12h18M7.5 8C5 8 4 6.5 4.8 5.2 6 3.2 9 5 12 8M16.5 8c2.5 0 3.5-1.5 2.7-2.8C18 3.2 15 5 12 8" /></>
+  , store: <><path d="M4 10v10h16V10" /><path d="M3 4h18l-2 6a3 3 0 0 1-4 0 3 3 0 0 1-6 0 3 3 0 0 1-4 0L3 4Z" /><path d="M8 20v-6h8v6" /></>
+  , trash: <><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6" /></>
+  , eye: <><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.5" /></>
+  , message: <><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z" /><path d="M8 9h8M8 13h5" /></>
+  , footprints: <><path d="M8.5 13.5c2 1.2 2.5 3.8 1.1 5.9-1.4 2.1-4.4 1.9-5.5.1-1.2-1.9.4-4.9 2.1-6.1.7-.5 1.5-.4 2.3.1ZM15.5 3.2c2-1.2 4.5.2 4.5 2.5 0 2.2-2.5 4.1-4.4 4.6-2.2.5-3.7-1.7-2.7-3.8.7-1.5 1.5-2.7 2.6-3.3Z" /></>
+  , 'door-open': <><path d="M4 21h16M6 21V4l10-2v19M16 5h3v16" /><path d="M12 12h.01" /></>
+  , search: <><circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.5 15.5 5 5" /></>
+  , 'arrow-right': <><path d="M4 12h16M14 6l6 6-6 6" /></>
 };
 
 export function GameIcon({ name, size = 18, className = '' }: { name: GameIconName; size?: number; className?: string }) {

@@ -12,7 +12,7 @@ flowchart TD
   API -->|authoritative result| Web
 ```
 
-The first vertical slice is one Las Palmas district. It proves the full loop: see world, choose an action, server resolves consequences, persistent state changes and the HUD gives feedback.
+The first vertical slice is a three-segment Las Palmas street network. React renders code-native 2.5D scenes and selectable objects, but the API decides whether travel, access, work, crime, NPC and salvage actions are valid. PostgreSQL persists the current segment, exploration, durable flags, player condition, cash and inventory rewards. Redis exposes only the remaining lifetime of short-lived action cooldowns.
 
 ## State boundaries
 
@@ -21,3 +21,5 @@ The first vertical slice is one Las Palmas district. It proves the full loop: se
 - Cash is stored as integer cents.
 - Every player state mutation increments `version` for optimistic concurrency.
 - Every action has a client-generated UUID and a unique durable log row, preventing duplicate rewards on retries.
+- Street object selection is local presentation state; visible objects, action availability, cooldowns and consequences come from the API.
+- Dumpster finds are inserted into the same physical inventory tables used by the Inventory screen.

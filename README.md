@@ -42,8 +42,9 @@ The web client runs at `http://localhost:5173`; the API runs at `http://localhos
 - Canonical SOL DORADO desktop/mobile shell and HUD
 - Redis-backed development session and presence
 - PostgreSQL-backed character identity, vitals, cash and location
-- One playable Las Palmas district screen
-- Server-authoritative walking, legal shift and petty-crime actions
+- One recognizable 2.5D Las Palmas street scene with three connected segments
+- Server-authoritative walking, contextual POI actions, legal work, petty crime and physical salvage
+- PostgreSQL-backed exploration and street consequences with Redis-backed interaction cooldowns
 - Idempotent action requests and persistent action log
 - Bootstrap endpoint returning one authoritative player snapshot
 - PostgreSQL-backed physical inventory containers and item instances
