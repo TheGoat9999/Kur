@@ -16,6 +16,27 @@ import './inventory.css';
 interface Props { onStateChange: (state: BootstrapState) => void; }
 type CategoryFilter = ItemCategory | 'all';
 
+interface InventoryV02Copy {
+  catalogLive: string;
+  categoryFilter: string;
+  all: string;
+  category: string;
+  weight: string;
+  quantity: string;
+  location: string;
+  value: string;
+  type: string;
+  condition: string;
+  noDirectUse: string;
+  health: string;
+  energy: string;
+  satiety: string;
+  hydration: string;
+  stress: string;
+  policeHeat: string;
+  categories: Record<ItemCategory, string>;
+}
+
 const CATEGORY_ORDER: readonly ItemCategory[] = [
   'personal', 'food', 'drink', 'tool', 'material', 'electronics', 'medical', 'weapon'
 ];
@@ -287,7 +308,7 @@ function ItemContents({ item, definition, quickSlot }: { item: InventoryItem; de
       {item.quantity > 1 && <b className="item-quantity">×{item.quantity}</b>}
       {quickSlot && <small className="quick-slot">{quickSlot}</small>}
       {condition !== null && <span className="slot-condition"><i style={{ width: `${condition}%` }} /></span>}
-      {definition?.legality !== 'legal' && <span className={`slot-legality slot-legality-${definition?.legality}`} />}
+      {definition && definition.legality !== 'legal' && <span className={`slot-legality slot-legality-${definition.legality}`} />}
     </>
   );
 }
@@ -315,7 +336,7 @@ function Meta({ label, value }: { label: string; value: string }) {
   return <div className="item-meta"><small>{label}</small><b>{value}</b></div>;
 }
 
-function ConditionBlock({ item, copy }: { item: InventoryItem; copy: (typeof INVENTORY_V02_COPY)['en'] }) {
+function ConditionBlock({ item, copy }: { item: InventoryItem; copy: InventoryV02Copy }) {
   const condition = readCondition(item.metadata);
   if (condition === null) return null;
   return (
@@ -326,7 +347,7 @@ function ConditionBlock({ item, copy }: { item: InventoryItem; copy: (typeof INV
   );
 }
 
-function EffectList({ definition, copy }: { definition: ItemDefinition; copy: (typeof INVENTORY_V02_COPY)['en'] }) {
+function EffectList({ definition, copy }: { definition: ItemDefinition; copy: InventoryV02Copy }) {
   const effects = Object.entries(definition.useEffects).filter(([, value]) => typeof value === 'number' && value !== 0);
   if (effects.length === 0) return <p className="item-passive-note">{copy.noDirectUse}</p>;
   return (
@@ -340,7 +361,7 @@ function EffectList({ definition, copy }: { definition: ItemDefinition; copy: (t
   );
 }
 
-function effectLabel(key: string, copy: (typeof INVENTORY_V02_COPY)['en']) {
+function effectLabel(key: string, copy: InventoryV02Copy) {
   const labels: Record<string, string> = {
     health: copy.health,
     energy: copy.energy,
@@ -356,7 +377,6 @@ function useLabel(definition: ItemDefinition, locale: 'bg' | 'en') {
   if (locale === 'bg') {
     if (definition.category === 'drink') return 'Изпий';
     if (definition.category === 'food') return 'Изяж';
-    if (definition.category === 'medical') return 'Използвай';
     return 'Използвай';
   }
   if (definition.category === 'drink') return 'Drink';
@@ -395,7 +415,7 @@ const INVENTORY_V02_COPY = {
     health: 'Здраве', energy: 'Енергия', satiety: 'Ситост', hydration: 'Хидратация', stress: 'Стрес', policeHeat: 'Издирване',
     categories: { personal: 'Лични', food: 'Храна', drink: 'Напитки', tool: 'Инструменти', material: 'Материали', electronics: 'Електроника', medical: 'Медицински', weapon: 'Оръжия' }
   }
-} as const;
+} satisfies Record<'en' | 'bg', InventoryV02Copy>;
 
 function humanizeError(reason: unknown, locale: 'bg' | 'en') {
   const value = reason instanceof Error ? reason.message : String(reason);
