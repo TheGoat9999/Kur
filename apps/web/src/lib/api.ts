@@ -5,6 +5,7 @@ import {
   FinanceStateSchema,
   InventoryMutationResultSchema,
   InventoryStateSchema,
+  StreetStateSchema,
   WorldActionResultSchema,
   type BootstrapState,
   type FinanceAccessMode,
@@ -14,6 +15,7 @@ import {
   type InventoryContainerKey,
   type InventoryMutationResult,
   type InventoryState,
+  type StreetState,
   type WorldActionId,
   type WorldActionResult
 } from '@sol-dorado/contracts';
@@ -52,13 +54,21 @@ export async function getBootstrap(): Promise<BootstrapState> {
   return BootstrapStateSchema.parse(await response.json());
 }
 
+export async function getStreetState(): Promise<StreetState> {
+  const response = await authenticatedFetch('/v1/world');
+  if (!response.ok) throw new ApiCommandError(await responseErrorCode(response, 'world_load_failed'));
+  return StreetStateSchema.parse(await response.json());
+}
+
 export async function runWorldAction(actionId: WorldActionId, expectedVersion: number): Promise<WorldActionResult> {
   const response = await authenticatedFetch('/v1/world/actions', {
     method: 'POST',
     body: JSON.stringify({ requestId: crypto.randomUUID(), actionId, expectedVersion })
   });
-  if (response.status === 409) throw new Error('Your state changed in another session. Refreshing is required.');
-  if (!response.ok) throw new Error(`Action failed (${response.status})`);
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null) as { error?: string; cooldownEndsAt?: string | null } | null;
+    throw new ApiCommandError(payload?.error ?? `world_action_failed_${response.status}`, payload ?? undefined);
+  }
   return WorldActionResultSchema.parse(await response.json());
 }
 
@@ -154,4 +164,15 @@ async function financeCommand(path: string, body?: unknown): Promise<FinanceMuta
 async function apiError(response: Response, fallback: string) {
   const payload = await response.json().catch(() => null) as { error?: string } | null;
   return payload?.error ?? `${fallback} (${response.status})`;
+}
+
+async function responseErrorCode(response: Response, fallback: string) {
+  const payload = await response.json().catch(() => null) as { error?: string } | null;
+  return payload?.error ?? fallback;
+}
+
+export class ApiCommandError extends Error {
+  constructor(public readonly code: string, public readonly details?: Record<string, unknown>) {
+    super(code);
+  }
 }

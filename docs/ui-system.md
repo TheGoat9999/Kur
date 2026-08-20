@@ -27,6 +27,8 @@ The glass direction is inspired by modern game interfaces: layered translucent s
 - The sidebar communicates information architecture and implementation status; it must not pretend that placeholders are playable.
 - The HUD is the single source of truth for player condition and cash.
 - Use panels only when they support a task. World interaction remains contextual and world-first.
+- Street controls live on recognizable scene objects. Object labels reveal on hover/focus and the interaction panel appears only after selection.
+- Travel exits are visible parts of the scene; switching street segments must never look like dashboard tab navigation.
 - Avoid emoji navigation, generic SaaS cards, giant empty rectangles and repeated status summaries.
 - Animation confirms hierarchy, state change and feedback; it is not decorative noise.
 - Each migrated feature must have loading, empty, error and disabled-access states.

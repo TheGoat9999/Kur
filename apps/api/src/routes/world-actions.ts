@@ -1,21 +1,37 @@
 import { Router } from 'express';
 import { WorldActionRequestSchema, WorldActionResultSchema } from '@sol-dorado/contracts';
 import type { AppServices } from '../types.js';
-import { applyWorldAction } from '../domain/actions.js';
+import { applyWorldAction, getActionAvailability, STREET_SEGMENTS } from '../domain/actions.js';
 import { getBootstrapState } from '../services/player-state.js';
+import {
+  addStreetReward,
+  getStreetState,
+  lockStreetProgress,
+  WorldActionCommandError,
+  worldCooldownKey
+} from '../services/street-world.js';
 
 export function worldActionRoutes(services: AppServices) {
   const router = Router();
+
+  router.get('/v1/world', async (request, response) => {
+    response.json(await getStreetState(services.db, services.redis, request.playerId!));
+  });
+
   router.post('/v1/world/actions', async (request, response) => {
     const parsed = WorldActionRequestSchema.safeParse(request.body);
     if (!parsed.success) return response.status(400).json({ error: 'invalid_action', issues: parsed.error.issues });
     const input = parsed.data;
     const playerId = request.playerId!;
     const client = await services.db.connect();
+    let cooldownWasSet = false;
 
     try {
       await client.query('BEGIN');
-      const duplicate = await client.query('SELECT result FROM world_action_log WHERE player_id = $1 AND request_id = $2', [playerId, input.requestId]);
+      const duplicate = await client.query(
+        'SELECT result FROM world_action_log WHERE player_id = $1 AND request_id = $2',
+        [playerId, input.requestId]
+      );
       if (duplicate.rows[0]) {
         await client.query('COMMIT');
         return response.json(WorldActionResultSchema.parse(duplicate.rows[0].result));
@@ -23,13 +39,16 @@ export function worldActionRoutes(services: AppServices) {
 
       const stateResult = await client.query('SELECT * FROM player_state WHERE player_id = $1 FOR UPDATE', [playerId]);
       const row = stateResult.rows[0];
-      if (!row) { await client.query('ROLLBACK'); return response.status(404).json({ error: 'player_not_found' }); }
+      if (!row) throw new WorldActionCommandError('player_not_found', 404);
       if (Number(row.version) !== input.expectedVersion) {
-        await client.query('ROLLBACK');
-        return response.status(409).json({ error: 'state_version_conflict', currentVersion: Number(row.version) });
+        throw new WorldActionCommandError('state_version_conflict', 409, { currentVersion: Number(row.version) });
       }
 
-      const outcome = applyWorldAction({
+      const progress = await lockStreetProgress(client, playerId);
+      const cooldownKey = worldCooldownKey(playerId, input.actionId);
+      const remainingCooldownMs = await services.redis.pttl(cooldownKey);
+      const cooldownEndsAt = remainingCooldownMs > 0 ? Date.now() + remainingCooldownMs : null;
+      const current = {
         health: row.health,
         energy: row.energy,
         satiety: row.satiety,
@@ -37,26 +56,95 @@ export function worldActionRoutes(services: AppServices) {
         stress: row.stress,
         policeHeat: row.police_heat,
         cashCents: Number(row.cash_cents),
-        streetSegment: row.street_segment
-      }, input.actionId);
+        ...progress
+      };
+      const availability = getActionAvailability(current, input.actionId, cooldownEndsAt);
+      if (availability !== 'available') {
+        throw new WorldActionCommandError(`world_action_${availability}`, 409, {
+          cooldownEndsAt: cooldownEndsAt === null ? null : new Date(cooldownEndsAt).toISOString()
+        });
+      }
+
+      const outcome = applyWorldAction(current, input.actionId);
+      if (outcome.reward) await addStreetReward(client, playerId, outcome.reward);
 
       await client.query({
-        text: `UPDATE player_state SET version = version + 1, health = $2, energy = $3, satiety = $4, hydration = $5, stress = $6, police_heat = $7, cash_cents = $8, street_segment = $9, updated_at = now() WHERE player_id = $1`,
-        values: [playerId, outcome.next.health, outcome.next.energy, outcome.next.satiety, outcome.next.hydration, outcome.next.stress, outcome.next.policeHeat, outcome.next.cashCents, outcome.next.streetSegment]
+        text: `
+          UPDATE player_state
+          SET version = version + 1,
+              health = $2,
+              energy = $3,
+              satiety = $4,
+              hydration = $5,
+              stress = $6,
+              police_heat = $7,
+              cash_cents = $8,
+              street_segment = $9,
+              updated_at = now()
+          WHERE player_id = $1
+        `,
+        values: [
+          playerId,
+          outcome.next.health,
+          outcome.next.energy,
+          outcome.next.satiety,
+          outcome.next.hydration,
+          outcome.next.stress,
+          outcome.next.policeHeat,
+          outcome.next.cashCents,
+          STREET_SEGMENTS[outcome.next.currentSegmentId].displayName
+        ]
+      });
+      await client.query({
+        text: `
+          UPDATE player_street_state
+          SET current_segment_id = $2,
+              visited_segment_ids = $3,
+              flags = $4,
+              updated_at = now()
+          WHERE player_id = $1
+        `,
+        values: [
+          playerId,
+          outcome.next.currentSegmentId,
+          outcome.next.visitedSegmentIds,
+          outcome.next.flags
+        ]
       });
 
+      if (outcome.cooldownMs) {
+        await services.redis.set(cooldownKey, '1', 'PX', outcome.cooldownMs);
+        cooldownWasSet = true;
+      }
+
       const state = await getBootstrapState(client, playerId);
-      if (!state) throw new Error('State disappeared during action transaction');
-      const result = WorldActionResultSchema.parse({ requestId: input.requestId, actionId: input.actionId, title: outcome.title, feedback: outcome.feedback, state });
-      await client.query('INSERT INTO world_action_log (player_id, request_id, action_id, result) VALUES ($1, $2, $3, $4)', [playerId, input.requestId, input.actionId, result]);
+      if (!state) throw new WorldActionCommandError('player_not_found', 404);
+      const street = await getStreetState(client, services.redis, playerId);
+      const result = WorldActionResultSchema.parse({
+        requestId: input.requestId,
+        actionId: input.actionId,
+        noticeId: outcome.noticeId,
+        state,
+        street,
+        reward: outcome.reward
+      });
+      await client.query(
+        'INSERT INTO world_action_log (player_id, request_id, action_id, result) VALUES ($1, $2, $3, $4)',
+        [playerId, input.requestId, input.actionId, result]
+      );
       await client.query('COMMIT');
       response.json(result);
     } catch (error) {
       await client.query('ROLLBACK');
+      if (cooldownWasSet) await services.redis.del(worldCooldownKey(playerId, input.actionId));
+      if (error instanceof WorldActionCommandError) {
+        return response.status(error.status).json({ error: error.code, ...error.details });
+      }
       throw error;
     } finally {
       client.release();
     }
   });
+
   return router;
 }
