@@ -35,6 +35,8 @@ export interface StreetPopulationDefinition {
   vehicles: StreetVehicleSlot[];
 }
 
+type StreetNpcMotion = Partial<Pick<StreetNpcSlot, 'toX' | 'toY' | 'durationSeconds' | 'delaySeconds' | 'direction'>>;
+
 const MAYA_VISUAL: WorldCharacterVisual = {
   ...visualFromSeed('maya-rojas'),
   body: 'female',
@@ -93,7 +95,7 @@ export const STREET_POPULATION: Record<StreetSegmentId, StreetPopulationDefiniti
   }
 };
 
-function npc(id: string, x: number, y: number, seed: string, overrides: Partial<StreetNpcSlot> = {}): StreetNpcSlot {
+function npc(id: string, x: number, y: number, seed: string, overrides: StreetNpcMotion = {}): StreetNpcSlot {
   return { id, x, y, visual: visualFromSeed(seed), ...overrides };
 }
 
