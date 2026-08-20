@@ -2,9 +2,9 @@
 
 This is the canonical implementation order for the world foundation. Do not skip ahead by building one-off movement, vehicle, NPC or map systems that would later need replacement.
 
-## Phase 1 — World v0.3: World Structure
+## Phase 1 — World v0.3: World Structure + Atlas
 
-Goal: make the entire geography one canonical backend-owned model rather than duplicated map/street configuration.
+Goal: make the entire geography one canonical backend-owned model and present it as a credible world map rather than a diagram/dashboard.
 
 Deliverables:
 - Region → Settlement → Zone → District → Street → Street Segment → Parcel/Site hierarchy.
@@ -12,11 +12,23 @@ Deliverables:
 - The existing Market Block 3, Cypress Corner and Mira Alley become canonical street segments in this hierarchy.
 - Sparse structural coverage for the wider SOL DORADO region: main city, desert town, coastal town and village, with authored zones/district skeletons.
 - World API returning the hierarchy and the player's current canonical path.
-- Interactive drill-down map: Region → Settlement → Zone → District → Street.
-- World map is navigation/inspection only in this phase; it must not teleport the player.
+- Atlas-style drill-down map: Region → Settlement → Zone → District.
+- Region view must show credible geography: coastline/water, relief/mountains, vegetation/forest, fields/agriculture, desert/dry terrain, rivers and major routes where appropriate.
+- Settlement/zone/district boundaries must be authored as non-overlapping geographic geometry, not independent placeholder polygons.
+- District view keeps the street network visible; selecting a segment never opens a meaningless isolated-line view.
+- Selecting the current playable segment exposes **Open street**.
+- Selecting another directly connected playable segment exposes server-authoritative **Travel here**. This is only the minimal map-to-street walking transition; full route navigation remains Phase 2.
+- Planned/unplayable streets remain inspectable but clearly disabled for travel.
 - Institutional placement begins at district/zone level instead of repeating police, EMS, taxi or mechanic content on every street.
+- Desktop and mobile atlas must fit the available viewport without requiring page-length scrolling.
 
-Exit criteria: the world map and street scene both refer to the same persistent world entities and stable IDs.
+Quality gate before Phase 2:
+- The atlas must visually read as an actual fictional region/city map, not graph paper, overlapping polygons or giant labels.
+- No sibling settlement, zone or district boundaries may visually overlap unless a future feature explicitly models an overlay layer.
+- Player location, selected geography and travel/open actions must be immediately understandable.
+- Do not proceed to Street v0.3 until this atlas is manually accepted.
+
+Exit criteria: the atlas and street scene refer to the same persistent world entities and stable IDs, and the atlas passes the visual/interaction quality gate above.
 
 ## Phase 2 — Street v0.3: Navigation
 
