@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { BootstrapState, StreetObjectId, StreetState, WorldActionId, WorldNoticeId } from '@sol-dorado/contracts';
+import type { WorldMapState } from '@sol-dorado/contracts/world-map';
 import { getStreetSpawnPosition, type StreetPosition } from '@sol-dorado/contracts/world-position';
 import { GameIcon } from '../../components/GameIcon';
 import { useNotifications, type NotificationTone } from '../../components/Notifications';
 import { useI18n, type TranslationKey } from '../../i18n';
-import { ApiCommandError, getBootstrap, getStreetPosition, getStreetState, moveStreetPlayer, runWorldAction } from '../../lib/api';
+import { ApiCommandError, getBootstrap, getStreetPosition, getStreetState, getWorldMap, moveStreetPlayer, runWorldAction, travelWorldMap } from '../../lib/api';
 import { StreetScene } from './StreetScene';
+import { WorldMapView } from './WorldMapView';
+import { worldMapCopy } from './world-map-copy';
 
 interface Props { state: BootstrapState; onStateChange: (state: BootstrapState) => void; }
 
@@ -29,7 +32,7 @@ const notices: Record<WorldNoticeId, { title: TranslationKey; message: Translati
 };
 
 export function WorldView({ state, onStateChange }: Props) {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const { push } = useNotifications();
   const [street, setStreet] = useState<StreetState | null>(null);
   const [position, setPosition] = useState<StreetPosition | null>(null);
@@ -37,6 +40,11 @@ export function WorldView({ state, onStateChange }: Props) {
   const [busy, setBusy] = useState<WorldActionId | null>(null);
   const [moving, setMoving] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  const [worldMap, setWorldMap] = useState<WorldMapState | null>(null);
+  const [mapOpen, setMapOpen] = useState(false);
+  const [mapBusy, setMapBusy] = useState(false);
+  const [mapTravelBusy, setMapTravelBusy] = useState(false);
+  const mapCopy = worldMapCopy(locale);
 
   const load = useCallback(async () => {
     setLoadError(false);
@@ -65,6 +73,38 @@ export function WorldView({ state, onStateChange }: Props) {
     return () => window.clearTimeout(timer);
   }, [street, load]);
 
+  async function openMap() {
+    if (mapBusy) return;
+    if (worldMap) { setMapOpen(true); return; }
+    setMapBusy(true);
+    try {
+      setWorldMap(await getWorldMap());
+      setMapOpen(true);
+    } catch {
+      push({ tone: 'error', title: t('common.actionBlocked'), message: mapCopy.mapLoadError });
+    } finally { setMapBusy(false); }
+  }
+
+  async function travelFromMap(segmentId: string) {
+    if (mapTravelBusy) return;
+    setMapTravelBusy(true);
+    try {
+      await travelWorldMap(segmentId);
+      const [nextStreet, nextState, spatial, nextMap] = await Promise.all([getStreetState(), getBootstrap(), getStreetPosition(), getWorldMap()]);
+      setStreet(nextStreet);
+      setPosition(spatial.position);
+      setWorldMap(nextMap);
+      setSelectedObjectId(null);
+      onStateChange(nextState);
+      setMapOpen(false);
+      push({ tone: 'success', title: mapCopy.travelHere, message: mapCopy.travelSuccess });
+    } catch (reason) {
+      const code = reason instanceof ApiCommandError ? reason.code : 'world_map_travel_failed';
+      const message = code === 'world_map_not_enough_energy' ? mapCopy.notEnoughEnergy : mapCopy.travelFailed;
+      push({ tone: 'error', title: t('common.actionBlocked'), message });
+    } finally { setMapTravelBusy(false); }
+  }
+
   async function move(target: StreetPosition) {
     if (moving || !street || !position) return;
     const previous = position;
@@ -92,6 +132,7 @@ export function WorldView({ state, onStateChange }: Props) {
       if (changedSegment) {
         setSelectedObjectId(null);
         setPosition(getStreetSpawnPosition(result.street.currentSegmentId));
+        setWorldMap(null);
       }
       push({ tone: copy.tone, title: t(copy.title), message: t(copy.message, { count: result.reward?.quantity ?? 1 }) });
     } catch (reason) {
@@ -105,7 +146,12 @@ export function WorldView({ state, onStateChange }: Props) {
   if ((!street || !position) && !loadError) return <div className="street-loading"><span><GameIcon name="map-pin" size={22} /></span><p>{t('world.loadingStreet')}</p></div>;
   if (!street || !position) return <div className="street-load-error"><GameIcon name="alert-triangle" size={24} /><h1>{t('world.loadFailed')}</h1><p>{t('world.loadFailedDetail')}</p><button className="primary-button" onClick={() => void load()}>{t('world.retry')}</button></div>;
 
-  return <section className="world-screen"><StreetScene street={street} position={position} moving={moving} selectedObjectId={selectedObjectId} busy={busy} onMove={target => void move(target)} onSelectObject={objectId => setSelectedObjectId(objectId as StreetObjectId)} onAction={actionId => void act(actionId)} onCloseSelection={() => setSelectedObjectId(null)} /></section>;
+  if (mapOpen && worldMap) return <section className="world-screen"><WorldMapView map={worldMap} travelBusy={mapTravelBusy} onClose={() => setMapOpen(false)} onTravel={segmentId => void travelFromMap(segmentId)} /></section>;
+
+  return <section className="world-screen">
+    <StreetScene street={street} position={position} moving={moving} selectedObjectId={selectedObjectId} busy={busy} onMove={target => void move(target)} onSelectObject={objectId => setSelectedObjectId(objectId as StreetObjectId)} onAction={actionId => void act(actionId)} onCloseSelection={() => setSelectedObjectId(null)} />
+    <button type="button" className="world-map-launch" disabled={mapBusy} onClick={() => void openMap()}><GameIcon name="world" size={14} />{mapCopy.openMap}</button>
+  </section>;
 }
 
 function notice(title: TranslationKey, message: TranslationKey, tone: NotificationTone) { return { title, message, tone }; }
