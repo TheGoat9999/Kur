@@ -1,17 +1,20 @@
 import { useState, type CSSProperties, type MouseEvent, type PointerEvent } from 'react';
-import type { StreetState, WorldActionId } from '@sol-dorado/contracts';
+import type { CharacterRecipe, StreetState, WorldActionId } from '@sol-dorado/contracts';
 import {
   getStreetActionAnchor,
   getStreetRoute,
   isStreetActionWithinReach,
+  streetDistance,
   type StreetMoveResult,
   type StreetPosition
 } from '@sol-dorado/contracts/world-position';
 import { GameIcon } from '../../components/GameIcon';
+import { WorldCharacter, visualFromCharacterRecipe, type WorldCharacterDirection } from '../../components/WorldCharacter';
 import { useI18n } from '../../i18n';
 import { InteractionPanel } from './InteractionPanel';
 import { StreetBackdrop } from './StreetBackdrop';
 import { StreetObject } from './StreetObject';
+import { StreetPopulation } from './StreetPopulation';
 import { STREET_SCENES } from './street-config';
 import './street-world.css';
 
@@ -19,11 +22,12 @@ const segmentOrder = ['market_block_3', 'cypress_corner', 'mira_alley'] as const
 
 type MovementPreview = Pick<StreetMoveResult, 'position' | 'route'> & { requestedPosition: StreetPosition; blocked: boolean };
 
-export function StreetScene({ street, position, moving, activeRoute, selectedObjectId, busy, onMove, onSelectObject, onAction, onCloseSelection }: {
+export function StreetScene({ street, position, moving, activeRoute, characterRecipe, selectedObjectId, busy, onMove, onSelectObject, onAction, onCloseSelection }: {
   street: StreetState;
   position: StreetPosition;
   moving: boolean;
   activeRoute: StreetPosition[] | null;
+  characterRecipe?: CharacterRecipe | null;
   selectedObjectId: string | null;
   busy: WorldActionId | null;
   onMove: (position: StreetPosition) => void;
@@ -38,6 +42,8 @@ export function StreetScene({ street, position, moving, activeRoute, selectedObj
   const selected = visibleObjects.find(object => object.id === selectedObjectId) ?? null;
   const inRange = selected ? selected.actions.some(actionId => isStreetActionWithinReach(street.currentSegmentId, position, actionId)) : false;
   const playerStyle = { '--player-x': `${position.x}%`, '--player-y': `${position.y}%` } as CSSProperties;
+  const playerVisual = visualFromCharacterRecipe(characterRecipe);
+  const playerDirection = directionForRoute(position, activeRoute);
 
   function eventPosition(event: MouseEvent<HTMLDivElement> | PointerEvent<HTMLDivElement>): StreetPosition {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -98,6 +104,7 @@ export function StreetScene({ street, position, moving, activeRoute, selectedObj
         onPointerLeave={() => !moving && setPreview(null)}
       >
         <StreetBackdrop theme={scene.theme} alerted={street.flags.cornerStoreAlerted} />
+        <StreetPopulation segmentId={street.currentSegmentId} visibleObjectIds={street.visibleObjectIds} />
 
         <div className="street-scene-meta" title={t(scene.atmosphereKey)}>
           <span>SOL DORADO / {t('world.title')}</span><h1>{t(scene.nameKey)}</h1>
@@ -129,8 +136,7 @@ export function StreetScene({ street, position, moving, activeRoute, selectedObj
         ))}
 
         <div className="street-player" style={playerStyle} aria-label={t('world.you')}>
-          <span className="street-player-shadow" />
-          <span className="street-player-figure"><i className="street-player-head" /><i className="street-player-body" /><i className="street-player-arm street-player-arm-left" /><i className="street-player-arm street-player-arm-right" /><i className="street-player-leg street-player-leg-left" /><i className="street-player-leg street-player-leg-right" /></span>
+          <WorldCharacter visual={playerVisual} direction={playerDirection} moving={moving} className="street-player-avatar" />
           <b>{t('world.you')}</b>
         </div>
 
@@ -140,4 +146,14 @@ export function StreetScene({ street, position, moving, activeRoute, selectedObj
       </div>
     </div>
   );
+}
+
+function directionForRoute(position: StreetPosition, route: StreetPosition[] | null): WorldCharacterDirection {
+  if (!route?.length) return 'south';
+  const next = route.find(point => streetDistance(position, point) > 1.2);
+  if (!next) return 'south';
+  const dx = next.x - position.x;
+  const dy = next.y - position.y;
+  if (Math.abs(dx) >= Math.abs(dy)) return dx >= 0 ? 'east' : 'west';
+  return dy >= 0 ? 'south' : 'north';
 }
