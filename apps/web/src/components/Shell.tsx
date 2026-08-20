@@ -86,6 +86,9 @@ export function Shell({ state, screen, menuOpen, onScreen, onMenu, children }: P
         density: 'Size', compact: 'Compact', comfortable: 'Comfortable', large: 'Large', stages: 'Show stage indicators',
         reset: 'Reset', close: 'Close', up: 'Move up', down: 'Move down', visible: 'Show'
       };
+  const legalCopy = locale === 'bg'
+    ? { copyright: '© 2026 SOL DORADO', note: 'Независима браузър игра' }
+    : { copyright: '© 2026 SOL DORADO', note: 'Independent browser game' };
 
   useEffect(() => {
     localStorage.setItem(RIGHT_NAV_STORAGE, JSON.stringify(rightNav));
@@ -175,6 +178,10 @@ export function Shell({ state, screen, menuOpen, onScreen, onMenu, children }: P
           <div className="sidebar-player-copy"><b>{state.character ? runtime(state.character.displayName) : t('shell.noCharacter')}</b><small><span /> {t('shell.sessionOnline')}</small></div>
           <GameIcon name="wifi" size={15} />
         </div>
+        <div className="sidebar-legal" title={`${legalCopy.copyright} · ${legalCopy.note}`}>
+          <span>{legalCopy.copyright}</span>
+          <small>{legalCopy.note}</small>
+        </div>
       </aside>
 
       <div className={`game-stage game-stage-${screen}`}>
@@ -237,8 +244,6 @@ export function Shell({ state, screen, menuOpen, onScreen, onMenu, children }: P
           </footer>
         </section>
       )}
-
-      <div className="game-footer-safe" aria-hidden="true" />
     </div>
   );
 }
