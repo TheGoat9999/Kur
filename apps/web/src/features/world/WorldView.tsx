@@ -5,7 +5,7 @@ import { getStreetSpawnPosition, type StreetPosition } from '@sol-dorado/contrac
 import { GameIcon } from '../../components/GameIcon';
 import { useNotifications, type NotificationTone } from '../../components/Notifications';
 import { useI18n, type TranslationKey } from '../../i18n';
-import { ApiCommandError, getBootstrap, getStreetPosition, getStreetState, getWorldMap, moveStreetPlayer, runWorldAction } from '../../lib/api';
+import { ApiCommandError, getBootstrap, getStreetPosition, getStreetState, getWorldMap, moveStreetPlayer, runWorldAction, travelWorldMap } from '../../lib/api';
 import { StreetScene } from './StreetScene';
 import { WorldMapView } from './WorldMapView';
 import { worldMapCopy } from './world-map-copy';
@@ -43,6 +43,7 @@ export function WorldView({ state, onStateChange }: Props) {
   const [worldMap, setWorldMap] = useState<WorldMapState | null>(null);
   const [mapOpen, setMapOpen] = useState(false);
   const [mapBusy, setMapBusy] = useState(false);
+  const [mapTravelBusy, setMapTravelBusy] = useState(false);
   const mapCopy = worldMapCopy(locale);
 
   const load = useCallback(async () => {
@@ -82,6 +83,26 @@ export function WorldView({ state, onStateChange }: Props) {
     } catch {
       push({ tone: 'error', title: t('common.actionBlocked'), message: mapCopy.mapLoadError });
     } finally { setMapBusy(false); }
+  }
+
+  async function travelFromMap(segmentId: string) {
+    if (mapTravelBusy) return;
+    setMapTravelBusy(true);
+    try {
+      await travelWorldMap(segmentId);
+      const [nextStreet, nextState, spatial, nextMap] = await Promise.all([getStreetState(), getBootstrap(), getStreetPosition(), getWorldMap()]);
+      setStreet(nextStreet);
+      setPosition(spatial.position);
+      setWorldMap(nextMap);
+      setSelectedObjectId(null);
+      onStateChange(nextState);
+      setMapOpen(false);
+      push({ tone: 'success', title: mapCopy.travelHere, message: mapCopy.travelSuccess });
+    } catch (reason) {
+      const code = reason instanceof ApiCommandError ? reason.code : 'world_map_travel_failed';
+      const message = code === 'world_map_not_enough_energy' ? mapCopy.notEnoughEnergy : mapCopy.travelFailed;
+      push({ tone: 'error', title: t('common.actionBlocked'), message });
+    } finally { setMapTravelBusy(false); }
   }
 
   async function move(target: StreetPosition) {
@@ -125,7 +146,7 @@ export function WorldView({ state, onStateChange }: Props) {
   if ((!street || !position) && !loadError) return <div className="street-loading"><span><GameIcon name="map-pin" size={22} /></span><p>{t('world.loadingStreet')}</p></div>;
   if (!street || !position) return <div className="street-load-error"><GameIcon name="alert-triangle" size={24} /><h1>{t('world.loadFailed')}</h1><p>{t('world.loadFailedDetail')}</p><button className="primary-button" onClick={() => void load()}>{t('world.retry')}</button></div>;
 
-  if (mapOpen && worldMap) return <section className="world-screen"><WorldMapView map={worldMap} onClose={() => setMapOpen(false)} /></section>;
+  if (mapOpen && worldMap) return <section className="world-screen"><WorldMapView map={worldMap} travelBusy={mapTravelBusy} onClose={() => setMapOpen(false)} onTravel={segmentId => void travelFromMap(segmentId)} /></section>;
 
   return <section className="world-screen">
     <StreetScene street={street} position={position} moving={moving} selectedObjectId={selectedObjectId} busy={busy} onMove={target => void move(target)} onSelectObject={objectId => setSelectedObjectId(objectId as StreetObjectId)} onAction={actionId => void act(actionId)} onCloseSelection={() => setSelectedObjectId(null)} />
