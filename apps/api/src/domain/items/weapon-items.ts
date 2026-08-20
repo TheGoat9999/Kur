@@ -5,7 +5,7 @@ export const WEAPON_ITEMS = defineCategory('weapon', [
   ['pocket_knife', 'Pocket Knife', 'melee', 180, 1, 1800],
   ['combat_knife', 'Combat Knife', 'melee', 420, 1, 4200, 'restricted'],
   ['baseball_bat', 'Baseball Bat', 'melee', 1100, 1, 2400],
-  ['baton', 'Baton', 'melee', 650, 1, 2800, 'restricted'],
+  ['baton', 'Baton', 'melee', 650, 1, 2800, 'restricted', {}, ['baton'], 'meleeWpnBatonT0PipeBaton.png'],
   ['machete', 'Machete', 'melee', 900, 1, 4800, 'restricted'],
   ['hatchet', 'Hatchet', 'melee', 1200, 1, 3200],
   ['compact_pistol', 'Compact Pistol', 'firearm', 760, 1, 42000, 'regulated'],

@@ -3,7 +3,7 @@ import { defineCategory } from './catalog-helpers.js';
 export const MATERIAL_ITEMS = defineCategory('material', [
   ['wood_plank', 'Wood Plank', 'lumber', 2500, 20, 700],
   ['wood_scrap', 'Wood Scrap', 'lumber', 600, 20, 120],
-  ['plywood_sheet', 'Plywood Sheet', 'lumber', 8500, 20, 2200],
+  ['plywood_sheet', 'Plywood Sheet', 'lumber', 8500, 20, 2200, 'legal', {}, ['plywood sheet', 'wood'], 'wood.png'],
   ['steel_bar', 'Steel Bar', 'metal', 4000, 20, 1800],
   ['steel_sheet', 'Steel Sheet', 'metal', 6000, 20, 2600],
   ['iron_bar', 'Iron Bar', 'metal', 4200, 20, 1500],
