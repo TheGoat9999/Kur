@@ -10,50 +10,113 @@ export const StreetPositionResultSchema = z.object({
   segmentId: StreetSpatialSegmentIdSchema,
   position: StreetPositionSchema
 });
+export const StreetMoveResultSchema = z.object({
+  segmentId: StreetSpatialSegmentIdSchema,
+  position: StreetPositionSchema,
+  requestedPosition: StreetPositionSchema,
+  route: z.array(StreetPositionSchema).min(1),
+  distance: z.number().finite().nonnegative()
+});
 
 export type StreetSpatialSegmentId = z.infer<typeof StreetSpatialSegmentIdSchema>;
 export type StreetPosition = z.infer<typeof StreetPositionSchema>;
 export type StreetPositionResult = z.infer<typeof StreetPositionResultSchema>;
+export type StreetMoveResult = z.infer<typeof StreetMoveResultSchema>;
+
+export type StreetNavigationNodeKind = 'sidewalk' | 'crossing' | 'entrance' | 'exit';
+export interface StreetNavigationNode {
+  id: string;
+  kind: StreetNavigationNodeKind;
+  position: StreetPosition;
+}
+export interface StreetNavigationEdge {
+  from: string;
+  to: string;
+}
+export interface StreetNavigationGraph {
+  snapRadius: number;
+  nodes: StreetNavigationNode[];
+  edges: StreetNavigationEdge[];
+}
 
 export interface StreetInteractionAnchor extends StreetPosition { radius: number; }
-interface StreetWalkBounds { minX: number; maxX: number; minY: number; maxY: number; }
 interface StreetSpatialDefinition {
   spawn: StreetPosition;
-  walkBounds: StreetWalkBounds;
   actions: Record<string, StreetInteractionAnchor>;
+  navigation: StreetNavigationGraph;
 }
 
 const same = (x: number, y: number, radius = 8): StreetInteractionAnchor => ({ x, y, radius });
+const nav = (id: string, x: number, y: number, kind: StreetNavigationNodeKind = 'sidewalk'): StreetNavigationNode => ({ id, kind, position: { x, y } });
+const edge = (from: string, to: string): StreetNavigationEdge => ({ from, to });
 
 export const STREET_SPATIAL: Record<StreetSpatialSegmentId, StreetSpatialDefinition> = {
   market_block_3: {
-    spawn: { x: 50, y: 57 },
-    walkBounds: { minX: 3, maxX: 97, minY: 31, maxY: 76 },
+    spawn: { x: 50, y: 67 },
     actions: {
       inspect_corner_store: same(80, 35), enter_corner_store: same(80, 35), shoplift_corner_store: same(80, 35), speak_corner_clerk: same(80, 35),
       deliver_el_camino: same(20, 35), inspect_el_camino: same(20, 35), enter_el_camino: same(20, 35),
       inspect_apartment: same(50, 35), enter_apartment: same(50, 35),
       inspect_service_alley: same(90, 73),
       travel_cypress_corner: same(4, 55, 9), travel_mira_alley: same(96, 55, 9)
+    },
+    navigation: {
+      snapRadius: 14,
+      nodes: [
+        nav('north_west', 8, 42), nav('el_camino', 20, 42, 'entrance'), nav('north_mid', 35, 42), nav('apartments', 50, 42, 'entrance'), nav('north_east_mid', 65, 42), nav('mercado', 80, 42, 'entrance'), nav('north_east', 92, 42),
+        nav('south_west', 8, 67), nav('south_mid_west', 28, 67), nav('crossing_south', 50, 67, 'crossing'), nav('south_mid_east', 72, 67), nav('south_east', 92, 67),
+        nav('crossing_north', 50, 42, 'crossing'), nav('west_exit', 4, 55, 'exit'), nav('east_exit', 96, 55, 'exit'), nav('service_alley', 90, 73, 'entrance')
+      ],
+      edges: [
+        edge('north_west', 'el_camino'), edge('el_camino', 'north_mid'), edge('north_mid', 'apartments'), edge('apartments', 'north_east_mid'), edge('north_east_mid', 'mercado'), edge('mercado', 'north_east'),
+        edge('south_west', 'south_mid_west'), edge('south_mid_west', 'crossing_south'), edge('crossing_south', 'south_mid_east'), edge('south_mid_east', 'south_east'),
+        edge('crossing_north', 'crossing_south'), edge('west_exit', 'north_west'), edge('west_exit', 'south_west'), edge('east_exit', 'north_east'), edge('east_exit', 'south_east'), edge('south_east', 'service_alley')
+      ]
     }
   },
   cypress_corner: {
-    spawn: { x: 50, y: 57 },
-    walkBounds: { minX: 3, maxX: 97, minY: 31, maxY: 76 },
+    spawn: { x: 50, y: 67 },
     actions: {
       inspect_apartment: same(20, 35), enter_apartment: same(20, 35),
       talk_maya: same(62, 72), ask_maya_information: same(62, 72),
       travel_market_block_3: same(4, 55, 9), travel_mira_alley: same(96, 55, 9)
+    },
+    navigation: {
+      snapRadius: 14,
+      nodes: [
+        nav('north_west', 8, 42), nav('apartments', 20, 42, 'entrance'), nav('park_north', 42, 42), nav('crossing_north', 50, 42, 'crossing'), nav('shops', 78, 42, 'entrance'), nav('north_east', 92, 42),
+        nav('south_west', 8, 67), nav('south_mid_west', 30, 67), nav('crossing_south', 50, 67, 'crossing'), nav('maya', 62, 72, 'entrance'), nav('south_mid_east', 75, 67), nav('south_east', 92, 67),
+        nav('west_exit', 4, 55, 'exit'), nav('east_exit', 96, 55, 'exit')
+      ],
+      edges: [
+        edge('north_west', 'apartments'), edge('apartments', 'park_north'), edge('park_north', 'crossing_north'), edge('crossing_north', 'shops'), edge('shops', 'north_east'),
+        edge('south_west', 'south_mid_west'), edge('south_mid_west', 'crossing_south'), edge('crossing_south', 'maya'), edge('maya', 'south_mid_east'), edge('south_mid_east', 'south_east'),
+        edge('crossing_north', 'crossing_south'), edge('west_exit', 'north_west'), edge('west_exit', 'south_west'), edge('east_exit', 'north_east'), edge('east_exit', 'south_east')
+      ]
     }
   },
   mira_alley: {
-    spawn: { x: 50, y: 57 },
-    walkBounds: { minX: 3, maxX: 97, minY: 31, maxY: 76 },
+    spawn: { x: 50, y: 67 },
     actions: {
       search_dumpster: same(26, 72),
       inspect_service_alley: same(50, 35),
       inspect_el_camino: same(79, 35),
       travel_market_block_3: same(4, 55, 9), travel_cypress_corner: same(96, 55, 9)
+    },
+    navigation: {
+      snapRadius: 15,
+      nodes: [
+        nav('left_north', 35, 35), nav('service', 50, 35, 'entrance'), nav('el_camino', 79, 35, 'entrance'),
+        nav('left_mid', 35, 52), nav('center_mid', 50, 52, 'crossing'), nav('right_mid', 65, 52),
+        nav('dumpster', 26, 72, 'entrance'), nav('left_south', 35, 70), nav('center_south', 50, 70), nav('right_south', 65, 70), nav('right_service', 78, 70),
+        nav('west_exit', 4, 55, 'exit'), nav('east_exit', 96, 55, 'exit')
+      ],
+      edges: [
+        edge('left_north', 'service'), edge('service', 'el_camino'), edge('left_north', 'left_mid'), edge('service', 'center_mid'), edge('el_camino', 'right_mid'),
+        edge('left_mid', 'center_mid'), edge('center_mid', 'right_mid'), edge('left_mid', 'left_south'), edge('center_mid', 'center_south'), edge('right_mid', 'right_south'),
+        edge('dumpster', 'left_south'), edge('left_south', 'center_south'), edge('center_south', 'right_south'), edge('right_south', 'right_service'),
+        edge('west_exit', 'left_mid'), edge('east_exit', 'right_mid')
+      ]
     }
   }
 };
@@ -66,6 +129,10 @@ export function getStreetActionAnchor(segmentId: StreetSpatialSegmentId, actionI
   return STREET_SPATIAL[segmentId].actions[actionId] ?? null;
 }
 
+export function getStreetNavigationGraph(segmentId: StreetSpatialSegmentId): StreetNavigationGraph {
+  return STREET_SPATIAL[segmentId].navigation;
+}
+
 export function streetDistance(a: StreetPosition, b: StreetPosition): number {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
@@ -75,15 +142,109 @@ export function isStreetActionWithinReach(segmentId: StreetSpatialSegmentId, pos
   return anchor !== null && streetDistance(position, anchor) <= anchor.radius;
 }
 
+export function resolveStreetNavigationTarget(segmentId: StreetSpatialSegmentId, requested: StreetPosition): StreetNavigationNode | null {
+  const graph = STREET_SPATIAL[segmentId].navigation;
+  const nearest = nearestNode(graph.nodes, requested);
+  return nearest && streetDistance(nearest.position, requested) <= graph.snapRadius ? nearest : null;
+}
+
 export function isStreetPositionWalkable(segmentId: StreetSpatialSegmentId, position: StreetPosition): boolean {
-  const bounds = STREET_SPATIAL[segmentId].walkBounds;
-  return position.x >= bounds.minX && position.x <= bounds.maxX && position.y >= bounds.minY && position.y <= bounds.maxY;
+  return resolveStreetNavigationTarget(segmentId, position) !== null;
 }
 
 export function clampStreetPosition(segmentId: StreetSpatialSegmentId, position: StreetPosition): StreetPosition {
-  const bounds = STREET_SPATIAL[segmentId].walkBounds;
+  const target = resolveStreetNavigationTarget(segmentId, position) ?? nearestNode(STREET_SPATIAL[segmentId].navigation.nodes, position);
+  return target ? { ...target.position } : getStreetSpawnPosition(segmentId);
+}
+
+export function getStreetRoute(segmentId: StreetSpatialSegmentId, start: StreetPosition, requested: StreetPosition): StreetMoveResult | null {
+  const graph = STREET_SPATIAL[segmentId].navigation;
+  const startNode = nearestNode(graph.nodes, start);
+  const targetNode = resolveStreetNavigationTarget(segmentId, requested);
+  if (!startNode || !targetNode) return null;
+
+  const nodeIds = shortestPath(graph, startNode.id, targetNode.id);
+  if (!nodeIds) return null;
+  const nodeById = new Map(graph.nodes.map(node => [node.id, node]));
+  const route: StreetPosition[] = [];
+  if (streetDistance(start, startNode.position) > 0.25) route.push({ ...start });
+  for (const id of nodeIds) {
+    const node = nodeById.get(id);
+    if (!node) continue;
+    const previous = route[route.length - 1];
+    if (!previous || streetDistance(previous, node.position) > 0.25) route.push({ ...node.position });
+  }
+  if (!route.length) route.push({ ...targetNode.position });
+
+  let distance = 0;
+  for (let index = 1; index < route.length; index += 1) distance += streetDistance(route[index - 1]!, route[index]!);
+
   return {
-    x: Math.max(bounds.minX, Math.min(bounds.maxX, position.x)),
-    y: Math.max(bounds.minY, Math.min(bounds.maxY, position.y))
+    segmentId,
+    requestedPosition: { ...requested },
+    position: { ...targetNode.position },
+    route,
+    distance
   };
+}
+
+function nearestNode(nodes: StreetNavigationNode[], position: StreetPosition): StreetNavigationNode | null {
+  let best: StreetNavigationNode | null = null;
+  let bestDistance = Number.POSITIVE_INFINITY;
+  for (const node of nodes) {
+    const distance = streetDistance(node.position, position);
+    if (distance < bestDistance) { best = node; bestDistance = distance; }
+  }
+  return best;
+}
+
+function shortestPath(graph: StreetNavigationGraph, startId: string, targetId: string): string[] | null {
+  if (startId === targetId) return [startId];
+  const nodeById = new Map(graph.nodes.map(node => [node.id, node]));
+  const adjacency = new Map<string, Array<{ id: string; weight: number }>>();
+  for (const node of graph.nodes) adjacency.set(node.id, []);
+  for (const connection of graph.edges) {
+    const from = nodeById.get(connection.from);
+    const to = nodeById.get(connection.to);
+    if (!from || !to) continue;
+    const weight = streetDistance(from.position, to.position);
+    adjacency.get(from.id)?.push({ id: to.id, weight });
+    adjacency.get(to.id)?.push({ id: from.id, weight });
+  }
+
+  const unvisited = new Set(graph.nodes.map(node => node.id));
+  const distances = new Map(graph.nodes.map(node => [node.id, Number.POSITIVE_INFINITY]));
+  const previous = new Map<string, string>();
+  distances.set(startId, 0);
+
+  while (unvisited.size) {
+    let current: string | null = null;
+    let currentDistance = Number.POSITIVE_INFINITY;
+    for (const id of unvisited) {
+      const distance = distances.get(id) ?? Number.POSITIVE_INFINITY;
+      if (distance < currentDistance) { current = id; currentDistance = distance; }
+    }
+    if (!current || currentDistance === Number.POSITIVE_INFINITY) break;
+    if (current === targetId) break;
+    unvisited.delete(current);
+    for (const neighbor of adjacency.get(current) ?? []) {
+      if (!unvisited.has(neighbor.id)) continue;
+      const candidate = currentDistance + neighbor.weight;
+      if (candidate < (distances.get(neighbor.id) ?? Number.POSITIVE_INFINITY)) {
+        distances.set(neighbor.id, candidate);
+        previous.set(neighbor.id, current);
+      }
+    }
+  }
+
+  if (!previous.has(targetId)) return null;
+  const path = [targetId];
+  let cursor = targetId;
+  while (cursor !== startId) {
+    const parent = previous.get(cursor);
+    if (!parent) return null;
+    path.push(parent);
+    cursor = parent;
+  }
+  return path.reverse();
 }
