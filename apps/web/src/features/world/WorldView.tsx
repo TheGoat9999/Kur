@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { BootstrapState, StreetObjectId, StreetState, WorldActionId, WorldNoticeId } from '@sol-dorado/contracts';
 import type { WorldMapState } from '@sol-dorado/contracts/world-map';
-import { getStreetSpawnPosition, type StreetPosition } from '@sol-dorado/contracts/world-position';
+import { getStreetRoute, getStreetSpawnPosition, streetDistance, type StreetPosition } from '@sol-dorado/contracts/world-position';
 import { GameIcon } from '../../components/GameIcon';
 import { useNotifications, type NotificationTone } from '../../components/Notifications';
 import { useI18n, type TranslationKey } from '../../i18n';
@@ -36,6 +36,7 @@ export function WorldView({ state, onStateChange }: Props) {
   const { push } = useNotifications();
   const [street, setStreet] = useState<StreetState | null>(null);
   const [position, setPosition] = useState<StreetPosition | null>(null);
+  const [activeRoute, setActiveRoute] = useState<StreetPosition[] | null>(null);
   const [selectedObjectId, setSelectedObjectId] = useState<StreetObjectId | null>(null);
   const [busy, setBusy] = useState<WorldActionId | null>(null);
   const [moving, setMoving] = useState(false);
@@ -95,6 +96,7 @@ export function WorldView({ state, onStateChange }: Props) {
       setPosition(spatial.position);
       setWorldMap(nextMap);
       setSelectedObjectId(null);
+      setActiveRoute(null);
       onStateChange(nextState);
       setMapOpen(false);
       push({ tone: 'success', title: mapCopy.travelHere, message: mapCopy.travelSuccess });
@@ -108,16 +110,25 @@ export function WorldView({ state, onStateChange }: Props) {
   async function move(target: StreetPosition) {
     if (moving || !street || !position) return;
     const previous = position;
+    const planned = getStreetRoute(street.currentSegmentId, position, target);
+    if (!planned) {
+      push({ tone: 'error', title: t('common.actionBlocked'), message: worldError('world_position_blocked', t) });
+      return;
+    }
     setMoving(true);
-    setPosition(target);
+    setActiveRoute(planned.route);
     try {
       const result = await moveStreetPlayer(target);
+      await animateStreetRoute(position, planned.route, next => setPosition(next));
       setPosition(result.position);
     } catch (reason) {
       setPosition(previous);
       const code = reason instanceof ApiCommandError ? reason.code : 'world_move_failed';
       push({ tone: 'error', title: t('common.actionBlocked'), message: worldError(code, t) });
-    } finally { setMoving(false); }
+    } finally {
+      setActiveRoute(null);
+      setMoving(false);
+    }
   }
 
   async function act(actionId: WorldActionId) {
@@ -131,6 +142,7 @@ export function WorldView({ state, onStateChange }: Props) {
       onStateChange(result.state);
       if (changedSegment) {
         setSelectedObjectId(null);
+        setActiveRoute(null);
         setPosition(getStreetSpawnPosition(result.street.currentSegmentId));
         setWorldMap(null);
       }
@@ -149,11 +161,30 @@ export function WorldView({ state, onStateChange }: Props) {
   if (mapOpen && worldMap) return <section className="world-screen"><WorldMapView map={worldMap} travelBusy={mapTravelBusy} onClose={() => setMapOpen(false)} onTravel={segmentId => void travelFromMap(segmentId)} /></section>;
 
   return <section className="world-screen">
-    <StreetScene street={street} position={position} moving={moving} selectedObjectId={selectedObjectId} busy={busy} onMove={target => void move(target)} onSelectObject={objectId => setSelectedObjectId(objectId as StreetObjectId)} onAction={actionId => void act(actionId)} onCloseSelection={() => setSelectedObjectId(null)} />
+    <StreetScene street={street} position={position} moving={moving} activeRoute={activeRoute} selectedObjectId={selectedObjectId} busy={busy} onMove={target => void move(target)} onSelectObject={objectId => setSelectedObjectId(objectId as StreetObjectId)} onAction={actionId => void act(actionId)} onCloseSelection={() => setSelectedObjectId(null)} />
     <button type="button" className="world-map-launch" disabled={mapBusy} onClick={() => void openMap()}><GameIcon name="world" size={14} />{mapCopy.openMap}</button>
   </section>;
 }
 
+async function animateStreetRoute(start: StreetPosition, route: StreetPosition[], apply: (position: StreetPosition) => void) {
+  let from = start;
+  for (const destination of route) {
+    const distance = streetDistance(from, destination);
+    if (distance < 0.25) { from = destination; continue; }
+    const steps = Math.max(1, Math.ceil(distance / 2.4));
+    for (let step = 1; step <= steps; step += 1) {
+      const progress = step / steps;
+      apply({
+        x: from.x + (destination.x - from.x) * progress,
+        y: from.y + (destination.y - from.y) * progress
+      });
+      await delay(28);
+    }
+    from = destination;
+  }
+}
+
+function delay(ms: number) { return new Promise<void>(resolve => window.setTimeout(resolve, ms)); }
 function notice(title: TranslationKey, message: TranslationKey, tone: NotificationTone) { return { title, message, tone }; }
 function worldError(code: string, t: ReturnType<typeof useI18n>['t']) {
   const errors: Record<string, TranslationKey> = {
