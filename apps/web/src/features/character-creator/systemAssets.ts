@@ -16,6 +16,8 @@ export type MakeHumanSystemAsset = {
   fallbackColor: string;
   thumbnailUrl: string;
   license: 'CC0-1.0';
+  runtime: 'legacy-mhclo';
+  qualityTier: 'dev-fitting';
 };
 
 const thumbnail = (id: string) => `https://static.makehumancommunity.org/assets/assetpacks/${id}.png`;
@@ -85,7 +87,9 @@ function asset(
     slots: [],
     fallbackColor,
     thumbnailUrl: thumbnail(id),
-    license: 'CC0-1.0'
+    license: 'CC0-1.0',
+    runtime: 'legacy-mhclo',
+    qualityTier: 'dev-fitting'
   };
 }
 
@@ -109,6 +113,8 @@ function clothing(
     slots,
     fallbackColor,
     thumbnailUrl: thumbnail(id),
-    license: 'CC0-1.0'
+    license: 'CC0-1.0',
+    runtime: 'legacy-mhclo',
+    qualityTier: 'dev-fitting'
   };
 }
