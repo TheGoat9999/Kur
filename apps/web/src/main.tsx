@@ -5,6 +5,7 @@ import { I18nProvider } from './i18n';
 import { NotificationProvider } from './components/Notifications';
 import './styles.css';
 import './hud.css';
+import './hud-v2.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
