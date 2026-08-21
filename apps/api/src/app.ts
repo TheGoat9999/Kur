@@ -18,6 +18,7 @@ import { npcRoutes } from './routes/npcs.js';
 import { policeRoutes } from './routes/police.js';
 import { emsRoutes } from './routes/ems.js';
 import { realEstateRoutes } from './routes/real-estate.js';
+import { hoodWalkRoutes } from './routes/hood-walk.js';
 
 export function createApp(services: AppServices) {
   const app = express();
@@ -31,6 +32,7 @@ export function createApp(services: AppServices) {
   app.use(characterRoutes(services));
   app.use(worldMapRoutes(services));
   app.use(worldActionRoutes(services));
+  app.use(hoodWalkRoutes(services));
   app.use(npcRoutes(services));
   app.use(inventoryRoutes(services));
   app.use(itemRoutes());
