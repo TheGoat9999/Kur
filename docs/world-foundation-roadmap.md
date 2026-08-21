@@ -64,7 +64,8 @@ Current implementation pass:
 - The player street avatar is rendered from the active Character Recipe instead of the primitive circle/stick marker.
 - Character profile and street avatar now share the same reusable world-character renderer.
 - Named NPCs and deterministic ambient NPCs use the same renderer with authored population slots.
-- Ambient pedestrians can move along authored visual sidewalk paths without becoming POIs or blocking street interaction.
+- Ambient pedestrians move only forward along their authored visual route; at the end they fade/reset off-screen instead of mechanically walking the same path backwards.
+- Street archetypes now carry denser but different ambient pedestrian and traffic populations: Market is busiest, Cypress is moderate mixed-use traffic, and Mira remains lower-density industrial/service traffic.
 - Reusable vehicle silhouettes and service variants exist; current scenes include parked civilian vehicles, delivery traffic and occasional taxi traffic without duplicating scarce institutional services.
 - The population layer is visual-only and `pointer-events: none`; navigation, POIs and authoritative gameplay remain unobstructed.
 
@@ -73,7 +74,8 @@ Quality gate before Phase 4:
 - Ambient population must make streets feel occupied without converting every person or vehicle into an interaction target.
 - Character movement, POI hit areas, street hover/click behaviour and contextual interaction UI must remain unobstructed by the visual population layer.
 - Vehicle and NPC density should vary by street archetype rather than appearing uniformly on every street.
-- Do not proceed to Mobility v0.1 until the World Visual pass is manually accepted.
+
+Status: manually accepted with the forward-only ambient movement/density correction implemented before Phase 4 work begins.
 
 Exit criteria: player/NPC/vehicle representations are reusable game-world entities rather than primitive decorative shapes.
 
@@ -94,6 +96,18 @@ Modes:
 - private vehicle: road route, parking/access, later fuel/condition;
 - taxi: request → pickup node → road route → drop-off → fare;
 - bus/public transport: walk to stop → wait → transit route → alight → walk.
+
+Current implementation pass:
+- Canonical world connections now support a reusable shortest-path resolver instead of assuming every journey is one direct edge.
+- The map previews the resolved walking route and total route distance for the selected playable street.
+- Server-authoritative map travel resolves the same canonical connection graph before applying player movement costs/state changes.
+- Route resolution is already mode-aware (`walk`, `car`, `taxi`, `bus`) so road/taxi/transit layers can reuse it rather than introducing separate fake travel models.
+
+Next Mobility slice:
+- Add explicit route quotes containing duration, fare/cost and constraints.
+- Add road/lane connectivity and active private-vehicle eligibility.
+- Add taxi pickup/drop-off flow and bus stop/transit legs as composed routes.
+- Keep actual persistent location changes server-authoritative.
 
 Exit criteria: vehicle/taxi/bus travel consumes the same canonical world graph instead of implementing separate fake travel timers.
 
