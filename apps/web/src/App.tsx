@@ -11,9 +11,11 @@ import { FinanceView } from './features/finance/FinanceView';
 import { VehiclesView, type VehicleViewMode } from './features/vehicles/VehiclesView';
 import { JobsView } from './features/jobs/JobsView';
 import { PoliceView } from './features/police/PoliceView';
+import { JusticeView } from './features/justice/JusticeView';
 import { EmsView } from './features/ems/EmsView';
 import { Ems112Overlay } from './features/ems/Ems112Overlay';
 import { RealEstateView } from './features/real-estate/RealEstateView';
+import { BusinessesView } from './features/businesses/BusinessesView';
 import { AdminPanel } from './features/admin/AdminPanel';
 import { useNotifications } from './components/Notifications';
 import { getBootstrap, travelWorldMap } from './lib/api';
@@ -30,6 +32,7 @@ export function App() {
   const [phoneOpen, setPhoneOpen] = useState(false);
   const [emsWorkspaceOpen, setEmsWorkspaceOpen] = useState(false);
   const [emergencyOpen, setEmergencyOpen] = useState(false);
+  const [publicSafetyWorkspace, setPublicSafetyWorkspace] = useState<'police' | 'justice'>('police');
   const [adminOpen, setAdminOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -158,6 +161,7 @@ export function App() {
       )}
       {screen === 'character' && <CharacterView state={state} onStateChange={setState} />}
       {screen === 'finance' && <FinanceView onStateChange={setState} />}
+      {screen === 'businesses' && <BusinessesView />}
       {screen === 'jobs' && <>
         <section className="mb-4 flex flex-col gap-3 rounded-2xl border border-cyan-300/15 bg-[linear-gradient(135deg,rgba(8,28,36,.92),rgba(8,17,22,.96))] p-4 shadow-lg md:flex-row md:items-center md:justify-between">
           <div>
@@ -172,8 +176,15 @@ export function App() {
       </>}
       {screen === 'property' && <RealEstateView onStateChange={setState} />}
       {screen === 'vehicles' && <VehiclesView state={state} mode={vehicleMode} onModeChange={setVehicleMode} onStateChange={setState} onWorld={() => { setVehicleMapFocusId(null); setScreen('world'); }} onLocateVehicle={locateVehicle} />}
-      {screen === 'police' && <PoliceView />}
-      {!['world', 'character', 'finance', 'inventory', 'vehicles', 'jobs', 'property', 'police'].includes(screen) && <IntegrationView feature={screen as 'hospitality'} />}
+      {screen === 'police' && <>
+        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-white/10 bg-[#0a1116] p-2">
+          <button onClick={() => setPublicSafetyWorkspace('police')} className={`min-h-10 rounded-xl px-4 text-xs font-black ${publicSafetyWorkspace === 'police' ? 'bg-cyan-300 text-slate-950' : 'bg-white/[.035] text-slate-300'}`}>SDPD · {locale === 'bg' ? 'Операции' : 'Operations'}</button>
+          <button onClick={() => setPublicSafetyWorkspace('justice')} className={`min-h-10 rounded-xl px-4 text-xs font-black ${publicSafetyWorkspace === 'justice' ? 'bg-amber-300 text-slate-950' : 'bg-white/[.035] text-slate-300'}`}>{locale === 'bg' ? 'Правосъдие · Право · Корекции' : 'Justice · Legal · Corrections'}</button>
+          <span className="ml-auto px-2 text-[10px] uppercase tracking-[.16em] text-slate-600">PUBLIC SAFETY → JUSTICE LIFECYCLE</span>
+        </div>
+        {publicSafetyWorkspace === 'police' ? <PoliceView /> : <JusticeView />}
+      </>}
+      {!['world', 'character', 'finance', 'businesses', 'inventory', 'vehicles', 'jobs', 'property', 'police'].includes(screen) && <IntegrationView feature={screen as 'hospitality'} />}
       {import.meta.env.DEV && <button onClick={() => setAdminOpen(true)} className="fixed bottom-4 right-4 z-[90] grid h-12 w-12 place-items-center rounded-full border border-amber-300/30 bg-[#0b171d]/95 text-lg text-amber-200 shadow-2xl backdrop-blur hover:border-amber-300/60" title={locale === 'bg' ? 'Администрация' : 'Administration'} aria-label={locale === 'bg' ? 'Отвори администрация' : 'Open administration'}>⚙</button>}
       {import.meta.env.DEV && <AdminPanel open={adminOpen} onClose={() => setAdminOpen(false)} onGameplayStateChanged={async () => setState(await getBootstrap())} />}
     </Shell>
