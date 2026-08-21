@@ -8,6 +8,7 @@ import { InventoryModalV05 } from './features/inventory/InventoryModalV05';
 import { PhoneLauncher, PhoneOverlay } from './features/phone/PhoneOverlay';
 import { FinanceView } from './features/finance/FinanceView';
 import { VehiclesView, type VehicleViewMode } from './features/vehicles/VehiclesView';
+import { JobsView } from './features/jobs/JobsView';
 import { useNotifications } from './components/Notifications';
 import { getBootstrap, travelWorldMap } from './lib/api';
 import { useI18n } from './i18n';
@@ -136,8 +137,9 @@ export function App() {
       )}
       {screen === 'character' && <CharacterView state={state} onStateChange={setState} />}
       {screen === 'finance' && <FinanceView onStateChange={setState} />}
+      {screen === 'jobs' && <JobsView onStateChange={setState} />}
       {screen === 'vehicles' && <VehiclesView state={state} mode={vehicleMode} onModeChange={setVehicleMode} onStateChange={setState} onWorld={() => { setVehicleMapFocusId(null); setScreen('world'); }} onLocateVehicle={locateVehicle} />}
-      {!['world', 'character', 'finance', 'inventory', 'vehicles'].includes(screen) && <IntegrationView feature={screen as 'property' | 'jobs' | 'hospitality' | 'police'} />}
+      {!['world', 'character', 'finance', 'inventory', 'vehicles', 'jobs'].includes(screen) && <IntegrationView feature={screen as 'property' | 'hospitality' | 'police'} />}
     </Shell>
   );
 }
