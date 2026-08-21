@@ -10,7 +10,9 @@ const ConfigSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3001),
   WEB_ORIGIN: z.string().default('http://localhost:5173'),
   DATABASE_URL: z.string().min(1),
-  REDIS_URL: z.string().min(1)
+  REDIS_URL: z.string().min(1),
+  OPENAI_API_KEY: z.string().min(1).optional(),
+  OPENAI_IMAGE_MODEL: z.string().min(1).default('gpt-image-2')
 });
 
 export type AppConfig = z.infer<typeof ConfigSchema>;
