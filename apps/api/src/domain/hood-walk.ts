@@ -111,7 +111,7 @@ export function buildHoodWalkLeads(input: { seed: number; step: number; segmentI
   if (fresh.length >= 3) candidates = fresh;
   const ranked = [...candidates].sort((a,b) => seededValue(input.seed, input.step, a) - seededValue(input.seed, input.step, b));
   const selected = ranked.slice(0,3);
-  const anchors = ANCHORS[input.step % ANCHORS.length];
+  const anchors = ANCHORS[input.step % ANCHORS.length]!;
   const clarity = input.memory.familiarity >= 25 || input.clues >= 4 ? 'clear' : input.memory.familiarity >= 8 || input.clues >= 2 ? 'readable' : 'vague';
   return selected.map((eventId,index) => ({
     id:`${input.step}:${eventId}`,
