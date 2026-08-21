@@ -21,7 +21,8 @@
     "./ems": { "types": "./dist/ems.d.ts", "import": "./dist/ems.js" },
     "./real-estate": { "types": "./dist/real-estate.d.ts", "import": "./dist/real-estate.js" },
     "./hood-walk": { "types": "./dist/hood-walk.d.ts", "import": "./dist/hood-walk.js" },
-    "./admin": { "types": "./dist/admin.d.ts", "import": "./dist/admin.js" }
+    "./admin": { "types": "./dist/admin.d.ts", "import": "./dist/admin.js" },
+    "./crime": { "types": "./dist/crime.d.ts", "import": "./dist/crime.js" }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
