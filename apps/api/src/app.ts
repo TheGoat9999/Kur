@@ -18,6 +18,7 @@ import { npcRoutes } from './routes/npcs.js';
 import { policeRoutes } from './routes/police.js';
 import { emsRoutes } from './routes/ems.js';
 import { realEstateRoutes } from './routes/real-estate.js';
+import { weaponsCraftingRoutes } from './routes/weapons-crafting.js';
 
 export function createApp(services: AppServices) {
   const app = express();
@@ -33,6 +34,7 @@ export function createApp(services: AppServices) {
   app.use(worldActionRoutes(services));
   app.use(npcRoutes(services));
   app.use(inventoryRoutes(services));
+  app.use(weaponsCraftingRoutes(services));
   app.use(itemRoutes());
   app.use(financeRoutes(services));
   app.use(phoneRoutes(services));

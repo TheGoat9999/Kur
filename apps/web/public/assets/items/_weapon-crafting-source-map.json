@@ -1,0 +1,26 @@
+{
+  "generatedAt": "2026-08-21",
+  "note": "Canonical item-key aliases reuse exact binary blobs already vendored in this repository from the Rainmad item workflow. No new external binary content was downloaded for these aliases.",
+  "licenseStatus": "public commercial-use license not independently verified; retain provenance review before commercial distribution",
+  "galleryUrl": "https://items.rainmad.com/",
+  "items": {
+    "weapon_parts_kit": {
+      "localPath": "/assets/items/weapon_parts_kit.png",
+      "derivedFromLocal": "/assets/items/weapon_cleaning_kit.png",
+      "sourceMetadata": "_source-map.json#weapon_cleaning_kit",
+      "provider": "rainmad"
+    },
+    "ammo_components_box": {
+      "localPath": "/assets/items/ammo_components_box.png",
+      "derivedFromLocal": "/assets/items/rifle_ammo.png",
+      "sourceMetadata": "_source-map.json#rifle_ammo",
+      "provider": "rainmad"
+    },
+    "precision_hardware_pack": {
+      "localPath": "/assets/items/precision_hardware_pack.png",
+      "derivedFromLocal": "/assets/items/screws_box.png",
+      "sourceMetadata": "_source-map.json#screws_box",
+      "provider": "rainmad"
+    }
+  }
+}

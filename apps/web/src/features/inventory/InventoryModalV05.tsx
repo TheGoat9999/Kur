@@ -17,6 +17,7 @@ import {
 import { GameIcon, type GameIconName } from '../../components/GameIcon';
 import { useI18n } from '../../i18n';
 import { useNotifications } from '../../components/Notifications';
+import { InventoryCraftingPanel, InventoryWeaponActions } from './InventoryWeaponsCrafting';
 import './inventory-v05.css';
 
 interface Props {
@@ -25,7 +26,7 @@ interface Props {
 }
 
 type CategoryFilter = ItemCategory | 'all';
-type SidebarTab = 'details' | 'storage';
+type SidebarTab = 'details' | 'crafting' | 'storage';
 
 interface HoverSlot {
   containerKey: InventoryContainerKey;
@@ -56,6 +57,7 @@ interface Copy {
   all: string;
   categories: Record<ItemCategory, string>;
   details: string;
+  crafting: string;
   storage: string;
   emptySlot: string;
   emptyPlayer: string;
@@ -131,7 +133,7 @@ const DEFAULT_THEME: InventoryThemeSettings = {
 const COPY: Record<'bg' | 'en', Copy> = {
   bg: {
     title: 'Инвентар',
-    subtitle: 'Предметите и земята са в един работен изглед. Drag & drop, двоен клик за бързо използване.',
+    subtitle: 'Предметите, оръжията и изработката са в един работен изглед. Drag & drop, двоен клик за бързо използване.',
     close: 'Затвори инвентара',
     carried: 'Носиш със себе си',
     nearby: 'Наблизо / Земя',
@@ -146,6 +148,7 @@ const COPY: Record<'bg' | 'en', Copy> = {
       electronics: 'Електроника', medical: 'Медицински', weapon: 'Оръжия'
     },
     details: 'Детайли',
+    crafting: 'Изработка',
     storage: 'Складове',
     emptySlot: 'Празен слот',
     emptyPlayer: 'Тук няма предмет. Пусни предмет върху този слот, за да го преместиш в раницата.',
@@ -194,7 +197,7 @@ const COPY: Record<'bg' | 'en', Copy> = {
   },
   en: {
     title: 'Inventory',
-    subtitle: 'Carried items and ground share one workspace. Drag & drop, double-click for quick use.',
+    subtitle: 'Items, weapons and crafting share one workspace. Drag & drop, double-click for quick use.',
     close: 'Close inventory',
     carried: 'Carried inventory',
     nearby: 'Nearby / Ground',
@@ -209,6 +212,7 @@ const COPY: Record<'bg' | 'en', Copy> = {
       electronics: 'Electronics', medical: 'Medical', weapon: 'Weapons'
     },
     details: 'Details',
+    crafting: 'Crafting',
     storage: 'Storage',
     emptySlot: 'Empty slot',
     emptyPlayer: 'There is no item here. Drop an item onto this slot to move it into your carried inventory.',
@@ -438,7 +442,7 @@ export function InventoryModalV05({ onStateChange, onClose }: Props) {
         <section className="inventory-v05 inventory-v05-loading" onMouseDown={event => event.stopPropagation()}>
           <GameIcon name="package" size={32} />
           <b>{copy.title}</b>
-          <span>{error ?? 'Loading...'}</span>
+          <span>{error ?? (locale === 'bg' ? 'Зареждане…' : 'Loading…')}</span>
           <button className="inventory-v05-close" onClick={onClose} aria-label={copy.close}><GameIcon name="x" size={19} /></button>
         </section>
       </div>
@@ -448,9 +452,7 @@ export function InventoryModalV05({ onStateChange, onClose }: Props) {
   const playerWeightPct = capacityPercent(player);
   const selectedUsable = Boolean(selected && isUsable(selected, selectedDefinition));
   const selectedSplittable = Boolean(selected?.stackable && selected.quantity > 1);
-  const selectedSource = selected ? inventory.containers.find(container => container.key === selected.containerKey) ?? null : null;
   const selectedTarget = selected?.containerKey === 'player' ? ground : player;
-  const previewIsSelected = Boolean(preview && selected && preview.id === selected.id && !hoveredSlot);
   const hoveredIsSelected = Boolean(preview && selected && preview.id === selected.id);
 
   return (
@@ -535,6 +537,7 @@ export function InventoryModalV05({ onStateChange, onClose }: Props) {
           <aside className="inventory-v05-sidebar">
             <nav className="inventory-v05-side-nav" aria-label="Inventory panel navigation">
               <button className={sidebarTab === 'details' ? 'active' : ''} onClick={() => setSidebarTab('details')}><GameIcon name="info" size={17} /><span>{copy.details}</span></button>
+              <button className={sidebarTab === 'crafting' ? 'active' : ''} onClick={() => { setSidebarTab('crafting'); setHoveredSlot(null); setSplitOpen(false); }}><GameIcon name="sparkles" size={17} /><span>{copy.crafting}</span></button>
               <button className={sidebarTab === 'storage' ? 'active' : ''} onClick={() => setSidebarTab('storage')}><GameIcon name="building" size={17} /><span>{copy.storage}</span></button>
             </nav>
 
@@ -557,8 +560,11 @@ export function InventoryModalV05({ onStateChange, onClose }: Props) {
                   onMove={() => selected && void move(selected.id, selectedTarget.key)}
                   onClear={() => selectItem(null)}
                 />
+                <InventoryWeaponActions item={selected} onInventory={setInventory} onError={reportError} />
                 {splitOpen && selected && <SplitPanel copy={copy} item={selected} quantity={splitQuantity} busy={busy} onQuantity={setSplitQuantity} onClose={() => setSplitOpen(false)} onConfirm={() => void confirmSplit()} />}
               </div>
+            ) : sidebarTab === 'crafting' ? (
+              <InventoryCraftingPanel catalogByKey={catalogByKey} onInventory={setInventory} onError={reportError} />
             ) : (
               <StoragePanel
                 copy={copy}
@@ -901,7 +907,14 @@ function humanizeError(reason: unknown, locale: 'bg' | 'en') {
     inventory_item_not_usable: 'Този предмет няма директно действие.',
     inventory_item_not_splittable: 'Този предмет не може да бъде разделян.',
     inventory_split_quantity_invalid: 'Избери валидно количество.',
-    inventory_slot_occupied: 'Избраният слот вече е зает.'
+    inventory_slot_occupied: 'Избраният слот вече е зает.',
+    inventory_item_not_weapon: 'Този предмет не е оръжие.',
+    weapon_does_not_use_ammo: 'Това оръжие не използва боеприпаси.',
+    weapon_magazine_full: 'Оръжието вече е напълно заредено.',
+    weapon_ammo_not_available: 'Не носиш съвместими боеприпаси.',
+    crafting_missing_ingredients: 'Нямаш всички необходими материали.',
+    crafting_recipe_not_found: 'Рецептата вече не е налична.',
+    crafting_output_unknown: 'Резултатът от рецептата не е разпознат.'
   };
   const en: Record<string, string> = {
     inventory_container_not_accessible: 'That container is not accessible from your current location.',
@@ -913,7 +926,14 @@ function humanizeError(reason: unknown, locale: 'bg' | 'en') {
     inventory_item_not_usable: 'That item has no direct use action.',
     inventory_item_not_splittable: 'That item cannot be split.',
     inventory_split_quantity_invalid: 'Choose a valid amount.',
-    inventory_slot_occupied: 'That slot is already occupied.'
+    inventory_slot_occupied: 'That slot is already occupied.',
+    inventory_item_not_weapon: 'That item is not a weapon.',
+    weapon_does_not_use_ammo: 'That weapon does not use ammunition.',
+    weapon_magazine_full: 'The weapon is already fully loaded.',
+    weapon_ammo_not_available: 'You are not carrying compatible ammunition.',
+    crafting_missing_ingredients: 'You are missing required materials.',
+    crafting_recipe_not_found: 'That recipe is no longer available.',
+    crafting_output_unknown: 'The recipe output is not recognized.'
   };
   return (locale === 'bg' ? bg : en)[raw] ?? raw.replaceAll('_', ' ');
 }
