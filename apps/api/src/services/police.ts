@@ -226,7 +226,7 @@ export async function createWarrant(db: Database, playerId: string, input: any) 
 export async function warrantAction(db: Database, playerId: string, warrantId: string, action: 'serve' | 'cancel') {
   await requireOfficer(db, playerId, true);
   const status = action === 'serve' ? 'served' : 'cancelled';
-  const q = await db.query(`UPDATE police_warrants SET status=$3,updated_at=now() WHERE id=$1 AND status='active' RETURNING id`, [warrantId, playerId, status]);
+  const q = await db.query(`UPDATE police_warrants SET status=$2,updated_at=now() WHERE id=$1 AND status='active' RETURNING id`, [warrantId, status]);
   if (!q.rows[0]) throw new PoliceCommandError('police_warrant_not_active', 409);
   await audit(db, playerId, `warrant_${status}`, 'warrant', warrantId);
   return getPoliceState(db, playerId);
