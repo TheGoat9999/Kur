@@ -6,6 +6,7 @@ import { healthRoutes } from './routes/health.js';
 import { sessionRoutes } from './routes/session.js';
 import { bootstrapRoutes } from './routes/bootstrap.js';
 import { characterRoutes } from './routes/character.js';
+import { characterPreviewRoutes } from './routes/character-preview.js';
 import { worldActionRoutes } from './routes/world-actions.js';
 import { worldMapRoutes } from './routes/world-map.js';
 import { inventoryRoutes } from './routes/inventory.js';
@@ -22,6 +23,7 @@ export function createApp(services: AppServices) {
   app.use(requireSession(services.redis));
   app.use(bootstrapRoutes(services));
   app.use(characterRoutes(services));
+  app.use(characterPreviewRoutes(services));
   app.use(worldMapRoutes(services));
   app.use(worldActionRoutes(services));
   app.use(inventoryRoutes(services));
