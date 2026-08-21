@@ -132,3 +132,4 @@ export type PhoneThread = z.infer<typeof PhoneThreadSchema>;
 export type PhoneNotification = z.infer<typeof PhoneNotificationSchema>;
 export type PhoneTask = z.infer<typeof PhoneTaskSchema>;
 export type PhoneNote = z.infer<typeof PhoneNoteSchema>;
+export type PhoneState = z.infer<typeof PhoneStateSchema>;
