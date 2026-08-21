@@ -21,6 +21,11 @@ import {
 } from '@sol-dorado/contracts';
 import { ItemCatalogResponseSchema, type ItemCatalogResponse } from '@sol-dorado/contracts/items';
 import {
+  PhoneStateSchema,
+  type PhoneSettings,
+  type PhoneState
+} from '@sol-dorado/contracts/phone';
+import {
   StreetPositionResultSchema,
   type StreetPosition,
   type StreetPositionResult
@@ -177,6 +182,48 @@ export async function useInventoryItem(itemId: string): Promise<InventoryMutatio
     throw new Error(payload?.error ?? `Inventory use failed (${response.status})`);
   }
   return InventoryMutationResultSchema.parse(await response.json());
+}
+
+export async function getPhone(): Promise<PhoneState> {
+  const response = await authenticatedFetch('/v1/phone');
+  if (!response.ok) throw new Error(await apiError(response, 'Phone failed'));
+  return PhoneStateSchema.parse(await response.json());
+}
+
+export async function patchPhoneSettings(patch: Partial<PhoneSettings>): Promise<PhoneState> {
+  const response = await authenticatedFetch('/v1/phone/settings', { method: 'PATCH', body: JSON.stringify(patch) });
+  if (!response.ok) throw new Error(await apiError(response, 'Phone settings failed'));
+  return PhoneStateSchema.parse(await response.json());
+}
+
+export async function sendPhoneMessage(threadId: string, body: string): Promise<PhoneState> {
+  const response = await authenticatedFetch('/v1/phone/messages', { method: 'POST', body: JSON.stringify({ threadId, body }) });
+  if (!response.ok) throw new Error(await apiError(response, 'Phone message failed'));
+  return PhoneStateSchema.parse(await response.json());
+}
+
+export async function readPhoneNotification(notificationId?: string, all = false): Promise<PhoneState> {
+  const response = await authenticatedFetch('/v1/phone/notifications/read', {
+    method: 'POST',
+    body: JSON.stringify(notificationId ? { notificationId } : { all })
+  });
+  if (!response.ok) throw new Error(await apiError(response, 'Phone notification failed'));
+  return PhoneStateSchema.parse(await response.json());
+}
+
+export async function setPhoneTask(taskId: string, completed: boolean): Promise<PhoneState> {
+  const response = await authenticatedFetch('/v1/phone/tasks', { method: 'PATCH', body: JSON.stringify({ taskId, completed }) });
+  if (!response.ok) throw new Error(await apiError(response, 'Phone task failed'));
+  return PhoneStateSchema.parse(await response.json());
+}
+
+export async function savePhoneNote(input: { noteId?: string; title: string; body: string; pinned?: boolean }): Promise<PhoneState> {
+  const response = await authenticatedFetch('/v1/phone/notes', {
+    method: 'POST',
+    body: JSON.stringify({ ...input, pinned: input.pinned ?? false })
+  });
+  if (!response.ok) throw new Error(await apiError(response, 'Phone note failed'));
+  return PhoneStateSchema.parse(await response.json());
 }
 
 export async function getFinance(): Promise<FinanceState> {
