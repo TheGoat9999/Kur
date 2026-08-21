@@ -31,7 +31,7 @@ describe('weapons and crafting definitions', () => {
   it('ships craftable maintenance, ammo, parts and weapons using known catalog items', () => {
     expect(CRAFTING_RECIPES.length).toBeGreaterThanOrEqual(10);
     const categories = new Set(CRAFTING_RECIPES.map(recipe => recipe.category));
-    expect(categories).toEqual(expect.objectContaining ? categories : categories);
+    expect(categories.size).toBeGreaterThanOrEqual(4);
     expect(categories.has('maintenance')).toBe(true);
     expect(categories.has('ammunition')).toBe(true);
     expect(categories.has('weapon_part')).toBe(true);
