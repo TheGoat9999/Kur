@@ -23,7 +23,7 @@ const groups: ReadonlyArray<{
   ] },
   { label: 'nav.assets', items: [
     { id: 'vehicles', icon: 'car', label: 'nav.vehicles', stage: 'migration' },
-    { id: 'property', icon: 'building', label: 'nav.property', stage: 'migration' }
+    { id: 'property', icon: 'building', label: 'nav.property', stage: 'live' }
   ] },
   { label: 'nav.institutions', items: [
     { id: 'hospitality', icon: 'utensils', label: 'nav.hospitality', stage: 'migration' },

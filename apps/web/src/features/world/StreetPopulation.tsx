@@ -10,6 +10,10 @@ import { STREET_POPULATION, type StreetNpcSlot } from './street-population';
 import './npc-life.css';
 
 const NPC_REACH = 11;
+const TRAFFIC_LANE_Y = {
+  east: 50.15,
+  west: 58.15
+} as const;
 
 export function StreetPopulation({ segmentId, visibleObjectIds, playerPosition, onApproach, suppressed = false, onNpcSelected }: {
   segmentId: StreetSegmentId;
@@ -78,12 +82,13 @@ export function StreetPopulation({ segmentId, visibleObjectIds, playerPosition, 
       <div className="street-population-layer" aria-hidden="true">
         {definition.vehicles.map(vehicle => {
           const moving = vehicle.toX !== undefined;
+          const laneY = moving ? TRAFFIC_LANE_Y[vehicle.heading] : vehicle.y;
           const style = {
-            '--vehicle-x': `${vehicle.x}%`, '--vehicle-y': `${vehicle.y}%`, '--vehicle-to-x': `${vehicle.toX ?? vehicle.x}%`,
+            '--vehicle-x': `${vehicle.x}%`, '--vehicle-y': `${laneY}%`, '--vehicle-to-x': `${vehicle.toX ?? vehicle.x}%`,
             '--vehicle-duration': `${vehicle.durationSeconds ?? 0}s`, '--vehicle-delay': `${vehicle.delaySeconds ?? 0}s`, '--vehicle-width': `${vehicle.widthPercent ?? 9.6}%`
           } as CSSProperties;
           const serviceProps = { ...(vehicle.service ? { service: vehicle.service } : {}), ...(vehicle.serviceLabel ? { serviceLabel: vehicle.serviceLabel } : {}) };
-          return <span key={vehicle.id} className={`street-vehicle-actor street-collision-actor ${moving ? 'street-vehicle-actor-moving' : ''} ${vehicle.parked ? 'street-vehicle-actor-parked' : ''}`} style={style} data-actor-kind="vehicle" onPointerDown={stopVehicleEvent} onClick={stopVehicleEvent}><WorldVehicle type={vehicle.type} color={vehicle.color} heading={vehicle.heading} {...serviceProps} /></span>;
+          return <span key={vehicle.id} className={`street-vehicle-actor street-collision-actor ${moving ? 'street-vehicle-actor-moving' : ''} ${vehicle.parked ? 'street-vehicle-actor-parked' : ''}`} style={style} data-actor-kind="vehicle" data-lane={moving ? vehicle.heading : 'parking'} onPointerDown={stopVehicleEvent} onClick={stopVehicleEvent}><WorldVehicle type={vehicle.type} color={vehicle.color} heading={vehicle.heading} assetSeed={vehicle.id} {...serviceProps} /></span>;
         })}
 
         {definition.npcs

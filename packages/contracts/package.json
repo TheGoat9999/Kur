@@ -18,6 +18,8 @@
     "./jobs": { "types": "./dist/jobs.d.ts", "import": "./dist/jobs.js" },
     "./npcs": { "types": "./dist/npcs.d.ts", "import": "./dist/npcs.js" },
     "./police": { "types": "./dist/police.d.ts", "import": "./dist/police.js" },
+    "./ems": { "types": "./dist/ems.d.ts", "import": "./dist/ems.js" },
+    "./real-estate": { "types": "./dist/real-estate.d.ts", "import": "./dist/real-estate.js" },
     "./weapons-crafting": { "types": "./dist/weapons-crafting.d.ts", "import": "./dist/weapons-crafting.js" }
   },
   "scripts": {
