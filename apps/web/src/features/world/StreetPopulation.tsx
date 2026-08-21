@@ -4,6 +4,11 @@ import { WorldCharacter, visualFromSeed, type WorldCharacterDirection } from '..
 import { WorldVehicle } from '../../components/WorldVehicle';
 import { STREET_POPULATION, type StreetNpcSlot } from './street-population';
 
+const TRAFFIC_LANE_Y = {
+  east: 50.15,
+  west: 58.15
+} as const;
+
 export function StreetPopulation({ segmentId, visibleObjectIds }: {
   segmentId: StreetSegmentId;
   visibleObjectIds: StreetObjectId[];
@@ -18,9 +23,10 @@ export function StreetPopulation({ segmentId, visibleObjectIds }: {
     <div className="street-population-layer" aria-hidden="true">
       {definition.vehicles.map(vehicle => {
         const moving = vehicle.toX !== undefined;
+        const laneY = moving ? TRAFFIC_LANE_Y[vehicle.heading] : vehicle.y;
         const style = {
           '--vehicle-x': `${vehicle.x}%`,
-          '--vehicle-y': `${vehicle.y}%`,
+          '--vehicle-y': `${laneY}%`,
           '--vehicle-to-x': `${vehicle.toX ?? vehicle.x}%`,
           '--vehicle-duration': `${vehicle.durationSeconds ?? 0}s`,
           '--vehicle-delay': `${vehicle.delaySeconds ?? 0}s`,
@@ -36,6 +42,7 @@ export function StreetPopulation({ segmentId, visibleObjectIds }: {
             className={`street-vehicle-actor street-collision-actor ${moving ? 'street-vehicle-actor-moving' : ''} ${vehicle.parked ? 'street-vehicle-actor-parked' : ''}`}
             style={style}
             data-actor-kind="vehicle"
+            data-lane={moving ? vehicle.heading : 'parking'}
             onPointerDown={stopVehicleEvent}
             onClick={stopVehicleEvent}
           >
