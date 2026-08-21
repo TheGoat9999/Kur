@@ -6,6 +6,7 @@ import { healthRoutes } from './routes/health.js';
 import { sessionRoutes } from './routes/session.js';
 import { bootstrapRoutes } from './routes/bootstrap.js';
 import { characterRoutes } from './routes/character.js';
+import { characterAssetRoutes } from './routes/character-assets.js';
 import { worldActionRoutes } from './routes/world-actions.js';
 import { inventoryRoutes } from './routes/inventory.js';
 import { financeRoutes } from './routes/finance.js';
@@ -17,6 +18,7 @@ export function createApp(services: AppServices) {
   app.use(express.json({ limit: '256kb' }));
   app.use(healthRoutes(services));
   app.use(sessionRoutes(services));
+  app.use(characterAssetRoutes(services));
   app.use(requireSession(services.redis));
   app.use(bootstrapRoutes(services));
   app.use(characterRoutes(services));
