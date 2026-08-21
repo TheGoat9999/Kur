@@ -53,6 +53,10 @@ export function resolvePursuitAction(current: { distanceIndex: number; risk: num
 
 function clamp(value: number) { return Math.max(0, Math.min(100, Math.round(value))); }
 
+export function normalizePoliceUnitIdentity(value: unknown) {
+  return value === true;
+}
+
 async function ensureProfile(db: Database, playerId: string) {
   await db.query(`INSERT INTO police_profiles (player_id) VALUES ($1) ON CONFLICT (player_id) DO NOTHING`, [playerId]);
 }
@@ -74,7 +78,7 @@ export async function getPoliceState(db: Database, playerId: string): Promise<Po
   await expireWarrants(db);
   const [profileQ, unitsQ, callsQ, intelQ, encounterQ, reportsQ, warrantsQ, bolosQ, evidenceQ, pursuitQ, auditQ, dashQ] = await Promise.all([
     db.query(`SELECT career_status,academy_stage,badge_number,rank_code,callsign,on_duty,complaints,citations,arrests FROM police_profiles WHERE player_id=$1`, [playerId]),
-    db.query(`SELECT id,callsign,unit_type,status,district,street_segment,is_npc,player_id=$1 AS is_self FROM police_units ORDER BY is_npc ASC,callsign`, [playerId]),
+    db.query(`SELECT id,callsign,unit_type,status,district,street_segment,is_npc,COALESCE(player_id=$1, false) AS is_self FROM police_units ORDER BY is_npc ASC,callsign`, [playerId]),
     db.query(`SELECT c.*,COALESCE(array_agg(u.callsign) FILTER (WHERE u.callsign IS NOT NULL),'{}') assigned_callsigns FROM police_dispatch_calls c LEFT JOIN police_dispatch_assignments a ON a.call_id=c.id LEFT JOIN police_units u ON u.id=a.unit_id WHERE c.status <> 'cleared' GROUP BY c.id ORDER BY c.priority DESC,c.created_at DESC LIMIT 30`),
     db.query(`SELECT id,call_id,source_type,label,summary,reliability,fields,created_at FROM police_intel ORDER BY created_at DESC LIMIT 60`),
     db.query(`SELECT id,encounter_type,status,subject_name,vehicle_id,legal_ground,detained,searched,metadata,started_at FROM police_encounters WHERE officer_player_id=$1 AND status='active' ORDER BY started_at DESC LIMIT 1`, [playerId]),
@@ -92,7 +96,7 @@ export async function getPoliceState(db: Database, playerId: string): Promise<Po
     serverTime: new Date().toISOString(),
     profile: { careerStatus: p.career_status, academyStage: p.academy_stage, badgeNumber: p.badge_number, rankCode: p.rank_code, callsign: p.callsign, onDuty: p.on_duty, complaints: p.complaints, citations: p.citations, arrests: p.arrests },
     dashboard: { activeCalls: d.active_calls, activeWarrants: d.active_warrants, activeBolos: d.active_bolos, officersOnDuty: d.officers_on_duty, openReports: d.open_reports },
-    units: unitsQ.rows.map(r => ({ id: r.id, callsign: r.callsign, unitType: r.unit_type, status: r.status, district: r.district, streetSegment: r.street_segment, isNpc: r.is_npc, isSelf: r.is_self })),
+    units: unitsQ.rows.map(r => ({ id: r.id, callsign: r.callsign, unitType: r.unit_type, status: r.status, district: r.district, streetSegment: r.street_segment, isNpc: r.is_npc, isSelf: normalizePoliceUnitIdentity(r.is_self) })),
     calls: callsQ.rows.map(r => ({ id: r.id, callCode: r.call_code, title: r.title, description: r.description, priority: r.priority, status: r.status, district: r.district, streetSegment: r.street_segment, sourceKind: r.source_kind, knowledge: r.knowledge ?? {}, assignedUnitCallsigns: r.assigned_callsigns ?? [], createdAt: iso(r.created_at) })),
     intel: intelQ.rows.map(r => ({ id: r.id, callId: r.call_id, sourceType: r.source_type, label: r.label, summary: r.summary, reliability: r.reliability, fields: r.fields ?? {}, createdAt: iso(r.created_at) })),
     activeEncounter: encounterQ.rows[0] ? mapEncounter(encounterQ.rows[0]) : null,
