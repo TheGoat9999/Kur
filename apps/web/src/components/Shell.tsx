@@ -22,7 +22,6 @@ const groups: ReadonlyArray<{
     { id: 'jobs', icon: 'briefcase', label: 'nav.jobs', stage: 'migration' }
   ] },
   { label: 'nav.assets', items: [
-    { id: 'vehicles', icon: 'car', label: 'nav.vehicles', stage: 'migration' },
     { id: 'property', icon: 'building', label: 'nav.property', stage: 'live' }
   ] },
   { label: 'nav.institutions', items: [
@@ -50,7 +49,7 @@ const DEFAULT_RIGHT_NAV: RightNavPreferences = {
     character: true,
     inventory: true,
     finance: true,
-    vehicles: true,
+    vehicles: false,
     property: true,
     jobs: true,
     hospitality: true,
@@ -76,7 +75,7 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem('sd_sidebar_collapsed') === 'true');
   const [rightNav, setRightNav] = useState<RightNavPreferences>(readRightNavPreferences);
   const [rightNavEditorOpen, setRightNavEditorOpen] = useState(false);
-  const active = navItems.find(item => item.id === screen)!;
+  const activeItem = navItems.find(item => item.id === screen);
   const serverTime = new Date(state.serverTime);
   const rightCopy = locale === 'bg'
     ? {
@@ -93,6 +92,7 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
     ? { copyright: '© 2026 SOL DORADO', note: 'Независима браузър игра' }
     : { copyright: '© 2026 SOL DORADO', note: 'Independent browser game' };
   const labelFor = (item: (typeof navItems)[number]) => item.id === 'government' ? (locale === 'bg' ? 'Идентичност и държава' : 'Identity & Government') : t(item.label);
+  const activeLabel = activeItem ? labelFor(activeItem) : screen === 'vehicles' ? t('nav.vehicles') : t('nav.world');
 
   useEffect(() => {
     localStorage.setItem(RIGHT_NAV_STORAGE, JSON.stringify(rightNav));
@@ -141,7 +141,7 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
         <button className="desktop-menu-button" onClick={() => onMenu(true)} aria-label={t('shell.openNavigation')}>☰</button>
         <div className="header-context header-context-screen">
           <span>SOL DORADO</span>
-          <b>{labelFor(active)}</b>
+          <b>{activeLabel}</b>
         </div>
         <div className="header-spacer" />
         <div className="language-toggle" role="group" aria-label={t('common.language')}>
@@ -267,7 +267,7 @@ function readRightNavPreferences(): RightNavPreferences {
     const density: RightNavDensity = parsed.density === 'compact' || parsed.density === 'large' ? parsed.density : 'comfortable';
     return {
       order,
-      visible: { ...DEFAULT_RIGHT_NAV.visible, ...(parsed.visible ?? {}) },
+      visible: { ...DEFAULT_RIGHT_NAV.visible, ...(parsed.visible ?? {}), vehicles: false },
       density,
       showStages: typeof parsed.showStages === 'boolean' ? parsed.showStages : true
     };
