@@ -7,6 +7,7 @@ import { MATERIAL_ITEMS } from './material-items.js';
 import { ELECTRONICS_ITEMS } from './electronics-items.js';
 import { MEDICAL_ITEMS } from './medical-items.js';
 import { WEAPON_ITEMS } from './weapon-items.js';
+import { CRAFTING_ITEMS } from './crafting-items.js';
 
 export const CORE_ITEM_CATALOG = ItemCatalogSchema.parse([
   ...PERSONAL_ITEMS,
@@ -16,7 +17,8 @@ export const CORE_ITEM_CATALOG = ItemCatalogSchema.parse([
   ...MATERIAL_ITEMS,
   ...ELECTRONICS_ITEMS,
   ...MEDICAL_ITEMS,
-  ...WEAPON_ITEMS
+  ...WEAPON_ITEMS,
+  ...CRAFTING_ITEMS
 ]);
 
 const uniqueKeys = new Set(CORE_ITEM_CATALOG.map(item => item.key));
