@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { PoliceStateSchema } from '@sol-dorado/contracts/police';
-import { evaluateFieldAction, resolvePursuitAction } from '../src/services/police.js';
+import { evaluateFieldAction, normalizePoliceUnitIdentity, resolvePursuitAction } from '../src/services/police.js';
 
 describe('police AIO domain', () => {
   it('keeps search authority separate from a generic detention', () => {
@@ -11,6 +11,13 @@ describe('police AIO domain', () => {
   it('records an arrest as unlawful without probable cause or warrant', () => {
     expect(evaluateFieldAction({ action: 'arrest', legalGround: 'reasonable_suspicion', detained: true, searched: true })).toEqual({ lawful: false, violation: 'unlawful_arrest' });
     expect(evaluateFieldAction({ action: 'arrest', legalGround: 'warrant', detained: false, searched: false })).toEqual({ lawful: true, violation: null });
+  });
+
+  it('normalizes nullable NPC ownership flags to strict booleans', () => {
+    expect(normalizePoliceUnitIdentity(null)).toBe(false);
+    expect(normalizePoliceUnitIdentity(undefined)).toBe(false);
+    expect(normalizePoliceUnitIdentity(false)).toBe(false);
+    expect(normalizePoliceUnitIdentity(true)).toBe(true);
   });
 
   it('removes live visual position when pursuit visual is lost', () => {
