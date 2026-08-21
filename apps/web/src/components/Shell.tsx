@@ -4,7 +4,7 @@ import { Hud } from './Hud';
 import { GameIcon, type GameIconName } from './GameIcon';
 import { useI18n, type TranslationKey } from '../i18n';
 
-export type Screen = 'world' | 'character' | 'inventory' | 'finance' | 'vehicles' | 'property' | 'jobs' | 'hospitality' | 'police';
+export type Screen = 'world' | 'character' | 'inventory' | 'finance' | 'vehicles' | 'property' | 'jobs' | 'hospitality' | 'government' | 'police';
 type FeatureStage = 'live' | 'foundation' | 'migration';
 type RightNavDensity = 'compact' | 'comfortable' | 'large';
 
@@ -27,6 +27,7 @@ const groups: ReadonlyArray<{
   ] },
   { label: 'nav.institutions', items: [
     { id: 'hospitality', icon: 'utensils', label: 'nav.hospitality', stage: 'migration' },
+    { id: 'government', icon: 'landmark', label: 'nav.character', stage: 'live' },
     { id: 'police', icon: 'shield', label: 'nav.police', stage: 'migration' }
   ] }
 ];
@@ -53,6 +54,7 @@ const DEFAULT_RIGHT_NAV: RightNavPreferences = {
     property: true,
     jobs: true,
     hospitality: true,
+    government: true,
     police: true
   },
   density: 'comfortable',
@@ -90,6 +92,7 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
   const legalCopy = locale === 'bg'
     ? { copyright: '© 2026 SOL DORADO', note: 'Независима браузър игра' }
     : { copyright: '© 2026 SOL DORADO', note: 'Independent browser game' };
+  const labelFor = (item: (typeof navItems)[number]) => item.id === 'government' ? (locale === 'bg' ? 'Идентичност и държава' : 'Identity & Government') : t(item.label);
 
   useEffect(() => {
     localStorage.setItem(RIGHT_NAV_STORAGE, JSON.stringify(rightNav));
@@ -138,7 +141,7 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
         <button className="desktop-menu-button" onClick={() => onMenu(true)} aria-label={t('shell.openNavigation')}>☰</button>
         <div className="header-context header-context-screen">
           <span>SOL DORADO</span>
-          <b>{t(active.label)}</b>
+          <b>{labelFor(active)}</b>
         </div>
         <div className="header-spacer" />
         <div className="language-toggle" role="group" aria-label={t('common.language')}>
@@ -166,11 +169,11 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
                 <button
                   key={item.id}
                   className={`game-nav-item ${isNavItemActive(item.id) ? 'game-nav-item-active' : ''}`}
-                  title={item.id === 'inventory' ? `${t(item.label)} · I` : collapsed ? t(item.label) : undefined}
+                  title={item.id === 'inventory' ? `${labelFor(item)} · I` : collapsed ? labelFor(item) : undefined}
                   onClick={() => navigate(item.id)}
                 >
                   <span className="nav-icon"><GameIcon name={item.icon} size={18} /></span>
-                  <span className="nav-copy"><b>{t(item.label)}</b><small>{item.id === 'inventory' ? `${stageLabel(item.stage, t)} · I` : stageLabel(item.stage, t)}</small></span>
+                  <span className="nav-copy"><b>{labelFor(item)}</b><small>{item.id === 'inventory' ? `${stageLabel(item.stage, t)} · I` : stageLabel(item.stage, t)}</small></span>
                   <span className={`stage-dot stage-dot-${item.stage}`} />
                 </button>
               ))}
@@ -201,12 +204,12 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
               key={item.id}
               className={`right-nav-item ${isNavItemActive(item.id) ? 'right-nav-item-active' : ''}`}
               onClick={() => navigate(item.id)}
-              aria-label={t(item.label)}
-              title={t(item.label)}
+              aria-label={labelFor(item)}
+              title={labelFor(item)}
             >
               <GameIcon name={item.icon} size={rightNav.density === 'large' ? 21 : rightNav.density === 'compact' ? 17 : 19} />
               {rightNav.showStages && <span className={`right-nav-stage right-nav-stage-${item.stage}`} />}
-              <span className="right-nav-tooltip">{t(item.label)}</span>
+              <span className="right-nav-tooltip">{labelFor(item)}</span>
             </button>
           ))}
         </div>
@@ -235,10 +238,10 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
             {orderedRightItems.map((item, index) => (
               <div className="right-nav-editor-row" key={item.id}>
                 <span className="right-nav-editor-icon"><GameIcon name={item.icon} size={16} /></span>
-                <span className="right-nav-editor-copy"><b>{t(item.label)}</b><small>{stageLabel(item.stage, t)}</small></span>
-                <button className={`right-nav-visibility ${rightNav.visible[item.id] ? 'right-nav-visibility-active' : ''}`} onClick={() => toggleRightItem(item.id)} aria-label={`${rightCopy.visible}: ${t(item.label)}`}><span /></button>
-                <button disabled={index === 0} onClick={() => moveRightItem(item.id, -1)} aria-label={`${rightCopy.up}: ${t(item.label)}`}>↑</button>
-                <button disabled={index === orderedRightItems.length - 1} onClick={() => moveRightItem(item.id, 1)} aria-label={`${rightCopy.down}: ${t(item.label)}`}>↓</button>
+                <span className="right-nav-editor-copy"><b>{labelFor(item)}</b><small>{stageLabel(item.stage, t)}</small></span>
+                <button className={`right-nav-visibility ${rightNav.visible[item.id] ? 'right-nav-visibility-active' : ''}`} onClick={() => toggleRightItem(item.id)} aria-label={`${rightCopy.visible}: ${labelFor(item)}`}><span /></button>
+                <button disabled={index === 0} onClick={() => moveRightItem(item.id, -1)} aria-label={`${rightCopy.up}: ${labelFor(item)}`}>↑</button>
+                <button disabled={index === orderedRightItems.length - 1} onClick={() => moveRightItem(item.id, 1)} aria-label={`${rightCopy.down}: ${labelFor(item)}`}>↓</button>
               </div>
             ))}
           </div>
