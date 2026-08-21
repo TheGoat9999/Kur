@@ -56,6 +56,22 @@ export function emsRoutes(services: AppServices) {
   router.post('/v1/ems/calls/status', async (request, response) => {
     const parsed = EmsStatusRequestSchema.safeParse(request.body);
     if (!parsed.success) return response.status(400).json({ error: 'invalid_ems_status', issues: parsed.error.issues });
+    if (parsed.data.status === 'on_scene') {
+      const proximity = await services.db.query(`
+        SELECT c.street_segment_id, c.position_x AS call_x, c.position_y AS call_y,
+          s.current_segment_id, s.position_x AS responder_x, s.position_y AS responder_y
+        FROM ems_calls c
+        JOIN player_street_state s ON s.player_id = $2
+        WHERE c.id = $1
+      `, [parsed.data.callId, request.playerId!]);
+      const row = proximity.rows[0];
+      if (!row) return response.status(409).json({ error: 'ems_not_close_enough' });
+      const dx = Number(row.call_x) - Number(row.responder_x);
+      const dy = Number(row.call_y) - Number(row.responder_y);
+      if (row.street_segment_id !== row.current_segment_id || Math.hypot(dx, dy) > 18) {
+        return response.status(409).json({ error: 'ems_not_close_enough' });
+      }
+    }
     return command(response, () => updateEmsCallStatus(services.db, request.playerId!, parsed.data.callId, parsed.data.status));
   });
 
