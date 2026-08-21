@@ -1,6 +1,5 @@
 import { z } from 'zod';
-import { StreetSegmentIdSchema } from './index.js';
-import { StreetPositionSchema } from './world-position.js';
+import { StreetPositionSchema, StreetSpatialSegmentIdSchema } from './world-position.js';
 
 export const LocalizedNpcTextSchema = z.object({
   bg: z.string().min(1),
@@ -59,7 +58,7 @@ export const NpcRelationshipSchema = z.object({
 });
 
 export const NpcPresenceSchema = z.object({
-  segmentId: StreetSegmentIdSchema,
+  segmentId: StreetSpatialSegmentIdSchema,
   position: StreetPositionSchema,
   intent: NpcIntentSchema,
   activity: LocalizedNpcTextSchema,
@@ -82,7 +81,7 @@ export const NpcPublicStateSchema = z.object({
 
 export const NearbyNpcsStateSchema = z.object({
   serverTime: z.iso.datetime(),
-  segmentId: StreetSegmentIdSchema,
+  segmentId: StreetSpatialSegmentIdSchema,
   npcs: z.array(NpcPublicStateSchema)
 });
 
