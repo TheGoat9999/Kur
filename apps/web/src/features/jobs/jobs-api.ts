@@ -22,9 +22,19 @@ async function request(path: string, init?: RequestInit, retry = true): Promise<
 }
 async function errorCode(response: Response) { const body = await response.json().catch(() => null) as { error?: string } | null; return body?.error ?? `jobs_failed_${response.status}`; }
 
-export async function getJobs(): Promise<JobsState> { const response=await request('/v1/jobs'); if(!response.ok)throw new Error(await errorCode(response)); return JobsStateSchema.parse(await response.json()); }
-async function command(path:string,body:unknown):Promise<JobMutationResult>{const response=await request(path,{method:'POST',body:JSON.stringify(body)});if(!response.ok)throw new Error(await errorCode(response));return JobMutationResultSchema.parse(await response.json());}
-export const startJob=(jobId:string)=>command('/v1/jobs/start',{jobId});
-export const completeTask=(shiftId:string,taskId:string)=>command('/v1/jobs/task',{shiftId,taskId});
-export const chooseJobEvent=(shiftId:string,eventId:string,choiceId:string)=>command('/v1/jobs/choice',{shiftId,eventId,choiceId});
-export const finishJob=(shiftId:string)=>command('/v1/jobs/finish',{shiftId});
+export async function getJobs(): Promise<JobsState> {
+  const response = await request('/v1/jobs');
+  if (!response.ok) throw new Error(await errorCode(response));
+  return JobsStateSchema.parse(await response.json());
+}
+async function command(path: string, body: unknown): Promise<JobMutationResult> {
+  const response = await request(path, { method: 'POST', body: JSON.stringify(body) });
+  if (!response.ok) throw new Error(await errorCode(response));
+  return JobMutationResultSchema.parse(await response.json());
+}
+export const startJob = (jobId: string, offerId: string) => command('/v1/jobs/start', { jobId, offerId });
+export const completeTask = (shiftId: string, taskId: string) => command('/v1/jobs/task', { shiftId, taskId });
+export const chooseJobEvent = (shiftId: string, eventId: string, choiceId: string) => command('/v1/jobs/choice', { shiftId, eventId, choiceId });
+export const finishJob = (shiftId: string) => command('/v1/jobs/finish', { shiftId });
+export const abandonJob = (shiftId: string) => command('/v1/jobs/abandon', { shiftId });
+export const claimQualification = (qualificationKey: string) => command('/v1/jobs/qualification', { qualificationKey });
