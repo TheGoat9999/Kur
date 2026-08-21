@@ -25,13 +25,13 @@ export function App() {
   const { push } = useNotifications();
   const [state, setState] = useState<BootstrapState | null>(null);
   const [screen, setScreen] = useState<Screen>('world');
-  const [vehicleMode, setVehicleMode] = useState<VehicleViewMode>('my');
+  const [vehicleMode, setVehicleMode] = useState<VehicleViewMode>('dealer');
   const [vehicleMapFocusId, setVehicleMapFocusId] = useState<string | null>(null);
   const [inventoryOpen, setInventoryOpen] = useState(false);
   const [phoneOpen, setPhoneOpen] = useState(false);
   const [emsWorkspaceOpen, setEmsWorkspaceOpen] = useState(false);
   const [emergencyOpen, setEmergencyOpen] = useState(false);
-  const [policeWorkspace, setPoliceWorkspace] = useState<'police' | 'justice'>('police');
+  const [publicSafetyWorkspace, setPublicSafetyWorkspace] = useState<'police' | 'justice'>('police');
   const [adminOpen, setAdminOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -125,7 +125,6 @@ export function App() {
       setMenuOpen(false);
       return;
     }
-    if (next === 'vehicles') setVehicleMode('my');
     setVehicleMapFocusId(null);
     setInventoryOpen(false);
     setPhoneOpen(false);
@@ -155,7 +154,7 @@ export function App() {
           {!inventoryOpen && !phoneOpen && !emergencyOpen && <PhoneLauncher onOpen={() => setPhoneOpen(true)} />}
           {!inventoryOpen && !phoneOpen && !emergencyOpen && <button onClick={() => setEmergencyOpen(true)} className="absolute bottom-4 left-4 z-30 min-h-11 rounded-xl border border-red-300/25 bg-[#0b171d]/95 px-4 text-xs font-black tracking-wide text-red-100 shadow-xl backdrop-blur hover:border-red-300/45">112 · {locale === 'bg' ? 'Медицински сигнал' : 'Medical emergency'}</button>}
           {inventoryOpen && <InventoryModalV05 onStateChange={setState} onClose={() => setInventoryOpen(false)} />}
-          {phoneOpen && <PhoneOverlay state={state} onClose={() => setPhoneOpen(false)} onOpenFeature={openPhoneFeature} />}
+          {phoneOpen && <PhoneOverlay state={state} onClose={() => setPhoneOpen(false)} onOpenFeature={openPhoneFeature} onLocateVehicle={locateVehicle} />}
           {emergencyOpen && <Ems112Overlay onClose={() => setEmergencyOpen(false)} />}
         </div>
       )}
@@ -177,11 +176,11 @@ export function App() {
       {screen === 'vehicles' && <VehiclesView state={state} mode={vehicleMode} onModeChange={setVehicleMode} onStateChange={setState} onWorld={() => { setVehicleMapFocusId(null); setScreen('world'); }} onLocateVehicle={locateVehicle} />}
       {screen === 'police' && <>
         <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-white/10 bg-[#0a1116] p-2">
-          <button onClick={() => setPoliceWorkspace('police')} className={`min-h-10 rounded-xl px-4 text-xs font-black ${policeWorkspace === 'police' ? 'bg-cyan-300 text-slate-950' : 'bg-white/[.035] text-slate-300'}`}>SDPD · {locale === 'bg' ? 'Операции' : 'Operations'}</button>
-          <button onClick={() => setPoliceWorkspace('justice')} className={`min-h-10 rounded-xl px-4 text-xs font-black ${policeWorkspace === 'justice' ? 'bg-amber-300 text-slate-950' : 'bg-white/[.035] text-slate-300'}`}>{locale === 'bg' ? 'Правосъдие · Право · Корекции' : 'Justice · Legal · Corrections'}</button>
+          <button onClick={() => setPublicSafetyWorkspace('police')} className={`min-h-10 rounded-xl px-4 text-xs font-black ${publicSafetyWorkspace === 'police' ? 'bg-cyan-300 text-slate-950' : 'bg-white/[.035] text-slate-300'}`}>SDPD · {locale === 'bg' ? 'Операции' : 'Operations'}</button>
+          <button onClick={() => setPublicSafetyWorkspace('justice')} className={`min-h-10 rounded-xl px-4 text-xs font-black ${publicSafetyWorkspace === 'justice' ? 'bg-amber-300 text-slate-950' : 'bg-white/[.035] text-slate-300'}`}>{locale === 'bg' ? 'Правосъдие · Право · Корекции' : 'Justice · Legal · Corrections'}</button>
           <span className="ml-auto px-2 text-[10px] uppercase tracking-[.16em] text-slate-600">PUBLIC SAFETY → JUSTICE LIFECYCLE</span>
         </div>
-        {policeWorkspace === 'police' ? <PoliceView /> : <JusticeView />}
+        {publicSafetyWorkspace === 'police' ? <PoliceView /> : <JusticeView />}
       </>}
       {!['world', 'character', 'finance', 'inventory', 'vehicles', 'jobs', 'property', 'police'].includes(screen) && <IntegrationView feature={screen as 'hospitality'} />}
       {import.meta.env.DEV && <button onClick={() => setAdminOpen(true)} className="fixed bottom-4 right-4 z-[90] grid h-12 w-12 place-items-center rounded-full border border-amber-300/30 bg-[#0b171d]/95 text-lg text-amber-200 shadow-2xl backdrop-blur hover:border-amber-300/60" title={locale === 'bg' ? 'Администрация' : 'Administration'} aria-label={locale === 'bg' ? 'Отвори администрация' : 'Open administration'}>⚙</button>}

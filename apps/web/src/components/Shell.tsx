@@ -22,7 +22,6 @@ const groups: ReadonlyArray<{
     { id: 'jobs', icon: 'briefcase', label: 'nav.jobs', stage: 'migration' }
   ] },
   { label: 'nav.assets', items: [
-    { id: 'vehicles', icon: 'car', label: 'nav.vehicles', stage: 'migration' },
     { id: 'property', icon: 'building', label: 'nav.property', stage: 'live' }
   ] },
   { label: 'nav.institutions', items: [
@@ -49,7 +48,7 @@ const DEFAULT_RIGHT_NAV: RightNavPreferences = {
     character: true,
     inventory: true,
     finance: true,
-    vehicles: true,
+    vehicles: false,
     property: true,
     jobs: true,
     hospitality: true,
@@ -74,7 +73,7 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem('sd_sidebar_collapsed') === 'true');
   const [rightNav, setRightNav] = useState<RightNavPreferences>(readRightNavPreferences);
   const [rightNavEditorOpen, setRightNavEditorOpen] = useState(false);
-  const active = navItems.find(item => item.id === screen)!;
+  const activeLabel = navItems.find(item => item.id === screen)?.label ?? (screen === 'vehicles' ? 'nav.vehicles' : 'nav.world');
   const serverTime = new Date(state.serverTime);
   const rightCopy = locale === 'bg'
     ? {
@@ -138,7 +137,7 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
         <button className="desktop-menu-button" onClick={() => onMenu(true)} aria-label={t('shell.openNavigation')}>☰</button>
         <div className="header-context header-context-screen">
           <span>SOL DORADO</span>
-          <b>{t(active.label)}</b>
+          <b>{t(activeLabel)}</b>
         </div>
         <div className="header-spacer" />
         <div className="language-toggle" role="group" aria-label={t('common.language')}>
@@ -264,7 +263,7 @@ function readRightNavPreferences(): RightNavPreferences {
     const density: RightNavDensity = parsed.density === 'compact' || parsed.density === 'large' ? parsed.density : 'comfortable';
     return {
       order,
-      visible: { ...DEFAULT_RIGHT_NAV.visible, ...(parsed.visible ?? {}) },
+      visible: { ...DEFAULT_RIGHT_NAV.visible, ...(parsed.visible ?? {}), vehicles: false },
       density,
       showStages: typeof parsed.showStages === 'boolean' ? parsed.showStages : true
     };
