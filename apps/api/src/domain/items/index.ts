@@ -28,6 +28,20 @@ export const ITEM_BY_KEY: ReadonlyMap<string, ItemDefinition> = new Map(
   CORE_ITEM_CATALOG.map(item => [item.key, item])
 );
 
+/**
+ * Keys used by the first inventory prototype before the 200-item catalog landed.
+ * Keep these aliases so old development databases remain playable even before
+ * the repair migration has been applied.
+ */
+export const LEGACY_ITEM_KEY_ALIASES: Readonly<Record<string, string>> = Object.freeze({
+  water: 'water_bottle',
+  gloves: 'work_gloves'
+});
+
+export function resolveItemKey(itemKey: string): string {
+  return LEGACY_ITEM_KEY_ALIASES[itemKey] ?? itemKey;
+}
+
 export const CORE_ITEM_CATEGORY_COUNTS: Readonly<Record<ItemCategory, number>> = Object.freeze(
   CORE_ITEM_CATALOG.reduce<Record<ItemCategory, number>>((counts, item) => {
     counts[item.category] += 1;
@@ -45,7 +59,7 @@ export const CORE_ITEM_CATEGORY_COUNTS: Readonly<Record<ItemCategory, number>> =
 );
 
 export function getItemDefinition(itemKey: string): ItemDefinition | undefined {
-  return ITEM_BY_KEY.get(itemKey);
+  return ITEM_BY_KEY.get(resolveItemKey(itemKey));
 }
 
 export function findItems(options: { category?: ItemCategory; search?: string } = {}): ItemDefinition[] {
