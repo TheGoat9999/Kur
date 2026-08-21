@@ -57,10 +57,10 @@ export const STREET_POPULATION: Record<StreetSegmentId, StreetPopulationDefiniti
       npc('market-east-north', 86.7, 37.1, 'market-east-north'),
       npc('market-office-south', 35.8, 71.4, 'market-office-south'),
       npc('market-cafe-north', 51.5, 37.2, 'market-cafe-north'),
-      npc('market-walker-a', 17, 72, 'market-walker-a', { toX: 41, toY: 72, durationSeconds: 16, delaySeconds: -3 }),
-      npc('market-walker-b', 82, 38, 'market-walker-b', { toX: 58, toY: 38, durationSeconds: 19, delaySeconds: -9 }),
-      npc('market-walker-c', 43, 72, 'market-walker-c', { toX: 69, toY: 72, durationSeconds: 21, delaySeconds: -12 }),
-      npc('market-walker-d', 71, 38, 'market-walker-d', { toX: 47, toY: 38, durationSeconds: 17, delaySeconds: -6 })
+      npc('market-walker-a', -5, 72, 'market-walker-a', { toX: 105, toY: 72, durationSeconds: 34, delaySeconds: -3 }),
+      npc('market-walker-b', 105, 38, 'market-walker-b', { toX: -5, toY: 38, durationSeconds: 37, delaySeconds: -11 }),
+      npc('market-walker-c', -12, 72, 'market-walker-c', { toX: 112, toY: 72, durationSeconds: 43, delaySeconds: -24 }),
+      npc('market-walker-d', 112, 38, 'market-walker-d', { toX: -12, toY: 38, durationSeconds: 46, delaySeconds: -31 })
     ],
     vehicles: [
       vehicle('market-car-1', 32.2, 47.0, 'sedan', 'east', '#526c73'),
@@ -78,9 +78,9 @@ export const STREET_POPULATION: Record<StreetSegmentId, StreetPopulationDefiniti
       npc('cypress-park', 37.5, 36.9, 'cypress-park'),
       npc('cypress-shops', 91.7, 36.9, 'cypress-shops'),
       npc('cypress-bench', 49.5, 37.1, 'cypress-bench'),
-      npc('cypress-walker-a', 20, 72, 'cypress-walker-a', { toX: 43, toY: 72, durationSeconds: 18, delaySeconds: -5 }),
-      npc('cypress-walker-b', 78, 38, 'cypress-walker-b', { toX: 56, toY: 38, durationSeconds: 20, delaySeconds: -13 }),
-      npc('cypress-walker-c', 45, 72, 'cypress-walker-c', { toX: 74, toY: 72, durationSeconds: 23, delaySeconds: -17 })
+      npc('cypress-walker-a', -6, 72, 'cypress-walker-a', { toX: 106, toY: 72, durationSeconds: 38, delaySeconds: -5 }),
+      npc('cypress-walker-b', 106, 38, 'cypress-walker-b', { toX: -6, toY: 38, durationSeconds: 42, delaySeconds: -19 }),
+      npc('cypress-walker-c', -13, 72, 'cypress-walker-c', { toX: 113, toY: 72, durationSeconds: 49, delaySeconds: -32 })
     ],
     vehicles: [
       vehicle('cypress-car-1', 20.5, 47.7, 'hatchback', 'east', '#647178'),
@@ -96,9 +96,9 @@ export const STREET_POPULATION: Record<StreetSegmentId, StreetPopulationDefiniti
     npcs: [
       npc('alley-service', 32.1, 37.1, 'alley-service'),
       npc('alley-yard', 58.3, 72.1, 'alley-yard'),
-      npc('alley-walker-a', 73, 72, 'alley-walker-a', { toX: 52, toY: 72, durationSeconds: 15, delaySeconds: -2 }),
-      npc('alley-walker-b', 18, 38, 'alley-walker-b', { toX: 37, toY: 38, durationSeconds: 18, delaySeconds: -10 }),
-      npc('alley-walker-c', 47, 72, 'alley-walker-c', { toX: 67, toY: 72, durationSeconds: 21, delaySeconds: -14 })
+      npc('alley-walker-a', 106, 72, 'alley-walker-a', { toX: -6, toY: 72, durationSeconds: 39, delaySeconds: -2 }),
+      npc('alley-walker-b', -7, 38, 'alley-walker-b', { toX: 107, toY: 38, durationSeconds: 44, delaySeconds: -17 }),
+      npc('alley-walker-c', -14, 72, 'alley-walker-c', { toX: 114, toY: 72, durationSeconds: 52, delaySeconds: -35 })
     ],
     vehicles: [
       vehicle('alley-van', 44.0, 47.7, 'van', 'east', '#697579', { widthPercent: 11.2, service: 'delivery', serviceLabel: 'DORADO' }),
