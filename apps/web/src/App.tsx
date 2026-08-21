@@ -62,12 +62,12 @@ export function App() {
     >
       {error && <div className="mb-4 rounded-xl border border-red-400/20 bg-red-400/8 p-3 text-sm text-red-100">{error}</div>}
       {screen === 'world' && (
-        <div className="world-inventory-stage">
+        <div className="world-inventory-stage h-full min-h-0">
           <WorldView state={state} onStateChange={setState} />
           {inventoryOpen && <InventoryView onStateChange={setState} onClose={() => setInventoryOpen(false)} />}
         </div>
       )}
-      {screen === 'character' && <CharacterView state={state} />}
+      {screen === 'character' && <CharacterView state={state} onStateChange={setState} />}
       {screen === 'finance' && <FinanceView onStateChange={setState} />}
       {!['world', 'character', 'finance', 'inventory'].includes(screen) && <IntegrationView feature={screen as 'vehicles' | 'property' | 'jobs' | 'hospitality' | 'police'} />}
     </Shell>
