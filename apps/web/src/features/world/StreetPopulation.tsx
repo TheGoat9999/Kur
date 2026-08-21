@@ -1,8 +1,8 @@
 import type { CSSProperties } from 'react';
 import type { StreetObjectId, StreetSegmentId } from '@sol-dorado/contracts';
-import { WorldCharacter, visualFromSeed } from '../../components/WorldCharacter';
+import { WorldCharacter, visualFromSeed, type WorldCharacterDirection } from '../../components/WorldCharacter';
 import { WorldVehicle } from '../../components/WorldVehicle';
-import { STREET_POPULATION } from './street-population';
+import { STREET_POPULATION, type StreetNpcSlot } from './street-population';
 
 export function StreetPopulation({ segmentId, visibleObjectIds }: {
   segmentId: StreetSegmentId;
@@ -47,10 +47,19 @@ export function StreetPopulation({ segmentId, visibleObjectIds }: {
           } as CSSProperties;
           return (
             <span key={npc.id} className={`street-npc-actor ${moving ? 'street-npc-actor-moving' : ''} ${npc.namedObjectId ? 'street-npc-actor-named' : ''}`} style={style}>
-              <WorldCharacter visual={npc.visual ?? visualFromSeed(`${segmentId}:${npc.id}`)} direction={npc.direction ?? 'south'} moving={moving} />
+              <WorldCharacter visual={npc.visual ?? visualFromSeed(`${segmentId}:${npc.id}`)} direction={npcDirection(npc)} moving={moving} />
             </span>
           );
         })}
     </div>
   );
+}
+
+function npcDirection(npc: StreetNpcSlot): WorldCharacterDirection {
+  if (npc.direction) return npc.direction;
+  const dx = (npc.toX ?? npc.x) - npc.x;
+  const dy = (npc.toY ?? npc.y) - npc.y;
+  if (Math.abs(dx) >= Math.abs(dy) && Math.abs(dx) > 0.01) return dx > 0 ? 'east' : 'west';
+  if (Math.abs(dy) > 0.01) return dy > 0 ? 'south' : 'north';
+  return 'south';
 }
