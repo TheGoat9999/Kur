@@ -9,6 +9,7 @@ import { PhoneLauncher, PhoneOverlay } from './features/phone/PhoneOverlay';
 import { FinanceView } from './features/finance/FinanceView';
 import { VehiclesView, type VehicleViewMode } from './features/vehicles/VehiclesView';
 import { JobsView } from './features/jobs/JobsView';
+import { EmsView } from './features/ems/EmsView';
 import { useNotifications } from './components/Notifications';
 import { getBootstrap, travelWorldMap } from './lib/api';
 import { useI18n } from './i18n';
@@ -22,6 +23,7 @@ export function App() {
   const [vehicleMapFocusId, setVehicleMapFocusId] = useState<string | null>(null);
   const [inventoryOpen, setInventoryOpen] = useState(false);
   const [phoneOpen, setPhoneOpen] = useState(false);
+  const [emsOpen, setEmsOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,6 +39,7 @@ export function App() {
       setVehicleMapFocusId(null);
       setScreen('world');
       setMenuOpen(false);
+      setEmsOpen(false);
       if (key === 'i') {
         setPhoneOpen(false);
         setInventoryOpen(value => !value);
@@ -53,6 +56,7 @@ export function App() {
     function openDealer() {
       setInventoryOpen(false);
       setPhoneOpen(false);
+      setEmsOpen(false);
       setMenuOpen(false);
       setVehicleMapFocusId(null);
       setVehicleMode('dealer');
@@ -88,12 +92,14 @@ export function App() {
   function locateVehicle(vehicleId: string) {
     setInventoryOpen(false);
     setPhoneOpen(false);
+    setEmsOpen(false);
     setMenuOpen(false);
     setVehicleMapFocusId(vehicleId);
     setScreen('world');
   }
 
   function changeScreen(next: Screen) {
+    setEmsOpen(false);
     if (next === 'inventory') {
       setVehicleMapFocusId(null);
       setPhoneOpen(false);
@@ -117,6 +123,7 @@ export function App() {
     setVehicleMapFocusId(null);
     setPhoneOpen(false);
     setInventoryOpen(false);
+    setEmsOpen(false);
     setMenuOpen(false);
     setScreen(feature);
   }
@@ -130,9 +137,11 @@ export function App() {
       {screen === 'world' && (
         <div className="world-inventory-stage h-full min-h-0">
           <WorldView state={state} onStateChange={setState} focusVehicleId={vehicleMapFocusId} onVehicleFocusHandled={() => setVehicleMapFocusId(null)} />
-          {!inventoryOpen && !phoneOpen && <PhoneLauncher onOpen={() => setPhoneOpen(true)} />}
+          {!inventoryOpen && !phoneOpen && !emsOpen && <PhoneLauncher onOpen={() => setPhoneOpen(true)} />}
+          {!inventoryOpen && !phoneOpen && !emsOpen && <button onClick={() => setEmsOpen(true)} className="absolute bottom-4 left-4 z-30 min-h-11 rounded-xl border border-red-300/25 bg-[#0b171d]/95 px-4 text-xs font-black tracking-wide text-red-100 shadow-xl backdrop-blur hover:border-red-300/45">✚ EMS / 112</button>}
           {inventoryOpen && <InventoryModalV05 onStateChange={setState} onClose={() => setInventoryOpen(false)} />}
           {phoneOpen && <PhoneOverlay state={state} onClose={() => setPhoneOpen(false)} onOpenFeature={openPhoneFeature} />}
+          {emsOpen && <EmsView onStateChange={setState} onClose={() => setEmsOpen(false)} />}
         </div>
       )}
       {screen === 'character' && <CharacterView state={state} onStateChange={setState} />}
