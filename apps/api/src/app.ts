@@ -20,6 +20,7 @@ import { emsRoutes } from './routes/ems.js';
 import { realEstateRoutes } from './routes/real-estate.js';
 import { hoodWalkRoutes } from './routes/hood-walk.js';
 import { adminRoutes } from './routes/admin.js';
+import { governmentRoutes } from './routes/government.js';
 
 export function createApp(services: AppServices) {
   const app = express();
@@ -44,6 +45,7 @@ export function createApp(services: AppServices) {
   app.use(policeRoutes(services));
   app.use(emsRoutes(services));
   app.use(realEstateRoutes(services));
+  app.use(governmentRoutes(services));
   app.use(adminRoutes(services));
   app.use((error: unknown, _request: Request, response: Response, _next: NextFunction) => {
     console.error(error);
