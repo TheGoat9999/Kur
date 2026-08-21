@@ -7,12 +7,12 @@ import {
 import type { AppServices } from '../types.js';
 import {
   GovernmentCommandError,
-  applyBusinessLicense,
   getGovernmentState,
   issueDrivingLicense,
   issueIdCard,
   updateCitizenProfile
 } from '../services/government.js';
+import { applyCanonicalBusinessLicense } from '../services/government-business.js';
 import { payCanonicalGovernmentFine } from '../services/government-fines.js';
 
 export function governmentRoutes(services: AppServices) {
@@ -47,7 +47,7 @@ export function governmentRoutes(services: AppServices) {
   router.post('/v1/government/business-license', async (request, response) => {
     const parsed = GovernmentBusinessLicenseRequestSchema.safeParse(request.body);
     if (!parsed.success) return response.status(400).json({ error: 'invalid_business_license_application', issues: parsed.error.issues });
-    try { response.json(await applyBusinessLicense(services.db, request.playerId!, parsed.data.businessName)); }
+    try { response.json(await applyCanonicalBusinessLicense(services.db, request.playerId!, parsed.data.businessName)); }
     catch (error) { handle(response, error); }
   });
 
