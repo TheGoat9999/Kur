@@ -14,6 +14,7 @@ import { itemRoutes } from './routes/items.js';
 import { phoneRoutes } from './routes/phone.js';
 import { vehicleRoutes } from './routes/vehicles.js';
 import { jobRoutes } from './routes/jobs.js';
+import { npcRoutes } from './routes/npcs.js';
 import { realEstateRoutes } from './routes/real-estate.js';
 
 export function createApp(services: AppServices) {
@@ -28,6 +29,7 @@ export function createApp(services: AppServices) {
   app.use(characterRoutes(services));
   app.use(worldMapRoutes(services));
   app.use(worldActionRoutes(services));
+  app.use(npcRoutes(services));
   app.use(inventoryRoutes(services));
   app.use(itemRoutes());
   app.use(financeRoutes(services));
