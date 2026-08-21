@@ -14,13 +14,13 @@ export type WorldVehicleAsset =
 
 const VEHICLE_ASSET_BASE = '/assets/vehicles/fbx-derived';
 const VEHICLE_ASSETS: Record<WorldVehicleAsset, string> = {
-  'normal-car-1': `${VEHICLE_ASSET_BASE}/normal-car-1.png`,
-  'normal-car-2': `${VEHICLE_ASSET_BASE}/normal-car-2.png`,
-  'sports-car-1': `${VEHICLE_ASSET_BASE}/sports-car-1.png`,
-  'sports-car-2': `${VEHICLE_ASSET_BASE}/sports-car-2.png`,
-  suv: `${VEHICLE_ASSET_BASE}/suv.png`,
-  taxi: `${VEHICLE_ASSET_BASE}/taxi.png`,
-  police: `${VEHICLE_ASSET_BASE}/police.png`
+  'normal-car-1': `${VEHICLE_ASSET_BASE}/normal-car-1.svg`,
+  'normal-car-2': `${VEHICLE_ASSET_BASE}/normal-car-2.svg`,
+  'sports-car-1': `${VEHICLE_ASSET_BASE}/sports-car-1.svg`,
+  'sports-car-2': `${VEHICLE_ASSET_BASE}/sports-car-2.svg`,
+  suv: `${VEHICLE_ASSET_BASE}/suv.svg`,
+  taxi: `${VEHICLE_ASSET_BASE}/taxi.svg`,
+  police: `${VEHICLE_ASSET_BASE}/police.svg`
 };
 
 export function WorldVehicle({
