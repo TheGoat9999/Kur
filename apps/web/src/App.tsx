@@ -17,6 +17,7 @@ export function App() {
   const [state, setState] = useState<BootstrapState | null>(null);
   const [screen, setScreen] = useState<Screen>('world');
   const [vehicleMode, setVehicleMode] = useState<VehicleViewMode>('my');
+  const [vehicleMapFocusId, setVehicleMapFocusId] = useState<string | null>(null);
   const [inventoryOpen, setInventoryOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +30,7 @@ export function App() {
       const target = event.target as HTMLElement | null;
       if (target?.matches('input, textarea, select, [contenteditable="true"]')) return;
       event.preventDefault();
+      setVehicleMapFocusId(null);
       setScreen('world');
       setInventoryOpen(value => !value);
       setMenuOpen(false);
@@ -41,6 +43,7 @@ export function App() {
     function openDealer() {
       setInventoryOpen(false);
       setMenuOpen(false);
+      setVehicleMapFocusId(null);
       setVehicleMode('dealer');
       setScreen('vehicles');
     }
@@ -71,8 +74,16 @@ export function App() {
     };
   }, [locale, push, t]);
 
+  function locateVehicle(vehicleId: string) {
+    setInventoryOpen(false);
+    setMenuOpen(false);
+    setVehicleMapFocusId(vehicleId);
+    setScreen('world');
+  }
+
   function changeScreen(next: Screen) {
     if (next === 'inventory') {
+      setVehicleMapFocusId(null);
       if (screen !== 'world') {
         setScreen('world');
         setInventoryOpen(true);
@@ -83,6 +94,7 @@ export function App() {
       return;
     }
     if (next === 'vehicles') setVehicleMode('my');
+    setVehicleMapFocusId(null);
     setInventoryOpen(false);
     setScreen(next);
   }
@@ -95,13 +107,18 @@ export function App() {
       {error && <div className="mb-4 rounded-xl border border-red-400/20 bg-red-400/8 p-3 text-sm text-red-100">{error}</div>}
       {screen === 'world' && (
         <div className="world-inventory-stage h-full min-h-0">
-          <WorldView state={state} onStateChange={setState} />
+          <WorldView
+            state={state}
+            onStateChange={setState}
+            focusVehicleId={vehicleMapFocusId}
+            onVehicleFocusHandled={() => setVehicleMapFocusId(null)}
+          />
           {inventoryOpen && <InventoryModalV05 onStateChange={setState} onClose={() => setInventoryOpen(false)} />}
         </div>
       )}
       {screen === 'character' && <CharacterView state={state} onStateChange={setState} />}
       {screen === 'finance' && <FinanceView onStateChange={setState} />}
-      {screen === 'vehicles' && <VehiclesView state={state} mode={vehicleMode} onModeChange={setVehicleMode} onStateChange={setState} onWorld={() => setScreen('world')} />}
+      {screen === 'vehicles' && <VehiclesView state={state} mode={vehicleMode} onModeChange={setVehicleMode} onStateChange={setState} onWorld={() => { setVehicleMapFocusId(null); setScreen('world'); }} onLocateVehicle={locateVehicle} />}
       {!['world', 'character', 'finance', 'inventory', 'vehicles'].includes(screen) && <IntegrationView feature={screen as 'property' | 'jobs' | 'hospitality' | 'police'} />}
     </Shell>
   );
