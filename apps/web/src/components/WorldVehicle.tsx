@@ -3,63 +3,74 @@ import type { CSSProperties } from 'react';
 export type WorldVehicleType = 'sedan' | 'hatchback' | 'coupe' | 'suv' | 'pickup' | 'van' | 'truck';
 export type WorldVehicleHeading = 'east' | 'west';
 export type WorldVehicleService = 'civilian' | 'taxi' | 'police' | 'ems' | 'delivery';
+export type WorldVehicleAsset =
+  | 'normal-car-1'
+  | 'normal-car-2'
+  | 'sports-car-1'
+  | 'sports-car-2'
+  | 'suv'
+  | 'taxi'
+  | 'police';
 
-const KENNEY_CAR = '/assets/vehicles/kenney/car_blue_1.png';
+const VEHICLE_ASSET_BASE = '/assets/vehicles/fbx-derived';
+const VEHICLE_ASSETS: Record<WorldVehicleAsset, string> = {
+  'normal-car-1': `${VEHICLE_ASSET_BASE}/normal-car-1.png`,
+  'normal-car-2': `${VEHICLE_ASSET_BASE}/normal-car-2.png`,
+  'sports-car-1': `${VEHICLE_ASSET_BASE}/sports-car-1.png`,
+  'sports-car-2': `${VEHICLE_ASSET_BASE}/sports-car-2.png`,
+  suv: `${VEHICLE_ASSET_BASE}/suv.png`,
+  taxi: `${VEHICLE_ASSET_BASE}/taxi.png`,
+  police: `${VEHICLE_ASSET_BASE}/police.png`
+};
 
-export function WorldVehicle({ type, color, heading = 'east', service = 'civilian', serviceLabel, className = '' }: {
+export function WorldVehicle({
+  type,
+  color,
+  heading = 'east',
+  service = 'civilian',
+  serviceLabel,
+  assetSeed = '',
+  className = ''
+}: {
   type: WorldVehicleType;
   color: string;
   heading?: WorldVehicleHeading;
   service?: WorldVehicleService;
   serviceLabel?: string | undefined;
+  assetSeed?: string;
   className?: string;
 }) {
+  const asset = selectVehicleAsset(type, service, assetSeed);
   const style = {
-    '--vehicle-hue': `${hueShiftFromBlue(color)}deg`,
-    '--vehicle-scale-x': vehicleScale(type).x,
-    '--vehicle-scale-y': vehicleScale(type).y
+    '--vehicle-owner-accent': color
   } as CSSProperties;
 
   return (
     <span
-      className={`world-vehicle world-vehicle-sprite world-vehicle-${type} world-vehicle-${heading} world-vehicle-service-${service} ${className}`.trim()}
+      className={`world-vehicle world-vehicle-sprite world-vehicle-${type} world-vehicle-${heading} world-vehicle-service-${service} world-vehicle-asset-${asset} ${className}`.trim()}
       style={style}
+      data-vehicle-asset={asset}
       aria-hidden="true"
     >
-      <img className="world-vehicle-sprite-image" src={KENNEY_CAR} alt="" draggable={false} />
-      {service === 'taxi' && <span className="world-vehicle-roof-badge world-vehicle-roof-badge-taxi">TAXI</span>}
-      {service === 'police' && <span className="world-vehicle-lightbar"><i /><i /></span>}
+      <img className="world-vehicle-sprite-image" src={VEHICLE_ASSETS[asset]} alt="" draggable={false} />
       {service === 'ems' && <span className="world-vehicle-roof-badge world-vehicle-roof-badge-ems">+</span>}
-      {serviceLabel && <span className="world-vehicle-service-label">{serviceLabel}</span>}
+      {serviceLabel && service !== 'taxi' && service !== 'police' && (
+        <span className="world-vehicle-service-label">{serviceLabel}</span>
+      )}
     </span>
   );
 }
 
-function vehicleScale(type: WorldVehicleType) {
-  if (type === 'coupe') return { x: 0.94, y: 0.9 };
-  if (type === 'hatchback') return { x: 0.91, y: 0.96 };
-  if (type === 'suv') return { x: 1.03, y: 1.08 };
-  if (type === 'pickup') return { x: 1.05, y: 1.02 };
-  if (type === 'van') return { x: 1.08, y: 1.12 };
-  if (type === 'truck') return { x: 1.14, y: 1.14 };
-  return { x: 1, y: 1 };
+function selectVehicleAsset(type: WorldVehicleType, service: WorldVehicleService, seed: string): WorldVehicleAsset {
+  if (service === 'taxi') return 'taxi';
+  if (service === 'police') return 'police';
+  if (type === 'suv' || type === 'pickup' || type === 'van' || type === 'truck') return 'suv';
+  if (type === 'coupe') return hashParity(seed) ? 'sports-car-1' : 'sports-car-2';
+  return hashParity(seed) ? 'normal-car-1' : 'normal-car-2';
 }
 
-function hueShiftFromBlue(hex: string) {
-  const match = /^#([0-9a-f]{6})$/i.exec(hex);
-  if (!match) return 0;
-  const value = match[1]!;
-  const r = Number.parseInt(value.slice(0, 2), 16) / 255;
-  const g = Number.parseInt(value.slice(2, 4), 16) / 255;
-  const b = Number.parseInt(value.slice(4, 6), 16) / 255;
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const delta = max - min;
-  if (delta === 0) return 0;
-  let hue = 0;
-  if (max === r) hue = 60 * (((g - b) / delta) % 6);
-  else if (max === g) hue = 60 * ((b - r) / delta + 2);
-  else hue = 60 * ((r - g) / delta + 4);
-  if (hue < 0) hue += 360;
-  return Math.round(hue - 205);
+function hashParity(seed: string) {
+  let hash = 0;
+  for (let index = 0; index < seed.length; index += 1) hash = (hash * 31 + seed.charCodeAt(index)) | 0;
+  return Math.abs(hash) % 2 === 0;
 }
