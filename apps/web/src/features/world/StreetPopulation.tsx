@@ -39,7 +39,7 @@ export function StreetPopulation({ segmentId, visibleObjectIds }: {
             onPointerDown={stopVehicleEvent}
             onClick={stopVehicleEvent}
           >
-            <WorldVehicle type={vehicle.type} color={vehicle.color} heading={vehicle.heading} {...serviceProps} />
+            <WorldVehicle type={vehicle.type} color={vehicle.color} heading={vehicle.heading} assetSeed={vehicle.id} {...serviceProps} />
           </span>
         );
       })}
