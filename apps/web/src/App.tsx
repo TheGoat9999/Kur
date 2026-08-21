@@ -13,22 +13,63 @@ export function App() {
   const { t } = useI18n();
   const [state, setState] = useState<BootstrapState | null>(null);
   const [screen, setScreen] = useState<Screen>('world');
+  const [inventoryOpen, setInventoryOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => { getBootstrap().then(setState).catch(reason => setError(reason instanceof Error ? reason.message : String(reason))); }, []);
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() !== 'i' || event.ctrlKey || event.metaKey || event.altKey) return;
+      const target = event.target as HTMLElement | null;
+      if (target?.matches('input, textarea, select, [contenteditable="true"]')) return;
+      event.preventDefault();
+      setScreen('world');
+      setInventoryOpen(value => !value);
+      setMenuOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
+  function changeScreen(next: Screen) {
+    if (next === 'inventory') {
+      if (screen !== 'world') {
+        setScreen('world');
+        setInventoryOpen(true);
+      } else {
+        setInventoryOpen(value => !value);
+      }
+      setMenuOpen(false);
+      return;
+    }
+    setInventoryOpen(false);
+    setScreen(next);
+  }
+
   if (error && !state) return <StartupError message={error} />;
   if (!state) return <div className="grid min-h-dvh place-items-center bg-[#091014] text-sm tracking-[0.18em] text-amber-200">{t('startup.connecting')}</div>;
 
   return (
-    <Shell state={state} screen={screen} menuOpen={menuOpen} onScreen={setScreen} onMenu={setMenuOpen}>
+    <Shell
+      state={state}
+      screen={screen}
+      inventoryOpen={inventoryOpen}
+      menuOpen={menuOpen}
+      onScreen={changeScreen}
+      onMenu={setMenuOpen}
+    >
       {error && <div className="mb-4 rounded-xl border border-red-400/20 bg-red-400/8 p-3 text-sm text-red-100">{error}</div>}
-      {screen === 'world' && <WorldView state={state} onStateChange={setState} />}
+      {screen === 'world' && (
+        <div className="world-inventory-stage">
+          <WorldView state={state} onStateChange={setState} />
+          {inventoryOpen && <InventoryView onStateChange={setState} onClose={() => setInventoryOpen(false)} />}
+        </div>
+      )}
       {screen === 'character' && <CharacterView state={state} />}
-      {screen === 'inventory' && <InventoryView onStateChange={setState} />}
       {screen === 'finance' && <FinanceView onStateChange={setState} />}
-      {!['world', 'character', 'inventory', 'finance'].includes(screen) && <IntegrationView feature={screen as 'vehicles' | 'property' | 'jobs' | 'hospitality' | 'police'} />}
+      {!['world', 'character', 'finance', 'inventory'].includes(screen) && <IntegrationView feature={screen as 'vehicles' | 'property' | 'jobs' | 'hospitality' | 'police'} />}
     </Shell>
   );
 }

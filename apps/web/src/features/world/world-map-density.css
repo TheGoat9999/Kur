@@ -1,0 +1,189 @@
+/* World v0.3 map density and interaction polish.
+   Geography is the visual subject. Decorative detail must never intercept street gameplay. */
+
+/* --------------------------------------------------------------------------
+   Interaction contract
+   -------------------------------------------------------------------------- */
+.world-map-area { pointer-events: auto; }
+.world-map-area text,
+.world-map-area circle { pointer-events: none; }
+
+/* Street selection owns district-level interaction. The visible street itself is decorative;
+   the segment hit path is the only generous click/tap target. */
+.world-map-street,
+.world-map-street * { pointer-events: none; }
+.world-map-segment { pointer-events: none; }
+.world-map-segment-hit { pointer-events: stroke; cursor: pointer; }
+.world-map-segment-focus,
+.world-map-segment circle { pointer-events: none; }
+
+/* Parcels belong to the world model but should not cover streets on the navigation map.
+   They will return later as proper POI/property symbols, not giant building rectangles. */
+.world-map-parcel { display: none; pointer-events: none; }
+
+/* Every atlas/backdrop layer is visual only. */
+.atlas-wave-lines,
+.atlas-terrain,
+.atlas-river,
+.atlas-dry-river,
+.atlas-contours,
+.atlas-mountains,
+.atlas-highways,
+.atlas-city-arterials,
+.atlas-rural-roads,
+.atlas-zone-roads,
+.atlas-minor-roads,
+.atlas-building-blocks,
+.atlas-service-ground,
+.atlas-district-park,
+.atlas-city-park,
+.atlas-hills,
+.atlas-harbor-water,
+.atlas-city-ocean,
+.atlas-forest-patch,
+.atlas-village-green,
+.atlas-main-land,
+.atlas-coastline { pointer-events: none; }
+
+/* The old large rectangular pseudo-buildings were useful during scaffolding but visually fight
+   the street network. Do not render them in the playable district map. */
+.atlas-building-blocks,
+.atlas-service-ground { display: none; }
+.atlas-minor-roads path { opacity: .16; stroke-width: .38; }
+.atlas-district-park { opacity: .42; }
+
+/* --------------------------------------------------------------------------
+   Borders and hierarchy
+   -------------------------------------------------------------------------- */
+.world-map-area-settlement polygon,
+.world-map-area-zone polygon,
+.world-map-area-district polygon {
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+}
+
+/* Region view: settlements need unmistakable territorial borders without card-like fills. */
+.world-map-area-settlement polygon {
+  fill: rgb(78 108 91 / .10);
+  stroke: #c0c4a3;
+  stroke-width: .48;
+  stroke-dasharray: none;
+}
+.world-map-area-settlement:hover polygon {
+  fill: rgb(211 190 126 / .12);
+  stroke: #e0cc8a;
+  stroke-width: .62;
+}
+.world-map-area-settlement.world-map-current polygon {
+  fill: rgb(218 181 96 / .11);
+  stroke: #e9bd69;
+  stroke-width: .72;
+}
+
+/* Settlement view: zone boundaries are deliberately stronger than terrain details. */
+.world-map-area-zone polygon {
+  fill-opacity: .28;
+  stroke: #a3b3ad;
+  stroke-width: .38;
+}
+.world-map-area-zone:hover polygon { stroke: #d5ded7; stroke-width: .52; fill-opacity: .36; }
+.world-map-area-zone.world-map-current polygon { stroke: #e4bb6a; stroke-width: .62; fill-opacity: .34; }
+
+/* Zone view: districts are adjacent pieces of geography, not four dashboard cards. */
+.world-map-area-district polygon {
+  fill-opacity: .37;
+  stroke: #9eaeaa;
+  stroke-width: .32;
+}
+.world-map-area-district:hover polygon { stroke: #d4dfda; stroke-width: .48; fill-opacity: .48; }
+.world-map-area-district.world-map-current polygon { stroke: #e1b766; stroke-width: .58; fill-opacity: .44; }
+
+/* Land-use identity stays subtle so borders and roads remain more important than fills. */
+.world-map-area-district.world-map-kind-residential polygon { fill: rgb(68 100 86 / .46); }
+.world-map-area-district.world-map-kind-commercial polygon { fill: rgb(72 91 92 / .52); }
+.world-map-area-district.world-map-kind-mixed_use polygon { fill: rgb(69 99 90 / .50); }
+.world-map-area-district.world-map-kind-civic polygon { fill: rgb(79 90 101 / .50); }
+.world-map-area-district.world-map-kind-nightlife polygon { fill: rgb(81 76 95 / .44); }
+.world-map-area-district.world-map-kind-industrial polygon { fill: rgb(84 83 72 / .49); }
+.world-map-area-district.world-map-kind-transit polygon { fill: rgb(76 92 96 / .48); }
+
+.world-map-area-zone text { font-size: 1.34px; stroke-width: .31px; }
+.world-map-area-district text { font-size: 1.22px; stroke-width: .29px; }
+.world-map-area-zone circle { r: .56px; }
+.world-map-area-district circle { r: .44px; }
+
+/* --------------------------------------------------------------------------
+   Non-blocking cartographic detail
+   -------------------------------------------------------------------------- */
+.world-map-level-settlement::after,
+.world-map-level-zone::after,
+.world-map-level-district::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  background-image:
+    radial-gradient(ellipse at 22% 28%, rgb(208 221 209 / .08) 0 1px, transparent 1.3px),
+    radial-gradient(ellipse at 73% 63%, rgb(208 221 209 / .06) 0 1px, transparent 1.2px),
+    repeating-linear-gradient(17deg, transparent 0 46px, rgb(215 224 218 / .045) 46px 47px);
+  background-size: 31px 37px, 47px 41px, auto;
+}
+.world-map-level-settlement::after { opacity: .42; }
+.world-map-level-zone::after { opacity: .58; }
+.world-map-level-district::after { opacity: .62; }
+
+/* Terrain reads as terrain but remains below gameplay geometry. */
+.atlas-main-land { filter: url(#atlas-shadow); }
+.atlas-forest { filter: saturate(.9); }
+.atlas-fields { opacity: .65; }
+.atlas-contours path { stroke-linecap: round; opacity: .2; }
+.atlas-highways path { stroke-linecap: round; opacity: .48; }
+.atlas-city-arterials path { stroke-width: .4; opacity: .33; }
+.atlas-city-park { opacity: .58; }
+.atlas-hills { opacity: .54; }
+
+/* --------------------------------------------------------------------------
+   Dense street network
+   -------------------------------------------------------------------------- */
+.world-map-street-casing { stroke: #132629; stroke-width: 1.42; }
+.world-map-street-surface { stroke: #708185; stroke-width: .69; opacity: .92; }
+.world-map-street-current .world-map-street-casing { stroke-width: 1.68; }
+.world-map-street-current .world-map-street-surface { stroke: #c1a86e; stroke-width: .92; }
+.world-map-street text {
+  opacity: 0;
+  font-size: 1px;
+  transition: opacity .12s ease;
+}
+.world-map-street-current text { opacity: 1; }
+
+/* Segment hit targets stay large even though the visual line stays thin. */
+.world-map-segment-hit { fill: none; stroke: transparent; stroke-width: 5.8; }
+.world-map-segment-planned circle { opacity: .28; r: .42px; }
+.world-map-segment-live circle { r: .7px; }
+.world-map-segment.world-map-current circle { r: 1.04px; }
+.world-map-segment.world-map-selected circle { r: .9px; }
+.world-map-segment-planned .world-map-segment-focus { stroke-width: .38; stroke-dasharray: .65 .82; opacity: .48; }
+.world-map-segment-live:hover .world-map-segment-focus,
+.world-map-segment.world-map-selected .world-map-segment-focus { stroke-width: 1.12; }
+
+/* Map frame and controls remain above decorative texture. */
+.world-map-canvas { box-shadow: inset 0 0 0 1px rgb(255 255 255 / .035); }
+.world-map-canvas::before {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  inset: 9px;
+  border: 1px solid rgb(219 228 222 / .055);
+  border-radius: 10px;
+  pointer-events: none;
+}
+.world-map-compass,
+.world-map-scale { z-index: 4; pointer-events: none; }
+
+@media (max-width: 760px) {
+  .world-map-area-zone text { font-size: 1.62px; }
+  .world-map-area-district text { font-size: 1.48px; }
+  .world-map-level-district::after { opacity: .45; }
+  .world-map-segment-hit { stroke-width: 7; }
+}

@@ -4,12 +4,14 @@ import {
   InventoryMutationResultSchema,
   InventoryUseRequestSchema
 } from '@sol-dorado/contracts';
+import { InventorySplitRequestSchema } from '@sol-dorado/contracts/inventory';
 import type { AppServices } from '../types.js';
 import { getBootstrapState } from '../services/player-state.js';
 import {
   getInventoryState,
   InventoryCommandError,
   moveInventoryItem,
+  splitInventoryItem,
   useInventoryItem
 } from '../services/inventory.js';
 
@@ -29,6 +31,23 @@ export function inventoryRoutes(services: AppServices) {
         request.playerId!,
         parsed.data.itemId,
         parsed.data.toContainerKey,
+        parsed.data.toSlotIndex
+      ));
+    } catch (error) {
+      if (error instanceof InventoryCommandError) return response.status(error.status).json({ error: error.code });
+      throw error;
+    }
+  });
+
+  router.post('/v1/inventory/split', async (request, response) => {
+    const parsed = InventorySplitRequestSchema.safeParse(request.body);
+    if (!parsed.success) return response.status(400).json({ error: 'invalid_inventory_split', issues: parsed.error.issues });
+    try {
+      response.json(await splitInventoryItem(
+        services.db,
+        request.playerId!,
+        parsed.data.itemId,
+        parsed.data.quantity,
         parsed.data.toSlotIndex
       ));
     } catch (error) {

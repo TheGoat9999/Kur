@@ -1,4 +1,5 @@
 import type { BootstrapState } from '@sol-dorado/contracts';
+import { WorldCharacter, visualFromCharacterRecipe } from '../../components/WorldCharacter';
 import { useI18n } from '../../i18n';
 
 export function CharacterView({ state }: { state: BootstrapState }) {
@@ -6,11 +7,17 @@ export function CharacterView({ state }: { state: BootstrapState }) {
   const recipe = state.character?.recipe;
   const appearance = recipe?.appearance ?? {};
   const grooming = recipe?.grooming ?? {};
+  const visual = visualFromCharacterRecipe(recipe);
   return (
     <section className="glass-panel overflow-hidden">
       <div className="grid min-h-[420px] md:grid-cols-[minmax(260px,.8fr)_1.2fr]">
         <div className="character-stage grid place-items-center border-b border-white/8 p-8 md:border-b-0 md:border-r">
-          <div className="text-center"><div className="mx-auto grid h-28 w-28 place-items-center rounded-full border border-amber-200/20 bg-amber-200/8 text-4xl">◇</div><p className="mt-4 text-xs text-slate-500">{t('character.renderer')}</p></div>
+          <div className="text-center">
+            {state.character
+              ? <div className="character-world-preview"><WorldCharacter visual={visual} direction="south" className="world-character-profile" /></div>
+              : <div className="mx-auto grid h-28 w-28 place-items-center rounded-full border border-amber-200/20 bg-amber-200/8 text-4xl">◇</div>}
+            <p className="mt-4 text-xs text-slate-500">{t('character.renderer')}</p>
+          </div>
         </div>
         <div className="p-6">
           <span className="eyebrow">{t('character.identity')}</span>

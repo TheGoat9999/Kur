@@ -5,6 +5,7 @@ import {
   type InventoryState
 } from '@sol-dorado/contracts';
 import type { Database } from '../db.js';
+import { getItemDefinition } from '../domain/items/index.js';
 
 export class InventoryCommandError extends Error {
   constructor(public readonly code: string, public readonly status: number) {
@@ -214,6 +215,87 @@ export async function moveInventoryItem(
   }
 }
 
+export async function splitInventoryItem(
+  db: Database,
+  playerId: string,
+  itemId: string,
+  quantity: number,
+  requestedSlot?: number
+): Promise<InventoryState> {
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+    const sourceResult = await client.query({
+      text: `
+        SELECT i.*, c.container_key, c.slot_count
+        FROM inventory_items i
+        JOIN inventory_containers c ON c.id = i.container_id
+        WHERE i.id = $1 AND i.player_id = $2
+        FOR UPDATE OF i, c
+      `,
+      values: [itemId, playerId]
+    });
+    const source = sourceResult.rows[0];
+    if (!source) throw new InventoryCommandError('inventory_item_not_found', 404);
+    assertAccessible(source.container_key);
+    if (!source.stackable || source.quantity <= 1) throw new InventoryCommandError('inventory_item_not_splittable', 409);
+    if (!Number.isInteger(quantity) || quantity <= 0 || quantity >= source.quantity) {
+      throw new InventoryCommandError('inventory_split_quantity_invalid', 400);
+    }
+
+    let targetSlot = requestedSlot;
+    if (targetSlot === undefined) {
+      const occupiedResult = await client.query(
+        'SELECT slot_index FROM inventory_items WHERE container_id = $1 ORDER BY slot_index',
+        [source.container_id]
+      );
+      const occupied = new Set<number>(occupiedResult.rows.map(row => row.slot_index));
+      targetSlot = Array.from({ length: source.slot_count }, (_, index) => index).find(index => !occupied.has(index));
+    }
+    if (targetSlot === undefined || targetSlot < 0 || targetSlot >= source.slot_count) {
+      throw new InventoryCommandError('inventory_container_full', 409);
+    }
+
+    const occupiedTarget = await client.query(
+      'SELECT id FROM inventory_items WHERE container_id = $1 AND slot_index = $2 FOR UPDATE',
+      [source.container_id, targetSlot]
+    );
+    if (occupiedTarget.rows[0]) throw new InventoryCommandError('inventory_slot_occupied', 409);
+
+    await client.query(
+      'UPDATE inventory_items SET quantity = quantity - $2, updated_at = now() WHERE id = $1',
+      [source.id, quantity]
+    );
+    await client.query({
+      text: `
+        INSERT INTO inventory_items
+          (player_id, container_id, item_key, display_name, category, symbol, quantity, unit_weight_grams, stackable, slot_index, metadata)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      `,
+      values: [
+        playerId,
+        source.container_id,
+        source.item_key,
+        source.display_name,
+        source.category,
+        source.symbol,
+        quantity,
+        source.unit_weight_grams,
+        source.stackable,
+        targetSlot,
+        source.metadata
+      ]
+    });
+    await client.query('COMMIT');
+    return getInventoryState(db, playerId);
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 export async function useInventoryItem(db: Database, playerId: string, itemId: string): Promise<void> {
   const client = await db.connect();
   try {
@@ -229,23 +311,35 @@ export async function useInventoryItem(db: Database, playerId: string, itemId: s
     });
     const item = itemResult.rows[0];
     if (!item) throw new InventoryCommandError('inventory_item_not_carried', 409);
-    const effects: Record<string, { hydration: number; satiety: number }> = {
-      water: { hydration: 18, satiety: 0 },
-      sandwich: { hydration: 0, satiety: 15 }
-    };
-    const effect = effects[item.item_key];
-    if (!effect) throw new InventoryCommandError('inventory_item_not_usable', 409);
+
+    const definition = getItemDefinition(item.item_key);
+    if (!definition || Object.keys(definition.useEffects).length === 0) {
+      throw new InventoryCommandError('inventory_item_not_usable', 409);
+    }
+    const effect = definition.useEffects;
 
     await client.query({
       text: `
         UPDATE player_state
-        SET hydration = LEAST(100, hydration + $2),
-            satiety = LEAST(100, satiety + $3),
+        SET health = GREATEST(0, LEAST(100, health + $2)),
+            energy = GREATEST(0, LEAST(100, energy + $3)),
+            satiety = GREATEST(0, LEAST(100, satiety + $4)),
+            hydration = GREATEST(0, LEAST(100, hydration + $5)),
+            stress = GREATEST(0, LEAST(100, stress + $6)),
+            police_heat = GREATEST(0, LEAST(100, police_heat + $7)),
             version = version + 1,
             updated_at = now()
         WHERE player_id = $1
       `,
-      values: [playerId, effect.hydration, effect.satiety]
+      values: [
+        playerId,
+        effect.health ?? 0,
+        effect.energy ?? 0,
+        effect.satiety ?? 0,
+        effect.hydration ?? 0,
+        effect.stress ?? 0,
+        effect.policeHeat ?? 0
+      ]
     });
     if (item.quantity === 1) await client.query('DELETE FROM inventory_items WHERE id = $1', [item.id]);
     else await client.query('UPDATE inventory_items SET quantity = quantity - 1, updated_at = now() WHERE id = $1', [item.id]);

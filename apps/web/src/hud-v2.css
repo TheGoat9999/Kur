@@ -1,0 +1,356 @@
+/* SOL DORADO interface v1.2 — icon-first HUD + compact right navigation rail */
+:root { --right-nav-width: 66px; }
+
+/* Desktop navigation becomes a compact game rail. The full left navigation remains available as a drawer. */
+@media (min-width: 761px) {
+  .game-shell,
+  .game-shell-collapsed {
+    --sidebar-width: 0px;
+    --sidebar-half: 0px;
+  }
+
+  .game-stage {
+    margin-left: 0 !important;
+    padding-right: var(--right-nav-width);
+  }
+
+  .game-sidebar {
+    width: 276px !important;
+    transform: translateX(-105%);
+    z-index: 90;
+    box-shadow: 26px 0 80px rgb(0 0 0 / .42);
+  }
+  .game-shell-collapsed .game-sidebar { width: 86px !important; }
+  .game-sidebar-open { transform: translateX(0); }
+
+  .desktop-menu-button {
+    display: grid;
+    place-items: center;
+  }
+
+  .nav-scrim-open {
+    position: fixed;
+    inset: 0;
+    z-index: 85;
+    display: block;
+    border: 0;
+    background: rgb(0 0 0 / .42);
+    backdrop-filter: blur(3px);
+  }
+}
+
+.right-nav-rail {
+  position: fixed;
+  right: 10px;
+  top: 50%;
+  z-index: 70;
+  display: flex;
+  width: 48px;
+  max-height: calc(100dvh - 96px);
+  flex-direction: column;
+  gap: 7px;
+  transform: translateY(-50%);
+  border: 1px solid rgb(255 255 255 / .10);
+  border-radius: 17px;
+  background: linear-gradient(180deg, rgb(11 24 29 / .86), rgb(5 13 17 / .82));
+  padding: 6px;
+  box-shadow: 0 24px 65px rgb(0 0 0 / .30), inset 0 1px rgb(255 255 255 / .04);
+  backdrop-filter: blur(24px) saturate(1.25);
+}
+.right-nav-group {
+  display: grid;
+  gap: 4px;
+}
+.right-nav-group + .right-nav-group {
+  border-top: 1px solid rgb(255 255 255 / .07);
+  padding-top: 7px;
+}
+.right-nav-item {
+  position: relative;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #71868e;
+}
+.right-nav-item:hover {
+  transform: translateX(-1px);
+  border-color: rgb(255 255 255 / .09);
+  background: rgb(255 255 255 / .045);
+  color: #d7e2e5;
+}
+.right-nav-item-active {
+  border-color: rgb(255 216 147 / .22);
+  background: linear-gradient(145deg, rgb(231 190 115 / .15), rgb(231 190 115 / .05));
+  color: var(--gold-bright);
+  box-shadow: inset 0 1px rgb(255 255 255 / .05), 0 0 18px rgb(231 190 115 / .05);
+}
+.right-nav-stage {
+  position: absolute;
+  right: 2px;
+  top: 2px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #45575e;
+}
+.right-nav-stage-live { background: #51d399; box-shadow: 0 0 7px rgb(81 211 153 / .5); }
+.right-nav-stage-foundation { background: #e7be73; }
+.right-nav-tooltip {
+  position: absolute;
+  right: calc(100% + 10px);
+  top: 50%;
+  width: max-content;
+  max-width: 190px;
+  transform: translate(5px, -50%);
+  opacity: 0;
+  pointer-events: none;
+  border: 1px solid rgb(255 255 255 / .11);
+  border-radius: 9px;
+  background: rgb(6 15 19 / .96);
+  padding: 6px 8px;
+  color: #dfe8ea;
+  font-size: 9px;
+  font-weight: 700;
+  box-shadow: 0 12px 34px rgb(0 0 0 / .32);
+  transition: opacity .14s ease, transform .14s ease;
+  white-space: nowrap;
+}
+.right-nav-item:hover .right-nav-tooltip,
+.right-nav-item:focus-visible .right-nav-tooltip {
+  transform: translate(0, -50%);
+  opacity: 1;
+}
+
+/* The HUD is now a set of discrete game instruments, not a panel covering the world. */
+.player-hud {
+  max-width: calc(100vw - var(--right-nav-width) - 44px) !important;
+}
+.hud-anchor-bottom-left { left: 22px !important; bottom: 20px !important; }
+.hud-anchor-bottom-center { left: calc(50% - (var(--right-nav-width) / 2)) !important; bottom: 20px !important; }
+.hud-anchor-top-left { left: 22px !important; top: 82px !important; }
+.player-hud-world.hud-anchor-bottom-left,
+.player-hud-world.hud-anchor-bottom-center { bottom: 20px !important; }
+
+.player-hud-frame,
+.player-hud-world .player-hud-frame {
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.player-hud-world .player-hud-frame::before { display: none; }
+
+.hud-main-row {
+  align-items: center;
+  gap: 7px;
+}
+
+.hud-location-card,
+.player-hud-world .hud-location-card {
+  display: flex;
+  min-height: 46px;
+  width: max-content;
+  max-width: 310px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgb(255 255 255 / .11);
+  border-radius: 13px;
+  background: linear-gradient(145deg, rgb(11 25 30 / .88), rgb(5 14 18 / .82));
+  padding: 0 10px;
+  box-shadow: 0 15px 42px rgb(0 0 0 / .28), inset 0 1px rgb(255 255 255 / .035);
+  backdrop-filter: blur(20px) saturate(1.2);
+}
+.hud-location-card > span {
+  flex: 0 0 auto;
+  gap: 5px;
+  font-size: 7px;
+  letter-spacing: .10em;
+}
+.hud-location-card > span::after {
+  content: "";
+  display: block;
+  width: 1px;
+  height: 18px;
+  margin-left: 3px;
+  background: rgb(255 255 255 / .09);
+}
+.hud-location-card > b {
+  max-width: 165px;
+  font-size: 10px;
+  font-weight: 720;
+}
+
+.hud-vitals-cluster,
+.player-hud-world .hud-vitals-cluster {
+  display: flex;
+  max-width: none;
+  flex-wrap: nowrap;
+  gap: 5px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.hud-stat,
+.hud-preset-compact .hud-stat {
+  --metric: #8fa0a7;
+  position: relative;
+  display: grid;
+  width: 46px;
+  min-width: 46px;
+  height: 46px;
+  min-height: 46px;
+  grid-template-columns: 1fr;
+  place-items: center;
+  overflow: visible;
+  border: 0;
+  border-radius: 13px;
+  background: conic-gradient(var(--metric) var(--hud-progress), rgb(255 255 255 / .085) 0);
+  padding: 2px;
+  color: var(--metric);
+  box-shadow: 0 13px 34px rgb(0 0 0 / .25), 0 0 18px color-mix(in srgb, var(--metric) 4%, transparent);
+  isolation: isolate;
+}
+.hud-stat::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  z-index: 0;
+  border: 1px solid rgb(255 255 255 / .07);
+  border-radius: 11px;
+  background: linear-gradient(145deg, rgb(13 27 32 / .95), rgb(6 15 19 / .94));
+  box-shadow: inset 0 1px rgb(255 255 255 / .035);
+}
+.hud-stat::before {
+  left: 6px;
+  top: 6px;
+  z-index: 0;
+  width: 34px;
+  height: 34px;
+  background: color-mix(in srgb, var(--metric) 11%, transparent);
+  filter: blur(13px);
+}
+.hud-stat-icon,
+.hud-preset-compact .hud-stat-icon {
+  position: relative;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--metric) 8%, transparent);
+  color: var(--metric);
+}
+.hud-stat-body,
+.hud-stat > strong,
+.hud-preset-compact .hud-stat-body,
+.hud-preset-compact .hud-stat > strong {
+  display: none !important;
+}
+.hud-stat-attention {
+  background: conic-gradient(var(--metric) var(--hud-progress), color-mix(in srgb, var(--metric) 14%, rgb(255 255 255 / .08)) 0);
+  box-shadow: 0 13px 34px rgb(0 0 0 / .26), 0 0 20px color-mix(in srgb, var(--metric) 10%, transparent);
+}
+.hud-stat-danger {
+  animation: hud-icon-warning 1.7s ease-in-out infinite;
+}
+@keyframes hud-icon-warning {
+  50% { transform: translateY(-1px); filter: brightness(1.16); }
+}
+.hud-police { margin-left: 6px; }
+.hud-police::after { border-color: color-mix(in srgb, var(--metric) 22%, rgb(255 255 255 / .07)); }
+
+.hud-preset-compact .hud-stat {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  min-height: 40px;
+  border-radius: 12px;
+}
+.hud-preset-compact .hud-stat::after { border-radius: 10px; }
+.hud-preset-compact .hud-stat-icon { width: 30px; height: 30px; }
+
+.hud-cash-card {
+  min-height: 46px;
+  min-width: 118px;
+  gap: 7px;
+  border-radius: 13px;
+  padding: 0 10px 0 7px;
+  box-shadow: 0 15px 42px rgb(0 0 0 / .26), inset 0 1px rgb(255 255 255 / .035);
+}
+.hud-cash-icon {
+  width: 31px;
+  height: 31px;
+  flex-basis: 31px;
+  border-radius: 9px;
+}
+.hud-cash-card > span:nth-child(2) small { display: none !important; }
+.hud-cash-card > span:nth-child(2) b {
+  margin: 0;
+  font-size: 13px;
+}
+.hud-cash-card em { top: -20px; }
+
+.hud-edit-button,
+.player-hud-world .hud-edit-button {
+  display: grid;
+  width: 46px;
+  min-width: 46px;
+  height: 46px;
+  min-height: 46px;
+  place-items: center;
+  border-radius: 13px;
+  padding: 0;
+}
+.hud-edit-button span { display: none; }
+
+/* The map gives a narrow lane to navigation rather than being covered by it. */
+.game-stage-world .game-content {
+  padding: 12px 12px 14px 14px;
+}
+.game-stage-world .world-screen .street-scene {
+  border-radius: 18px;
+}
+
+@media (max-width: 1100px) and (min-width: 761px) {
+  :root { --right-nav-width: 60px; }
+  .right-nav-rail { right: 8px; width: 44px; padding: 5px; }
+  .right-nav-item { width: 32px; height: 32px; }
+  .hud-location-card > span { max-width: 95px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hud-location-card > b { max-width: 130px; }
+  .hud-stat { width: 42px; min-width: 42px; height: 42px; min-height: 42px; }
+  .hud-stat-icon { width: 31px; height: 31px; }
+  .hud-cash-card { min-height: 42px; min-width: 108px; }
+  .hud-edit-button, .player-hud-world .hud-edit-button { width: 42px; min-width: 42px; height: 42px; min-height: 42px; }
+}
+
+@media (max-width: 760px) {
+  :root { --right-nav-width: 0px; }
+  .right-nav-rail { display: none; }
+  .game-stage { padding-right: 0; }
+  .player-hud { max-width: calc(100vw - 24px) !important; }
+  .hud-anchor-bottom-left,
+  .hud-anchor-top-left { left: 12px !important; }
+  .hud-anchor-bottom-center { left: 50% !important; }
+  .hud-main-row { max-width: calc(100vw - 24px); flex-wrap: wrap; gap: 5px; }
+  .hud-location-card { min-height: 40px; max-width: min(280px, calc(100vw - 24px)); }
+  .hud-location-card > span { font-size: 6px; }
+  .hud-location-card > b { max-width: 135px; font-size: 9px; }
+  .hud-vitals-cluster { gap: 4px; }
+  .hud-stat { width: 40px; min-width: 40px; height: 40px; min-height: 40px; }
+  .hud-stat-icon { width: 30px; height: 30px; }
+  .hud-cash-card { min-height: 40px; min-width: 102px; }
+  .hud-edit-button,
+  .player-hud-world .hud-edit-button { width: 40px; min-width: 40px; height: 40px; min-height: 40px; }
+}

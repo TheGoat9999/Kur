@@ -19,11 +19,18 @@ import {
   type WorldActionId,
   type WorldActionResult
 } from '@sol-dorado/contracts';
+import { ItemCatalogResponseSchema, type ItemCatalogResponse } from '@sol-dorado/contracts/items';
 import {
   StreetPositionResultSchema,
   type StreetPosition,
   type StreetPositionResult
 } from '@sol-dorado/contracts/world-position';
+import {
+  WorldMapStateSchema,
+  WorldMapTravelResultSchema,
+  type WorldMapState,
+  type WorldMapTravelResult
+} from '@sol-dorado/contracts/world-map';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 const TOKEN_KEY = 'sd_session_token_v1';
@@ -65,6 +72,21 @@ export async function getStreetState(): Promise<StreetState> {
   return StreetStateSchema.parse(await response.json());
 }
 
+export async function getWorldMap(): Promise<WorldMapState> {
+  const response = await authenticatedFetch('/v1/world/map');
+  if (!response.ok) throw new ApiCommandError(await responseErrorCode(response, 'world_map_load_failed'));
+  return WorldMapStateSchema.parse(await response.json());
+}
+
+export async function travelWorldMap(segmentId: string): Promise<WorldMapTravelResult> {
+  const response = await authenticatedFetch('/v1/world/map/travel', {
+    method: 'POST',
+    body: JSON.stringify({ segmentId })
+  });
+  if (!response.ok) throw new ApiCommandError(await responseErrorCode(response, `world_map_travel_failed_${response.status}`));
+  return WorldMapTravelResultSchema.parse(await response.json());
+}
+
 export async function getStreetPosition(): Promise<StreetPositionResult> {
   const response = await authenticatedFetch('/v1/world/position');
   if (!response.ok) throw new ApiCommandError(await responseErrorCode(response, 'world_position_load_failed'));
@@ -92,6 +114,12 @@ export async function runWorldAction(actionId: WorldActionId, expectedVersion: n
   return WorldActionResultSchema.parse(await response.json());
 }
 
+export async function getItemCatalog(): Promise<ItemCatalogResponse> {
+  const response = await authenticatedFetch('/v1/items/catalog');
+  if (!response.ok) throw new Error(`Item catalog failed (${response.status})`);
+  return ItemCatalogResponseSchema.parse(await response.json());
+}
+
 export async function getInventory(): Promise<InventoryState> {
   const response = await authenticatedFetch('/v1/inventory');
   if (!response.ok) throw new Error(`Inventory failed (${response.status})`);
@@ -110,6 +138,22 @@ export async function moveInventoryItem(
   if (!response.ok) {
     const payload = await response.json().catch(() => null) as { error?: string } | null;
     throw new Error(payload?.error ?? `Inventory move failed (${response.status})`);
+  }
+  return InventoryStateSchema.parse(await response.json());
+}
+
+export async function splitInventoryItem(
+  itemId: string,
+  quantity: number,
+  toSlotIndex?: number
+): Promise<InventoryState> {
+  const response = await authenticatedFetch('/v1/inventory/split', {
+    method: 'POST',
+    body: JSON.stringify({ itemId, quantity, toSlotIndex })
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null) as { error?: string } | null;
+    throw new Error(payload?.error ?? `Inventory split failed (${response.status})`);
   }
   return InventoryStateSchema.parse(await response.json());
 }

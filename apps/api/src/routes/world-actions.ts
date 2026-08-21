@@ -2,13 +2,13 @@ import { Router } from 'express';
 import { WorldActionRequestSchema, WorldActionResultSchema } from '@sol-dorado/contracts';
 import {
   StreetMoveRequestSchema,
-  StreetPositionResultSchema,
+  StreetMoveResultSchema,
+  getStreetRoute,
   getStreetSpawnPosition,
-  isStreetActionWithinReach,
-  isStreetPositionWalkable
+  isStreetActionWithinReach
 } from '@sol-dorado/contracts/world-position';
 import type { AppServices } from '../types.js';
-import { applyWorldAction, getActionAvailability, STREET_SEGMENTS } from '../domain/actions.js';
+import { applyWorldAction, getActionAvailability, STREET_SEGMENTS, TRAVEL_DESTINATIONS } from '../domain/actions.js';
 import { getBootstrapState } from '../services/player-state.js';
 import {
   addStreetReward,
@@ -38,15 +38,14 @@ export function worldActionRoutes(services: AppServices) {
     try {
       await client.query('BEGIN');
       const progress = await lockStreetProgress(client, playerId);
-      if (!isStreetPositionWalkable(progress.currentSegmentId, parsed.data)) {
-        throw new WorldActionCommandError('world_position_blocked', 409);
-      }
+      const movement = getStreetRoute(progress.currentSegmentId, progress.position, parsed.data);
+      if (!movement) throw new WorldActionCommandError('world_position_blocked', 409);
       await client.query(
         'UPDATE player_street_state SET position_x = $2, position_y = $3, updated_at = now() WHERE player_id = $1',
-        [playerId, parsed.data.x, parsed.data.y]
+        [playerId, movement.position.x, movement.position.y]
       );
       await client.query('COMMIT');
-      response.json(StreetPositionResultSchema.parse({ segmentId: progress.currentSegmentId, position: parsed.data }));
+      response.json(StreetMoveResultSchema.parse(movement));
     } catch (error) {
       await client.query('ROLLBACK');
       if (error instanceof WorldActionCommandError) return response.status(error.status).json({ error: error.code, ...error.details });
@@ -85,6 +84,24 @@ export function worldActionRoutes(services: AppServices) {
       const progress = await lockStreetProgress(client, playerId);
       if (!isStreetActionWithinReach(progress.currentSegmentId, progress.position, input.actionId)) {
         throw new WorldActionCommandError('world_action_too_far', 409);
+      }
+
+      const travelDestination = TRAVEL_DESTINATIONS[input.actionId];
+      if (travelDestination) {
+        const connection = await client.query({
+          text: `
+            SELECT 1
+            FROM world_street_connections
+            WHERE 'walk' = ANY(modes)
+              AND (
+                (from_segment_id = $1 AND to_segment_id = $2)
+                OR (bidirectional = true AND from_segment_id = $2 AND to_segment_id = $1)
+              )
+            LIMIT 1
+          `,
+          values: [progress.currentSegmentId, travelDestination]
+        });
+        if (!connection.rows[0]) throw new WorldActionCommandError('world_action_route_unavailable', 409);
       }
 
       const cooldownKey = worldCooldownKey(playerId, input.actionId);

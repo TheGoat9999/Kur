@@ -1,0 +1,124 @@
+/* Street v0.3 navigation overlay. Gameplay geometry stays in shared contracts. */
+.world-screen .street-scene { cursor: none; }
+.world-screen .street-object,
+.world-screen .street-interaction-panel button,
+.world-screen .world-map-launch { cursor: pointer; }
+.world-screen .street-interaction-panel { cursor: default; }
+
+.world-screen .street-navigation-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.world-screen .street-navigation-overlay polyline {
+  fill: none;
+  stroke: rgb(127 205 216 / .46);
+  stroke-width: .38;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1.15 1.15;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 3px rgb(70 182 199 / .22));
+}
+.world-screen .street-navigation-overlay-active polyline {
+  stroke: rgb(238 197 111 / .78);
+  stroke-width: .52;
+  stroke-dasharray: 1.6 .8;
+  animation: street-route-flow .7s linear infinite;
+}
+@keyframes street-route-flow { to { stroke-dashoffset: -2.4; } }
+
+.world-screen .street-move-cursor {
+  position: absolute;
+  left: var(--move-x);
+  top: var(--move-y);
+  z-index: 17;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  color: #b9dfe5;
+}
+.world-screen .street-move-cursor > span {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 1px solid rgb(117 202 214 / .52);
+  border-radius: 50%;
+  background: rgb(6 24 29 / .84);
+  box-shadow: 0 5px 16px rgb(0 0 0 / .32), inset 0 1px rgb(255 255 255 / .08);
+  backdrop-filter: blur(8px);
+}
+.world-screen .street-move-cursor-ring {
+  position: absolute;
+  inset: 1px;
+  border: 1px solid rgb(117 202 214 / .26);
+  border-radius: 50%;
+  animation: street-cursor-breathe 1.2s ease-in-out infinite;
+}
+.world-screen .street-move-cursor-active > span {
+  border-color: rgb(239 198 112 / .74);
+  background: rgb(51 41 22 / .9);
+  color: #f4d48f;
+}
+.world-screen .street-move-cursor-active .street-move-cursor-ring {
+  border-color: rgb(239 198 112 / .42);
+  animation: street-destination-pulse .75s ease-out infinite;
+}
+.world-screen .street-move-cursor-blocked > span {
+  border-color: rgb(225 103 103 / .65);
+  background: rgb(54 22 24 / .9);
+  color: #ffaaa2;
+}
+.world-screen .street-move-cursor-blocked .street-move-cursor-ring {
+  border-color: rgb(225 103 103 / .35);
+  animation: none;
+}
+@keyframes street-cursor-breathe {
+  50% { transform: scale(1.16); opacity: .55; }
+}
+@keyframes street-destination-pulse {
+  from { transform: scale(.8); opacity: .9; }
+  to { transform: scale(1.48); opacity: 0; }
+}
+
+/* Frame-by-frame routed motion must not inherit the old long CSS tween. */
+.world-screen .street-scene-moving .street-player {
+  transition: left .045s linear, top .045s linear;
+}
+
+/* The district map contract: every segment owns its hit testing; decoration never does. */
+.world-map-level-district .world-map-segment {
+  pointer-events: all;
+  cursor: pointer;
+}
+.world-map-level-district .world-map-segment-hit {
+  stroke-width: 7;
+  pointer-events: stroke;
+}
+.world-map-level-district .world-map-segment:hover .world-map-segment-focus,
+.world-map-level-district .world-map-segment:focus-visible .world-map-segment-focus {
+  stroke: #e2bd6c;
+  stroke-width: 1.35;
+}
+.world-map-level-district .atlas-building-blocks,
+.world-map-level-district .atlas-service-ground,
+.world-map-level-district .atlas-minor-roads,
+.world-map-level-district .world-map-parcel,
+.world-map-level-district .world-map-street text {
+  pointer-events: none;
+}
+
+@media (pointer: coarse) {
+  .world-screen .street-scene { cursor: default; }
+  .world-map-level-district .world-map-segment-hit { stroke-width: 10; }
+}

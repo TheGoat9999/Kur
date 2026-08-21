@@ -66,7 +66,7 @@ const actionSegments: Partial<Record<WorldActionId, StreetSegmentId[]>> = {
   ask_maya_information: ['cypress_corner']
 };
 
-const travelDestinations: Partial<Record<WorldActionId, StreetSegmentId>> = {
+export const TRAVEL_DESTINATIONS: Partial<Record<WorldActionId, StreetSegmentId>> = {
   travel_market_block_3: 'market_block_3',
   travel_cypress_corner: 'cypress_corner',
   travel_mira_alley: 'mira_alley'
@@ -80,7 +80,7 @@ export function getActionAvailability(
   cooldownEndsAt: number | null = null,
   now = Date.now()
 ): StreetActionAvailability {
-  const destination = travelDestinations[actionId];
+  const destination = TRAVEL_DESTINATIONS[actionId];
   if (destination) return destination === current.currentSegmentId ? 'wrong_location' : 'available';
   if (!actionSegments[actionId]?.includes(current.currentSegmentId)) return 'wrong_location';
   if (actionId === 'enter_apartment') return 'locked';
@@ -102,7 +102,7 @@ export function applyWorldAction(
     visitedSegmentIds: [...current.visitedSegmentIds],
     flags: { ...current.flags }
   };
-  const destination = travelDestinations[actionId];
+  const destination = TRAVEL_DESTINATIONS[actionId];
   if (destination) {
     next.energy = clamp(next.energy - 3);
     next.hydration = clamp(next.hydration - 1);
