@@ -13,14 +13,16 @@ export type WorldVehicleAsset =
   | 'police';
 
 const VEHICLE_ASSET_BASE = '/assets/vehicles/fbx-derived';
+const VEHICLE_ASSET_VERSION = '20260822-fbx-raster-1';
+const vehicleAssetUrl = (name: WorldVehicleAsset) => `${VEHICLE_ASSET_BASE}/${name}.webp?v=${VEHICLE_ASSET_VERSION}`;
 const VEHICLE_ASSETS: Record<WorldVehicleAsset, string> = {
-  'normal-car-1': `${VEHICLE_ASSET_BASE}/normal-car-1.svg`,
-  'normal-car-2': `${VEHICLE_ASSET_BASE}/normal-car-2.svg`,
-  'sports-car-1': `${VEHICLE_ASSET_BASE}/sports-car-1.svg`,
-  'sports-car-2': `${VEHICLE_ASSET_BASE}/sports-car-2.svg`,
-  suv: `${VEHICLE_ASSET_BASE}/suv.svg`,
-  taxi: `${VEHICLE_ASSET_BASE}/taxi.svg`,
-  police: `${VEHICLE_ASSET_BASE}/police.svg`
+  'normal-car-1': vehicleAssetUrl('normal-car-1'),
+  'normal-car-2': vehicleAssetUrl('normal-car-2'),
+  'sports-car-1': vehicleAssetUrl('sports-car-1'),
+  'sports-car-2': vehicleAssetUrl('sports-car-2'),
+  suv: vehicleAssetUrl('suv'),
+  taxi: vehicleAssetUrl('taxi'),
+  police: vehicleAssetUrl('police')
 };
 
 export function WorldVehicle({
@@ -50,9 +52,10 @@ export function WorldVehicle({
       className={`world-vehicle world-vehicle-sprite world-vehicle-${type} world-vehicle-${heading} world-vehicle-service-${service} world-vehicle-asset-${asset} ${className}`.trim()}
       style={style}
       data-vehicle-asset={asset}
+      data-vehicle-render="fbx-raster-v2"
       aria-hidden="true"
     >
-      <img className="world-vehicle-sprite-image" src={VEHICLE_ASSETS[asset]} alt="" draggable={false} />
+      <img className="world-vehicle-sprite-image" src={VEHICLE_ASSETS[asset]} alt="" draggable={false} decoding="async" />
       {service === 'ems' && <span className="world-vehicle-roof-badge world-vehicle-roof-badge-ems">+</span>}
       {serviceLabel && service !== 'taxi' && service !== 'police' && (
         <span className="world-vehicle-service-label">{serviceLabel}</span>
