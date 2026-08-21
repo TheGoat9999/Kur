@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { VehicleState } from '@sol-dorado/contracts/vehicles';
+import type { PlayerVehicle, VehicleState } from '@sol-dorado/contracts/vehicles';
 import { resolveWorldRoute } from '@sol-dorado/contracts/world-map';
 import type {
   WorldDistrict,
@@ -16,30 +16,46 @@ import { useI18n } from '../../i18n';
 import { worldMapCopy } from './world-map-copy';
 import './world-map.css';
 import './vehicle-world.css';
+import './vehicle-world-v03.css';
 
 type MapLevel = 'region' | 'settlement' | 'zone' | 'district';
 
 type Props = {
   map: WorldMapState;
   vehicles: VehicleState | null;
+  focusVehicleId?: string | null;
   travelBusy: boolean;
   onClose: () => void;
   onTravel: (segmentId: string) => void;
   onDrive: (vehicleId: string, segmentId: string) => void;
 };
 
-export function WorldMapView({ map, vehicles, travelBusy, onClose, onTravel, onDrive }: Props) {
+export function WorldMapView({ map, vehicles, focusVehicleId = null, travelBusy, onClose, onTravel, onDrive }: Props) {
   const { locale } = useI18n();
   const copy = worldMapCopy(locale);
   const serviceCopy = locale === 'bg'
-    ? { service: 'УСЛУГА В СВЕТА', visit: 'Посети', travel: 'Отиди до', locatedAt: 'Намира се на тази улица', drive: 'Карай дотук', vehicle: 'ТВОЯТ АВТОМОБИЛ', carRoute: 'с кола' }
-    : { service: 'WORLD SERVICE', visit: 'Visit', travel: 'Travel to', locatedAt: 'Located on this street', drive: 'Drive here', vehicle: 'YOUR VEHICLE', carRoute: 'by car' };
-  const [level, setLevel] = useState<MapLevel>('region');
-  const [settlementId, setSettlementId] = useState(map.current.settlementId);
-  const [zoneId, setZoneId] = useState(map.current.zoneId);
-  const [districtId, setDistrictId] = useState(map.current.districtId);
-  const [selectedSegmentId, setSelectedSegmentId] = useState(map.current.segmentId);
+    ? {
+        service: 'УСЛУГА В СВЕТА', visit: 'Посети', travel: 'Отиди до', locatedAt: 'Намира се на тази улица',
+        drive: 'Карай дотук', vehicle: 'ТВОЯТ АВТОМОБИЛ', carRoute: 'с кола', vehicleHere: 'КОЛАТА ТИ Е ТУК',
+        goToVehicle: 'Отиди до колата', openAtVehicle: 'Отвори улицата при колата', locked: 'Заключена', unlocked: 'Отключена',
+        focused: 'ФОКУСИРАН АВТОМОБИЛ'
+      }
+    : {
+        service: 'WORLD SERVICE', visit: 'Visit', travel: 'Travel to', locatedAt: 'Located on this street',
+        drive: 'Drive here', vehicle: 'YOUR VEHICLE', carRoute: 'by car', vehicleHere: 'YOUR CAR IS HERE',
+        goToVehicle: 'Go to vehicle', openAtVehicle: 'Open street at vehicle', locked: 'Locked', unlocked: 'Unlocked',
+        focused: 'FOCUSED VEHICLE'
+      };
+
+  const initialVehicle = focusVehicleId ? vehicles?.ownedVehicles.find(vehicle => vehicle.id === focusVehicleId) ?? null : null;
+  const initialPath = initialVehicle ? resolveVehicleWorldPath(map, initialVehicle.parkedSegmentId) : null;
+  const [level, setLevel] = useState<MapLevel>(initialPath ? 'district' : 'region');
+  const [settlementId, setSettlementId] = useState(initialPath?.settlement.id ?? map.current.settlementId);
+  const [zoneId, setZoneId] = useState(initialPath?.zone.id ?? map.current.zoneId);
+  const [districtId, setDistrictId] = useState(initialPath?.district.id ?? map.current.districtId);
+  const [selectedSegmentId, setSelectedSegmentId] = useState(initialVehicle?.parkedSegmentId ?? map.current.segmentId);
   const [selectedParcelId, setSelectedParcelId] = useState<string | null>(null);
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(initialVehicle?.id ?? null);
 
   const region = map.regions.find(item => item.id === map.current.regionId) ?? map.regions[0];
   const settlement = map.settlements.find(item => item.id === settlementId);
@@ -48,6 +64,7 @@ export function WorldMapView({ map, vehicles, travelBusy, onClose, onTravel, onD
   const selectedSegment = map.segments.find(item => item.id === selectedSegmentId);
   const selectedStreet = selectedSegment ? map.streets.find(item => item.id === selectedSegment.streetId) : undefined;
   const selectedParcel = selectedParcelId ? map.parcels.find(item => item.id === selectedParcelId) : undefined;
+  const selectedVehicle = selectedVehicleId ? vehicles?.ownedVehicles.find(vehicle => vehicle.id === selectedVehicleId) ?? null : null;
   const walkRoute = selectedSegment ? resolveWorldRoute(map, map.current.segmentId, selectedSegment.id, 'walk') : null;
   const drivingVehicle = vehicles?.ownedVehicles.find(vehicle => vehicle.active && vehicle.occupied && vehicle.parkedSegmentId === map.current.segmentId) ?? null;
   const driveRoute = drivingVehicle && selectedSegment ? resolveWorldRoute(map, map.current.segmentId, selectedSegment.id, 'car') : null;
@@ -58,11 +75,26 @@ export function WorldMapView({ map, vehicles, travelBusy, onClose, onTravel, onD
   function selectSegment(id: string) {
     setSelectedSegmentId(id);
     setSelectedParcelId(null);
+    setSelectedVehicleId(null);
   }
 
   function selectParcel(parcel: WorldParcel) {
     setSelectedSegmentId(parcel.segmentId);
     setSelectedParcelId(parcel.id);
+    setSelectedVehicleId(null);
+  }
+
+  function selectVehicle(vehicle: PlayerVehicle) {
+    const target = resolveVehicleWorldPath(map, vehicle.parkedSegmentId);
+    if (target) {
+      setSettlementId(target.settlement.id);
+      setZoneId(target.zone.id);
+      setDistrictId(target.district.id);
+      setLevel('district');
+    }
+    setSelectedSegmentId(vehicle.parkedSegmentId);
+    setSelectedParcelId(null);
+    setSelectedVehicleId(vehicle.id);
   }
 
   function enterSettlement(item: WorldSettlement) {
@@ -70,6 +102,7 @@ export function WorldMapView({ map, vehicles, travelBusy, onClose, onTravel, onD
     const child = map.zones.find(zoneItem => zoneItem.settlementId === item.id);
     if (child) setZoneId(child.id);
     setSelectedParcelId(null);
+    setSelectedVehicleId(null);
     setLevel('settlement');
   }
 
@@ -78,6 +111,7 @@ export function WorldMapView({ map, vehicles, travelBusy, onClose, onTravel, onD
     const child = map.districts.find(districtItem => districtItem.zoneId === item.id);
     if (child) setDistrictId(child.id);
     setSelectedParcelId(null);
+    setSelectedVehicleId(null);
     setLevel('zone');
   }
 
@@ -88,6 +122,7 @@ export function WorldMapView({ map, vehicles, travelBusy, onClose, onTravel, onD
     const first = map.segments.find(segment => streetIds.has(segment.streetId));
     if (current ?? first) setSelectedSegmentId((current ?? first)!.id);
     setSelectedParcelId(null);
+    setSelectedVehicleId(null);
     setLevel('district');
   }
 
@@ -97,6 +132,7 @@ export function WorldMapView({ map, vehicles, travelBusy, onClose, onTravel, onD
     setDistrictId(map.current.districtId);
     setSelectedSegmentId(map.current.segmentId);
     setSelectedParcelId(null);
+    setSelectedVehicleId(null);
     setLevel('district');
   }
 
@@ -107,7 +143,7 @@ export function WorldMapView({ map, vehicles, travelBusy, onClose, onTravel, onD
       <div className="world-map-heading">
         <span>{level === 'region' ? copy.region : level === 'settlement' ? copy.settlement : level === 'zone' ? copy.zone : copy.district}</span>
         <b>{title ?? copy.map}</b>
-        <small>{level === 'district' ? copy.streetHint : copy.hierarchyHint}</small>
+        <small>{selectedVehicle ? `${serviceCopy.focused} · ${selectedVehicle.parkedLocation.segment}` : level === 'district' ? copy.streetHint : copy.hierarchyHint}</small>
       </div>
       <div className="world-map-actions">
         {drivingVehicle && <div className="world-map-driving-chip"><GameIcon name="car" size={14} /><span>{serviceCopy.vehicle}</span><b>{drivingVehicle.model.model}</b></div>}
@@ -117,13 +153,13 @@ export function WorldMapView({ map, vehicles, travelBusy, onClose, onTravel, onD
     </header>
 
     <nav className="world-map-breadcrumb" aria-label={copy.map}>
-      <button onClick={() => setLevel('region')}>{region?.name ?? 'SOL DORADO'}</button>
-      {level !== 'region' && settlement && <><i>›</i><button onClick={() => setLevel('settlement')}>{settlement.name}</button></>}
-      {(level === 'zone' || level === 'district') && zone && <><i>›</i><button onClick={() => setLevel('zone')}>{zone.name}</button></>}
+      <button onClick={() => { setLevel('region'); setSelectedVehicleId(null); }}>{region?.name ?? 'SOL DORADO'}</button>
+      {level !== 'region' && settlement && <><i>›</i><button onClick={() => { setLevel('settlement'); setSelectedVehicleId(null); }}>{settlement.name}</button></>}
+      {(level === 'zone' || level === 'district') && zone && <><i>›</i><button onClick={() => { setLevel('zone'); setSelectedVehicleId(null); }}>{zone.name}</button></>}
       {level === 'district' && district && <><i>›</i><button aria-current="page">{district.name}</button></>}
     </nav>
 
-    <div className={`world-map-canvas world-map-level-${level}`}>
+    <div className={`world-map-canvas world-map-level-${level} ${selectedVehicle ? 'world-map-vehicle-focused' : ''}`}>
       <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" role="img" aria-label={`${copy.map}: ${title ?? ''}`}>
         <AtlasDefs />
         {level === 'region' && region && <RegionBackdrop geometry={region.geometry} />}
@@ -140,35 +176,47 @@ export function WorldMapView({ map, vehicles, travelBusy, onClose, onTravel, onD
         {level === 'zone' && zone && map.districts.filter(item => item.zoneId === zone.id).map(item =>
           <Area key={item.id} geometry={item.geometry} name={item.name} current={item.id === map.current.districtId} kind={item.kind} variant="district" onClick={() => enterDistrict(item)} />
         )}
-        {level === 'district' && district && <DistrictNetwork map={map} vehicles={vehicles} districtId={district.id} selectedSegmentId={selectedSegmentId} selectedParcelId={selectedParcelId} routeSegmentIds={walkRoute?.segmentIds ?? []} onSelectSegment={selectSegment} onSelectParcel={selectParcel} emptyLabel={copy.noStreets} />}
+        {level === 'district' && district && <DistrictNetwork map={map} vehicles={vehicles} districtId={district.id} selectedSegmentId={selectedSegmentId} selectedParcelId={selectedParcelId} selectedVehicleId={selectedVehicleId} routeSegmentIds={walkRoute?.segmentIds ?? []} onSelectSegment={selectSegment} onSelectParcel={selectParcel} onSelectVehicle={selectVehicle} emptyLabel={copy.noStreets} />}
       </svg>
       <div className="world-map-compass" aria-hidden="true"><span>N</span><i /></div>
       <div className="world-map-scale" aria-hidden="true"><i /><span>{level === 'region' ? '25 km' : level === 'settlement' ? '5 km' : level === 'zone' ? '1 km' : '250 m'}</span></div>
+      {selectedVehicle && <div className="world-map-focused-vehicle-banner"><GameIcon name="car" size={18} /><div><span>{serviceCopy.vehicleHere}</span><b>{selectedVehicle.model.brand} {selectedVehicle.model.model}</b><small>{selectedVehicle.parkedLocation.district} · {selectedVehicle.parkedLocation.street} · {selectedVehicle.parkedLocation.segment}</small></div></div>}
     </div>
 
-    {level === 'district' && selectedSegment && <footer className={`world-map-selection ${isCurrent ? 'world-map-selection-current' : ''} ${selectedParcel?.serviceKey ? 'world-map-selection-service' : ''}`}>
+    {level === 'district' && selectedSegment && <footer className={`world-map-selection ${isCurrent ? 'world-map-selection-current' : ''} ${selectedParcel?.serviceKey ? 'world-map-selection-service' : ''} ${selectedVehicle ? 'world-map-selection-vehicle' : ''}`}>
       <div className="world-map-selection-main">
-        <span>{selectedParcel?.serviceKey ? serviceCopy.service : selectedSegment.playable ? copy.playable : copy.planned}</span>
-        <b>{selectedParcel?.name ?? selectedSegment.displayName}</b>
-        <small>{selectedParcel?.serviceKey
-          ? `${serviceCopy.locatedAt} · ${selectedSegment.displayName}`
-          : isCurrent ? copy.currentStreet : canTravel ? copy.travelDetail.replace('{distance}', String(walkRoute?.distanceMeters ?? 0)) : selectedSegment.playable ? copy.noDirectRoute : copy.notAccessible}</small>
+        <span>{selectedVehicle ? serviceCopy.vehicle : selectedParcel?.serviceKey ? serviceCopy.service : selectedSegment.playable ? copy.playable : copy.planned}</span>
+        <b>{selectedVehicle ? `${selectedVehicle.model.brand} ${selectedVehicle.model.model}` : selectedParcel?.name ?? selectedSegment.displayName}</b>
+        <small>{selectedVehicle
+          ? `${selectedVehicle.parkedLocation.district} · ${selectedVehicle.parkedLocation.street} · ${selectedVehicle.parkedLocation.segment}`
+          : selectedParcel?.serviceKey
+            ? `${serviceCopy.locatedAt} · ${selectedSegment.displayName}`
+            : isCurrent ? copy.currentStreet : canTravel ? copy.travelDetail.replace('{distance}', String(walkRoute?.distanceMeters ?? 0)) : selectedSegment.playable ? copy.noDirectRoute : copy.notAccessible}</small>
       </div>
       <div className="world-map-selection-meta">
         {selectedStreet && <span>{selectedStreet.name}</span>}
         {walkRoute && !isCurrent && <span>{walkRoute.distanceMeters} m · {copy.walk}</span>}
         {driveRoute && !isCurrent && <span>{driveRoute.distanceMeters} m · {serviceCopy.carRoute}</span>}
-        {vehicles?.ownedVehicles.some(vehicle => vehicle.parkedSegmentId === selectedSegment.id) && <span><GameIcon name="car" size={12} /> {serviceCopy.vehicle}</span>}
+        {selectedVehicle && <span><GameIcon name="lock" size={12} /> {selectedVehicle.locked ? serviceCopy.locked : serviceCopy.unlocked}</span>}
+        {selectedVehicle && <span>{Math.round(selectedVehicle.fuelPercent)}% fuel</span>}
+        {!selectedVehicle && vehicles?.ownedVehicles.some(vehicle => vehicle.parkedSegmentId === selectedSegment.id) && <span><GameIcon name="car" size={12} /> {serviceCopy.vehicle}</span>}
       </div>
       <div className="world-map-travel-actions">
-        {selectedParcel?.serviceKey && isCurrent
-          ? <button className="world-map-primary-action world-map-service-action" onClick={() => openWorldService(selectedParcel.serviceKey!)}><GameIcon name="store" size={14} />{serviceCopy.visit} {selectedParcel.name}</button>
-          : isCurrent
-            ? <button className="world-map-primary-action" onClick={onClose}><GameIcon name="map-pin" size={14} />{copy.openStreet}</button>
+        {selectedVehicle
+          ? isCurrent
+            ? <button className="world-map-primary-action world-map-vehicle-action" onClick={onClose}><GameIcon name="car" size={14} />{serviceCopy.openAtVehicle}</button>
             : <>
-              {canDrive && drivingVehicle && <button className="world-map-primary-action world-map-drive-action" disabled={travelBusy} onClick={() => onDrive(drivingVehicle.id, selectedSegment.id)}><GameIcon name="car" size={14} />{travelBusy ? copy.travelling : serviceCopy.drive}</button>}
-              <button className="world-map-primary-action" disabled={!canTravel || travelBusy} onClick={() => onTravel(selectedSegment.id)}><GameIcon name="footprints" size={14} />{travelBusy ? copy.travelling : canTravel ? selectedParcel?.serviceKey ? `${serviceCopy.travel} ${selectedParcel.name}` : copy.travelHere : copy.unavailable}</button>
-            </>}
+                {canDrive && drivingVehicle && <button className="world-map-primary-action world-map-drive-action" disabled={travelBusy} onClick={() => onDrive(drivingVehicle.id, selectedSegment.id)}><GameIcon name="car" size={14} />{travelBusy ? copy.travelling : serviceCopy.drive}</button>}
+                <button className="world-map-primary-action world-map-vehicle-action" disabled={!canTravel || travelBusy} onClick={() => onTravel(selectedSegment.id)}><GameIcon name="map-pin" size={14} />{travelBusy ? copy.travelling : serviceCopy.goToVehicle}</button>
+              </>
+          : selectedParcel?.serviceKey && isCurrent
+            ? <button className="world-map-primary-action world-map-service-action" onClick={() => openWorldService(selectedParcel.serviceKey!)}><GameIcon name="store" size={14} />{serviceCopy.visit} {selectedParcel.name}</button>
+            : isCurrent
+              ? <button className="world-map-primary-action" onClick={onClose}><GameIcon name="map-pin" size={14} />{copy.openStreet}</button>
+              : <>
+                  {canDrive && drivingVehicle && <button className="world-map-primary-action world-map-drive-action" disabled={travelBusy} onClick={() => onDrive(drivingVehicle.id, selectedSegment.id)}><GameIcon name="car" size={14} />{travelBusy ? copy.travelling : serviceCopy.drive}</button>}
+                  <button className="world-map-primary-action" disabled={!canTravel || travelBusy} onClick={() => onTravel(selectedSegment.id)}><GameIcon name="footprints" size={14} />{travelBusy ? copy.travelling : canTravel ? selectedParcel?.serviceKey ? `${serviceCopy.travel} ${selectedParcel.name}` : copy.travelHere : copy.unavailable}</button>
+                </>}
       </div>
     </footer>}
   </div>;
@@ -261,15 +309,17 @@ function Area({ geometry, name, current, kind, variant, onClick }: { geometry: W
   </g>;
 }
 
-function DistrictNetwork({ map, vehicles, districtId, selectedSegmentId, selectedParcelId, routeSegmentIds, onSelectSegment, onSelectParcel, emptyLabel }: {
+function DistrictNetwork({ map, vehicles, districtId, selectedSegmentId, selectedParcelId, selectedVehicleId, routeSegmentIds, onSelectSegment, onSelectParcel, onSelectVehicle, emptyLabel }: {
   map: WorldMapState;
   vehicles: VehicleState | null;
   districtId: string;
   selectedSegmentId: string;
   selectedParcelId: string | null;
+  selectedVehicleId: string | null;
   routeSegmentIds: string[];
   onSelectSegment: (id: string) => void;
   onSelectParcel: (parcel: WorldParcel) => void;
+  onSelectVehicle: (vehicle: PlayerVehicle) => void;
   emptyLabel: string;
 }) {
   const streets = map.streets.filter(item => item.districtId === districtId);
@@ -288,12 +338,14 @@ function DistrictNetwork({ map, vehicles, districtId, selectedSegmentId, selecte
       const segment = segments.find(item => item.id === vehicle.parkedSegmentId);
       if (!segment) return null;
       const sameSegmentIndex = districtVehicles.filter(item => item.parkedSegmentId === vehicle.parkedSegmentId).findIndex(item => item.id === vehicle.id);
-      const x = segment.geometry.center.x + sameSegmentIndex * 2.2;
-      const y = segment.geometry.center.y + 3.3 + (index % 2) * .4;
-      return <g key={vehicle.id} className={`world-map-player-vehicle ${vehicle.active ? 'active' : ''}`} onClick={() => onSelectSegment(vehicle.parkedSegmentId)} role="button" aria-label={vehicle.model.displayName}>
-        <circle cx={x} cy={y} r="2.2" />
-        <text x={x} y={y + .55} textAnchor="middle">V</text>
-        <title>{vehicle.model.displayName} · {vehicle.parkedDisplayName}</title>
+      const x = segment.geometry.center.x + sameSegmentIndex * 2.6;
+      const y = segment.geometry.center.y + 3.7 + (index % 2) * .45;
+      const selected = selectedVehicleId === vehicle.id;
+      return <g key={vehicle.id} className={`world-map-player-vehicle ${vehicle.active ? 'active' : ''} ${selected ? 'selected' : ''}`} onClick={() => onSelectVehicle(vehicle)} role="button" aria-label={vehicle.model.displayName}>
+        {selected && <circle className="world-map-player-vehicle-pulse" cx={x} cy={y} r="4.2" />}
+        <circle cx={x} cy={y} r="2.7" />
+        <text x={x} y={y + .6} textAnchor="middle">CAR</text>
+        <title>{vehicle.model.displayName} · {vehicle.parkedLocation.district} · {vehicle.parkedLocation.segment}</title>
       </g>;
     })}
   </>;
@@ -323,6 +375,20 @@ function ParcelMarker({ parcel, selected, onClick }: { parcel: WorldParcel; sele
     {dealership && <><circle className="world-map-dealer-pin" cx={parcel.geometry.center.x} cy={parcel.geometry.center.y} r="2.1" /><text className="world-map-dealer-label" x={parcel.geometry.center.x} y={parcel.geometry.center.y + .65} textAnchor="middle">D</text></>}
     <title>{parcel.name}</title>
   </g>;
+}
+
+function resolveVehicleWorldPath(map: WorldMapState, segmentId: string) {
+  const segment = map.segments.find(item => item.id === segmentId);
+  if (!segment) return null;
+  const street = map.streets.find(item => item.id === segment.streetId);
+  if (!street) return null;
+  const district = map.districts.find(item => item.id === street.districtId);
+  if (!district) return null;
+  const zone = map.zones.find(item => item.id === district.zoneId);
+  if (!zone) return null;
+  const settlement = map.settlements.find(item => item.id === zone.settlementId);
+  if (!settlement) return null;
+  return { segment, street, district, zone, settlement };
 }
 
 function Mountain({ x, y }: { x: number; y: number }) {
