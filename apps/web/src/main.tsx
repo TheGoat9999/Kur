@@ -7,6 +7,10 @@ import './styles.css';
 import './features/world/world-map-density.css';
 import './features/world/street-navigation.css';
 import './features/world/world-visual.css';
+import './hud.css';
+import './hud-v2.css';
+import './hud-v3.css';
+import './hud-v4.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -1,0 +1,236 @@
+/* SOL DORADO interface v1.4 — separated chrome, safe modal geometry, full color palette */
+:root {
+  --sd-header-height: 64px;
+  --sd-right-rail-lane: 72px;
+  --sd-hud-edge: 18px;
+}
+
+/* Remove the artificial footer lane. HUD is an in-world overlay, not a footer and not part of the left navigation. */
+.game-footer-safe { display: none !important; }
+
+@media (min-width: 761px) {
+  .game-sidebar {
+    top: var(--sd-header-height) !important;
+    bottom: 0 !important;
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+  }
+
+  .game-nav {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #2b3e45 transparent;
+  }
+
+  .sidebar-player,
+  .sidebar-legal { flex: 0 0 auto; }
+
+  .game-stage {
+    padding-bottom: 0 !important;
+  }
+
+  .game-stage-world .game-content {
+    height: calc(100dvh - var(--sd-header-height)) !important;
+    padding-bottom: 12px !important;
+  }
+
+  .right-nav-rail {
+    bottom: 10px !important;
+  }
+
+  /* HUD remains inside the playable canvas, offset from both sidebars. */
+  .player-hud {
+    max-width: calc(100vw - var(--sidebar-width) - var(--sd-right-rail-lane) - 40px) !important;
+  }
+  .hud-anchor-bottom-left {
+    left: calc(var(--sidebar-width) + var(--sd-hud-edge)) !important;
+    bottom: var(--sd-hud-edge) !important;
+  }
+  .hud-anchor-bottom-center {
+    left: calc(50% + var(--sidebar-half) - 36px) !important;
+    bottom: var(--sd-hud-edge) !important;
+    transform: translateX(-50%) !important;
+  }
+  .player-hud-world.hud-anchor-bottom-left,
+  .player-hud-world.hud-anchor-bottom-center {
+    bottom: var(--sd-hud-edge) !important;
+  }
+  .hud-anchor-top-left {
+    left: calc(var(--sidebar-width) + var(--sd-hud-edge)) !important;
+    top: calc(var(--sd-header-height) + var(--sd-hud-edge)) !important;
+  }
+}
+
+/* Compact legal identity stays in navigation chrome without inventing provider details. */
+.sidebar-legal {
+  display: grid;
+  gap: 3px;
+  border-top: 1px solid rgb(255 255 255 / .055);
+  padding: 9px 12px 11px;
+  color: #6f8188;
+}
+.sidebar-legal span {
+  color: #8b9ba1;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+.sidebar-legal small {
+  color: #52656d;
+  font-size: 7px;
+}
+.game-shell-collapsed .sidebar-legal {
+  min-height: 36px;
+  place-items: center;
+  padding: 7px;
+}
+.game-shell-collapsed .sidebar-legal span,
+.game-shell-collapsed .sidebar-legal small { display: none; }
+.game-shell-collapsed .sidebar-legal::before {
+  content: "©";
+  color: #7d8f96;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+/* HUD editor is a real modal in the game canvas, not an absolutely positioned child that can collide with navigation. */
+.hud-editor-backdrop {
+  position: fixed;
+  left: var(--sidebar-width);
+  right: var(--sd-right-rail-lane);
+  top: var(--sd-header-height);
+  bottom: 0;
+  z-index: 128;
+  border: 0;
+  background: rgb(0 0 0 / .24);
+  padding: 0;
+  pointer-events: auto;
+  backdrop-filter: blur(2px);
+}
+
+.hud-editor,
+.hud-anchor-bottom-center .hud-editor,
+.hud-anchor-top-left .hud-editor {
+  position: fixed !important;
+  left: calc(50% + var(--sidebar-half) - 36px) !important;
+  right: auto !important;
+  top: calc(var(--sd-header-height) + 22px) !important;
+  bottom: auto !important;
+  z-index: 130 !important;
+  width: min(520px, calc(100vw - var(--sidebar-width) - var(--sd-right-rail-lane) - 48px)) !important;
+  max-height: calc(100dvh - var(--sd-header-height) - 44px) !important;
+  transform: translateX(-50%) !important;
+  animation: hud-editor-v4-in .18s ease both !important;
+}
+@keyframes hud-editor-v4-in {
+  from { opacity: 0; transform: translate(-50%, 7px) scale(.988); }
+  to { opacity: 1; transform: translateX(-50%); }
+}
+
+/* Full spectrum custom color. Semantic mode keeps gameplay meanings; custom mode applies any chosen accent. */
+.hud-color-custom .hud-stat { --metric: var(--hud-custom-color) !important; }
+.hud-color-custom .hud-location-card > span svg,
+.hud-color-custom .hud-cash-icon,
+.hud-color-custom .hud-edit-button { color: var(--hud-custom-color) !important; }
+.hud-color-custom .hud-cash-card {
+  border-color: color-mix(in srgb, var(--hud-custom-color) 24%, transparent) !important;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--hud-custom-color) 9%, rgb(11 25 30 / .9)), rgb(5 14 18 / .84)) !important;
+}
+.hud-color-custom .hud-cash-card > span:nth-child(2) b {
+  color: color-mix(in srgb, var(--hud-custom-color) 72%, white) !important;
+}
+.hud-color-custom .hud-edit-button:hover,
+.hud-color-custom .hud-edit-button-active {
+  border-color: color-mix(in srgb, var(--hud-custom-color) 34%, transparent) !important;
+  background: color-mix(in srgb, var(--hud-custom-color) 9%, rgb(9 19 23 / .78)) !important;
+}
+
+.hud-full-color-control {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 7px;
+}
+.hud-full-color-control > button,
+.hud-full-color-control > label {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid rgb(255 255 255 / .075);
+  border-radius: 10px;
+  background: rgb(255 255 255 / .025);
+  padding: 7px 9px;
+  color: #80939a;
+  cursor: pointer;
+}
+.hud-full-color-control > button:hover,
+.hud-full-color-control > label:hover,
+.hud-full-color-control > .hud-choice-active {
+  border-color: rgb(255 216 147 / .24);
+  background: linear-gradient(180deg, rgb(231 190 115 / .10), rgb(231 190 115 / .035));
+  color: #dbe4e7;
+}
+.hud-semantic-preview {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  border: 1px solid rgb(255 255 255 / .18);
+  border-radius: 50%;
+  background: conic-gradient(#51d399 0 20%, #e7be73 20% 40%, #e89762 40% 60%, #54bdd2 60% 80%, #a58ae0 80%);
+  box-shadow: inset 0 0 0 3px rgb(5 13 17 / .55);
+}
+.hud-full-color-control input[type="color"] {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  border: 1px solid rgb(255 255 255 / .18);
+  border-radius: 8px;
+  background: transparent;
+  padding: 2px;
+  cursor: pointer;
+}
+.hud-full-color-control input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+.hud-full-color-control input[type="color"]::-webkit-color-swatch { border: 0; border-radius: 5px; }
+.hud-full-color-control input[type="color"]::-moz-color-swatch { border: 0; border-radius: 5px; }
+.hud-full-color-control label > span { min-width: 0; }
+.hud-full-color-control label b,
+.hud-full-color-control label small { display: block; }
+.hud-full-color-control label b { font-size: 8px; font-weight: 760; }
+.hud-full-color-control label small { margin-top: 3px; color: #60747c; font-size: 7px; }
+
+.hud-shape-grid-v4 { grid-template-columns: repeat(4, 1fr) !important; }
+.hud-shape-choice-square > i { border-radius: 2px; }
+.hud-shape-square .hud-stat,
+.hud-shape-square .hud-stat::after,
+.hud-shape-square .hud-stat-icon,
+.hud-shape-square .hud-location-card,
+.hud-shape-square .hud-cash-card,
+.hud-shape-square .hud-edit-button { border-radius: 3px !important; }
+
+/* Right-nav editor stays in the right-side canvas lane and never crosses the left navigation. */
+.right-nav-editor {
+  right: calc(var(--sd-right-rail-lane) + 12px) !important;
+  bottom: 12px !important;
+  max-height: calc(100dvh - var(--sd-header-height) - 24px) !important;
+}
+
+@media (max-width: 760px) {
+  .sidebar-legal { display: none; }
+  .hud-editor-backdrop {
+    inset: var(--sd-header-height) 0 0;
+  }
+  .hud-editor,
+  .hud-anchor-bottom-center .hud-editor,
+  .hud-anchor-top-left .hud-editor {
+    left: 50% !important;
+    top: calc(var(--sd-header-height) + 12px) !important;
+    width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - var(--sd-header-height) - 24px) !important;
+  }
+  .hud-full-color-control { grid-template-columns: 1fr; }
+  .hud-shape-grid-v4 { grid-template-columns: repeat(2, 1fr) !important; }
+}
