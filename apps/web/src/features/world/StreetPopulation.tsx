@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, MouseEvent, PointerEvent } from 'react';
 import type { StreetObjectId, StreetSegmentId } from '@sol-dorado/contracts';
 import { WorldCharacter, visualFromSeed, type WorldCharacterDirection } from '../../components/WorldCharacter';
 import { WorldVehicle } from '../../components/WorldVehicle';
@@ -9,6 +9,10 @@ export function StreetPopulation({ segmentId, visibleObjectIds }: {
   visibleObjectIds: StreetObjectId[];
 }) {
   const definition = STREET_POPULATION[segmentId];
+
+  function stopCollisionEvent(event: MouseEvent<HTMLElement> | PointerEvent<HTMLElement>) {
+    event.stopPropagation();
+  }
 
   return (
     <div className="street-population-layer" aria-hidden="true">
@@ -27,7 +31,14 @@ export function StreetPopulation({ segmentId, visibleObjectIds }: {
           ...(vehicle.serviceLabel ? { serviceLabel: vehicle.serviceLabel } : {})
         };
         return (
-          <span key={vehicle.id} className={`street-vehicle-actor ${moving ? 'street-vehicle-actor-moving' : ''}`} style={style}>
+          <span
+            key={vehicle.id}
+            className={`street-vehicle-actor street-collision-actor ${moving ? 'street-vehicle-actor-moving' : ''} ${vehicle.parked ? 'street-vehicle-actor-parked' : ''}`}
+            style={style}
+            data-actor-kind="vehicle"
+            onPointerDown={stopCollisionEvent}
+            onClick={stopCollisionEvent}
+          >
             <WorldVehicle type={vehicle.type} color={vehicle.color} heading={vehicle.heading} {...serviceProps} />
           </span>
         );
@@ -46,7 +57,14 @@ export function StreetPopulation({ segmentId, visibleObjectIds }: {
             '--npc-delay': `${npc.delaySeconds ?? 0}s`
           } as CSSProperties;
           return (
-            <span key={npc.id} className={`street-npc-actor ${moving ? 'street-npc-actor-moving' : ''} ${npc.namedObjectId ? 'street-npc-actor-named' : ''}`} style={style}>
+            <span
+              key={npc.id}
+              className={`street-npc-actor street-collision-actor ${moving ? 'street-npc-actor-moving' : ''} ${npc.namedObjectId ? 'street-npc-actor-named' : ''}`}
+              style={style}
+              data-actor-kind="npc"
+              onPointerDown={stopCollisionEvent}
+              onClick={stopCollisionEvent}
+            >
               <WorldCharacter visual={npc.visual ?? visualFromSeed(`${segmentId}:${npc.id}`)} direction={npcDirection(npc)} moving={moving} />
             </span>
           );
