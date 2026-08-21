@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { getResponsiveStreetRoute } from '@sol-dorado/contracts/street-routing';
 import {
   clampStreetPosition,
   getStreetActionAnchor,
@@ -22,6 +23,18 @@ describe('street spatial contract', () => {
     expect(route).not.toBeNull();
     expect(route?.position.x).toBeCloseTo(73.4, 4);
     expect(route?.position.y).toBeCloseTo(67, 4);
+  });
+
+  it('keeps the requested pointer destination inside the pedestrian corridor', () => {
+    const route = getResponsiveStreetRoute('market_block_3', { x: 50, y: 67 }, { x: 73.4, y: 65 });
+    expect(route).not.toBeNull();
+    expect(route?.position).toEqual({ x: 73.4, y: 65 });
+    expect(route?.route.at(-1)).toEqual({ x: 73.4, y: 65 });
+  });
+
+  it('blocks arbitrary road clicks but still allows the authored crossing', () => {
+    expect(getResponsiveStreetRoute('market_block_3', { x: 50, y: 67 }, { x: 30, y: 55 })).toBeNull();
+    expect(getResponsiveStreetRoute('market_block_3', { x: 50, y: 67 }, { x: 50, y: 55 })?.position).toEqual({ x: 50, y: 55 });
   });
 
   it('routes across authored crossings rather than walking through the block', () => {
