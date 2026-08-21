@@ -27,6 +27,7 @@ export const OwnedPropertySchema = z.object({
   access: z.array(PropertyAccessSchema),
   tenantName: z.string().nullable(), monthlyRentCents: z.number().int().nonnegative()
 });
+export type OwnedProperty = z.infer<typeof OwnedPropertySchema>;
 
 export const RealEstateCareerSchema = z.object({
   licenseStage: z.number().int().min(0).max(2),
