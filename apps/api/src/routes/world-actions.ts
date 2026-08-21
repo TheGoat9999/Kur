@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { WorldActionRequestSchema, WorldActionResultSchema } from '@sol-dorado/contracts';
+import { getResponsiveStreetRoute } from '@sol-dorado/contracts/street-routing';
 import {
   StreetMoveRequestSchema,
   StreetMoveResultSchema,
-  getStreetRoute,
   getStreetSpawnPosition,
   isStreetActionWithinReach
 } from '@sol-dorado/contracts/world-position';
@@ -38,7 +38,7 @@ export function worldActionRoutes(services: AppServices) {
     try {
       await client.query('BEGIN');
       const progress = await lockStreetProgress(client, playerId);
-      const movement = getStreetRoute(progress.currentSegmentId, progress.position, parsed.data);
+      const movement = getResponsiveStreetRoute(progress.currentSegmentId, progress.position, parsed.data);
       if (!movement) throw new WorldActionCommandError('world_position_blocked', 409);
       await client.query(
         'UPDATE player_street_state SET position_x = $2, position_y = $3, updated_at = now() WHERE player_id = $1',
