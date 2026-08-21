@@ -14,6 +14,8 @@ import {
   splitInventoryItem,
   useInventoryItem
 } from '../services/inventory.js';
+import { useMedicalInventoryItem } from '../services/medical-treatment.js';
+import { NeedsCommandError } from '../services/needs.js';
 
 export function inventoryRoutes(services: AppServices) {
   const router = Router();
@@ -26,13 +28,7 @@ export function inventoryRoutes(services: AppServices) {
     const parsed = InventoryMoveRequestSchema.safeParse(request.body);
     if (!parsed.success) return response.status(400).json({ error: 'invalid_inventory_move', issues: parsed.error.issues });
     try {
-      response.json(await moveInventoryItem(
-        services.db,
-        request.playerId!,
-        parsed.data.itemId,
-        parsed.data.toContainerKey,
-        parsed.data.toSlotIndex
-      ));
+      response.json(await moveInventoryItem(services.db, request.playerId!, parsed.data.itemId, parsed.data.toContainerKey, parsed.data.toSlotIndex));
     } catch (error) {
       if (error instanceof InventoryCommandError) return response.status(error.status).json({ error: error.code });
       throw error;
@@ -43,13 +39,7 @@ export function inventoryRoutes(services: AppServices) {
     const parsed = InventorySplitRequestSchema.safeParse(request.body);
     if (!parsed.success) return response.status(400).json({ error: 'invalid_inventory_split', issues: parsed.error.issues });
     try {
-      response.json(await splitInventoryItem(
-        services.db,
-        request.playerId!,
-        parsed.data.itemId,
-        parsed.data.quantity,
-        parsed.data.toSlotIndex
-      ));
+      response.json(await splitInventoryItem(services.db, request.playerId!, parsed.data.itemId, parsed.data.quantity, parsed.data.toSlotIndex));
     } catch (error) {
       if (error instanceof InventoryCommandError) return response.status(error.status).json({ error: error.code });
       throw error;
@@ -60,7 +50,10 @@ export function inventoryRoutes(services: AppServices) {
     const parsed = InventoryUseRequestSchema.safeParse(request.body);
     if (!parsed.success) return response.status(400).json({ error: 'invalid_inventory_use', issues: parsed.error.issues });
     try {
-      await useInventoryItem(services.db, request.playerId!, parsed.data.itemId);
+      const before = await getInventoryState(services.db, request.playerId!);
+      const item = before.containers.flatMap(container => container.items).find(candidate => candidate.id === parsed.data.itemId);
+      if (item?.category === 'medical') await useMedicalInventoryItem(services.db, request.playerId!, parsed.data.itemId);
+      else await useInventoryItem(services.db, request.playerId!, parsed.data.itemId);
       const [inventory, state] = await Promise.all([
         getInventoryState(services.db, request.playerId!),
         getBootstrapState(services.db, request.playerId!)
@@ -68,7 +61,7 @@ export function inventoryRoutes(services: AppServices) {
       if (!state) return response.status(404).json({ error: 'player_not_found' });
       response.json(InventoryMutationResultSchema.parse({ inventory, state }));
     } catch (error) {
-      if (error instanceof InventoryCommandError) return response.status(error.status).json({ error: error.code });
+      if (error instanceof InventoryCommandError || error instanceof NeedsCommandError) return response.status(error.status).json({ error: error.code });
       throw error;
     }
   });
