@@ -12,21 +12,21 @@ const EXPECTED_COUNTS = {
   food: 40,
   drink: 25,
   tool: 25,
-  material: 35,
+  material: 38,
   electronics: 25,
   medical: 20,
   weapon: 25
 } as const;
 
 describe('core item catalog', () => {
-  it('contains exactly 200 core items', () => {
-    expect(CORE_ITEM_CATALOG).toHaveLength(200);
+  it('contains exactly 203 core items', () => {
+    expect(CORE_ITEM_CATALOG).toHaveLength(203);
     expect(CORE_ITEM_CATEGORY_COUNTS).toEqual(EXPECTED_COUNTS);
   });
 
   it('uses unique item keys and local asset paths', () => {
-    expect(new Set(CORE_ITEM_CATALOG.map(item => item.key)).size).toBe(200);
-    expect(new Set(CORE_ITEM_CATALOG.map(item => item.image.localPath)).size).toBe(200);
+    expect(new Set(CORE_ITEM_CATALOG.map(item => item.key)).size).toBe(203);
+    expect(new Set(CORE_ITEM_CATALOG.map(item => item.image.localPath)).size).toBe(203);
   });
 
   it('contains the MVP anchor items', () => {
