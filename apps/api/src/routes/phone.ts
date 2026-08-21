@@ -4,7 +4,8 @@ import {
   PhoneSaveNoteRequestSchema,
   PhoneSendMessageRequestSchema,
   PhoneSettingsPatchSchema,
-  PhoneToggleTaskRequestSchema
+  PhoneToggleTaskRequestSchema,
+  type PhoneSettings
 } from '@sol-dorado/contracts/phone';
 import type { AppServices } from '../types.js';
 import {
@@ -28,7 +29,8 @@ export function phoneRoutes(services: AppServices) {
   router.patch('/v1/phone/settings', async (request, response) => {
     const body = parse(PhoneSettingsPatchSchema, request.body, response);
     if (!body) return;
-    try { response.json(await updatePhoneSettings(services.db, request.playerId!, body)); }
+    const patch = Object.fromEntries(Object.entries(body).filter(([, value]) => value !== undefined)) as Partial<PhoneSettings>;
+    try { response.json(await updatePhoneSettings(services.db, request.playerId!, patch)); }
     catch (error) { handlePhoneError(error, response); }
   });
 
@@ -56,7 +58,10 @@ export function phoneRoutes(services: AppServices) {
   router.post('/v1/phone/notes', async (request, response) => {
     const body = parse(PhoneSaveNoteRequestSchema, request.body, response);
     if (!body) return;
-    try { response.json(await savePhoneNote(services.db, request.playerId!, body)); }
+    const note = body.noteId
+      ? { noteId: body.noteId, title: body.title, body: body.body, pinned: body.pinned }
+      : { title: body.title, body: body.body, pinned: body.pinned };
+    try { response.json(await savePhoneNote(services.db, request.playerId!, note)); }
     catch (error) { handlePhoneError(error, response); }
   });
 
