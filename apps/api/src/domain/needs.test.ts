@@ -1,0 +1,20 @@
+import { describe, expect, it } from 'vitest';
+import { applyNeedsTicks, shouldBeUnconscious } from './needs.js';
+
+describe('needs consequences', () => {
+  it('decays satiety hydration and energy deterministically', () => {
+    expect(applyNeedsTicks({ health:100,energy:80,satiety:70,hydration:70,stress:10 }, 2, 0)).toEqual({ health:100,energy:78,satiety:68,hydration:66,stress:10 });
+  });
+
+  it('makes dehydration and bleeding dangerous instead of cosmetic', () => {
+    const next = applyNeedsTicks({ health:50,energy:30,satiety:30,hydration:16,stress:10 }, 2, 2);
+    expect(next.health).toBeLessThan(46);
+    expect(next.hydration).toBe(12);
+    expect(next.stress).toBeGreaterThan(10);
+  });
+
+  it('detects critical unconscious states', () => {
+    expect(shouldBeUnconscious({ health:10,energy:20,satiety:20,hydration:20,stress:40 }, 2)).toBe(true);
+    expect(shouldBeUnconscious({ health:70,energy:20,satiety:20,hydration:20,stress:40 }, 0)).toBe(false);
+  });
+});
