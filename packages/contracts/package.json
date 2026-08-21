@@ -22,6 +22,7 @@
     "./justice": { "types": "./dist/justice.d.ts", "import": "./dist/justice.js" },
     "./real-estate": { "types": "./dist/real-estate.d.ts", "import": "./dist/real-estate.js" },
     "./hood-walk": { "types": "./dist/hood-walk.d.ts", "import": "./dist/hood-walk.js" },
+    "./businesses": { "types": "./dist/businesses.d.ts", "import": "./dist/businesses.js" },
     "./admin": { "types": "./dist/admin.d.ts", "import": "./dist/admin.js" },
     "./needs": { "types": "./dist/needs.d.ts", "import": "./dist/needs.js" },
     "./government": { "types": "./dist/government.d.ts", "import": "./dist/government.js" }
