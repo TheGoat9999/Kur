@@ -13,6 +13,7 @@ import { financeRoutes } from './routes/finance.js';
 import { itemRoutes } from './routes/items.js';
 import { phoneRoutes } from './routes/phone.js';
 import { vehicleRoutes } from './routes/vehicles.js';
+import { jobRoutes } from './routes/jobs.js';
 import { policeRoutes } from './routes/police.js';
 
 export function createApp(services: AppServices) {
@@ -32,6 +33,7 @@ export function createApp(services: AppServices) {
   app.use(financeRoutes(services));
   app.use(phoneRoutes(services));
   app.use(vehicleRoutes(services));
+  app.use(jobRoutes(services));
   app.use(policeRoutes(services));
   app.use((error: unknown, _request: Request, response: Response, _next: NextFunction) => {
     console.error(error);
