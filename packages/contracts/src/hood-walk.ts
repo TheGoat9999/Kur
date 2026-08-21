@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { BootstrapStateSchema, type BootstrapState } from './index.js';
+import { BootstrapStateSchema } from './index.js';
 
 export const HOOD_WALK_MAX_STEPS = 5;
 
@@ -137,6 +137,4 @@ export const HoodWalkMutationResultSchema = z.object({
   state: BootstrapStateSchema.nullable(),
   noticeId: z.enum(['started', 'lead_picked', 'choice_resolved', 'completed', 'ended'])
 });
-export interface HoodWalkMutationResult extends z.infer<typeof HoodWalkMutationResultSchema> {
-  state: BootstrapState | null;
-}
+export type HoodWalkMutationResult = z.infer<typeof HoodWalkMutationResultSchema>;
