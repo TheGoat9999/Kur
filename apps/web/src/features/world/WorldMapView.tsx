@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { resolveWorldRoute } from '@sol-dorado/contracts/world-map';
 import type {
   WorldDistrict,
   WorldMapGeometry,
@@ -38,9 +39,9 @@ export function WorldMapView({ map, travelBusy, onClose, onTravel }: Props) {
   const district = map.districts.find(item => item.id === districtId);
   const selectedSegment = map.segments.find(item => item.id === selectedSegmentId);
   const selectedStreet = selectedSegment ? map.streets.find(item => item.id === selectedSegment.streetId) : undefined;
-  const connection = selectedSegment ? walkingConnection(map, map.current.segmentId, selectedSegment.id) : undefined;
+  const route = selectedSegment ? resolveWorldRoute(map, map.current.segmentId, selectedSegment.id, 'walk') : null;
   const isCurrent = selectedSegment?.id === map.current.segmentId;
-  const canTravel = Boolean(selectedSegment?.playable && !isCurrent && connection);
+  const canTravel = Boolean(selectedSegment?.playable && !isCurrent && route);
 
   function enterSettlement(item: WorldSettlement) {
     setSettlementId(item.id);
@@ -112,7 +113,7 @@ export function WorldMapView({ map, travelBusy, onClose, onTravel }: Props) {
         {level === 'zone' && zone && map.districts.filter(item => item.zoneId === zone.id).map(item =>
           <Area key={item.id} geometry={item.geometry} name={item.name} current={item.id === map.current.districtId} kind={item.kind} variant="district" onClick={() => enterDistrict(item)} />
         )}
-        {level === 'district' && district && <DistrictNetwork map={map} districtId={district.id} selectedSegmentId={selectedSegmentId} onSelect={setSelectedSegmentId} emptyLabel={copy.noStreets} />}
+        {level === 'district' && district && <DistrictNetwork map={map} districtId={district.id} selectedSegmentId={selectedSegmentId} routeSegmentIds={route?.segmentIds ?? []} onSelect={setSelectedSegmentId} emptyLabel={copy.noStreets} />}
       </svg>
       <div className="world-map-compass" aria-hidden="true"><span>N</span><i /></div>
       <div className="world-map-scale" aria-hidden="true"><i /><span>{level === 'region' ? '25 km' : level === 'settlement' ? '5 km' : level === 'zone' ? '1 km' : '250 m'}</span></div>
@@ -122,11 +123,11 @@ export function WorldMapView({ map, travelBusy, onClose, onTravel }: Props) {
       <div className="world-map-selection-main">
         <span>{selectedSegment.playable ? copy.playable : copy.planned}</span>
         <b>{selectedSegment.displayName}</b>
-        <small>{isCurrent ? copy.currentStreet : canTravel ? copy.travelDetail.replace('{distance}', String(connection?.distanceMeters ?? 0)) : selectedSegment.playable ? copy.noDirectRoute : copy.notAccessible}</small>
+        <small>{isCurrent ? copy.currentStreet : canTravel ? copy.travelDetail.replace('{distance}', String(route?.distanceMeters ?? 0)) : selectedSegment.playable ? copy.noDirectRoute : copy.notAccessible}</small>
       </div>
       <div className="world-map-selection-meta">
         {selectedStreet && <span>{selectedStreet.name}</span>}
-        {connection && !isCurrent && <span>{connection.distanceMeters} m · {copy.walk}</span>}
+        {route && !isCurrent && <span>{route.distanceMeters} m · {copy.walk}</span>}
       </div>
       {isCurrent
         ? <button className="world-map-primary-action" onClick={onClose}><GameIcon name="map-pin" size={14} />{copy.openStreet}</button>
@@ -222,16 +223,24 @@ function Area({ geometry, name, current, kind, variant, onClick }: { geometry: W
   </g>;
 }
 
-function DistrictNetwork({ map, districtId, selectedSegmentId, onSelect, emptyLabel }: { map: WorldMapState; districtId: string; selectedSegmentId: string; onSelect: (id: string) => void; emptyLabel: string }) {
+function DistrictNetwork({ map, districtId, selectedSegmentId, routeSegmentIds, onSelect, emptyLabel }: {
+  map: WorldMapState;
+  districtId: string;
+  selectedSegmentId: string;
+  routeSegmentIds: string[];
+  onSelect: (id: string) => void;
+  emptyLabel: string;
+}) {
   const streets = map.streets.filter(item => item.districtId === districtId);
   if (!streets.length) return <text x="50" y="50" textAnchor="middle" className="world-map-empty">{emptyLabel}</text>;
   const streetIds = new Set(streets.map(item => item.id));
   const segments = map.segments.filter(item => streetIds.has(item.streetId));
   const segmentIds = new Set(segments.map(item => item.id));
   const parcels = map.parcels.filter(item => segmentIds.has(item.segmentId));
+  const routeIds = new Set(routeSegmentIds);
   return <>
     {streets.map(item => <StreetRoad key={item.id} street={item} current={item.id === map.current.streetId} />)}
-    {segments.map(item => <SegmentRoad key={item.id} item={item} current={item.id === map.current.segmentId} selected={item.id === selectedSegmentId} onClick={() => onSelect(item.id)} />)}
+    {segments.map(item => <SegmentRoad key={item.id} item={item} current={item.id === map.current.segmentId} selected={item.id === selectedSegmentId} routed={routeIds.has(item.id)} onClick={() => onSelect(item.id)} />)}
     {parcels.map(parcel => <ParcelMarker key={parcel.id} parcel={parcel} />)}
   </>;
 }
@@ -244,8 +253,8 @@ function StreetRoad({ street, current }: { street: WorldStreet; current: boolean
   </g>;
 }
 
-function SegmentRoad({ item, current, selected, onClick }: { item: WorldStreetSegment; current: boolean; selected: boolean; onClick: () => void }) {
-  return <g className={`world-map-segment ${item.playable ? 'world-map-segment-live' : 'world-map-segment-planned'} ${current ? 'world-map-current' : ''} ${selected ? 'world-map-selected' : ''}`} onClick={onClick}>
+function SegmentRoad({ item, current, selected, routed, onClick }: { item: WorldStreetSegment; current: boolean; selected: boolean; routed: boolean; onClick: () => void }) {
+  return <g className={`world-map-segment ${item.playable ? 'world-map-segment-live' : 'world-map-segment-planned'} ${current ? 'world-map-current' : ''} ${selected ? 'world-map-selected' : ''} ${routed ? 'world-map-segment-route' : ''}`} onClick={onClick}>
     <path d={path(item.geometry)} className="world-map-segment-hit" />
     <path d={path(item.geometry)} className="world-map-segment-focus" />
     <circle cx={item.geometry.center.x} cy={item.geometry.center.y} r={current ? 1.35 : .9} />
@@ -259,10 +268,6 @@ function ParcelMarker({ parcel }: { parcel: WorldParcel }) {
 
 function Mountain({ x, y }: { x: number; y: number }) {
   return <g transform={`translate(${x} ${y})`}><path d="M-3 3L0-3 3 3Z"/><path d="M-1.15-.7L0-3 1.1-.8 .35-.35 0-.7-.45-.25Z" className="snow"/></g>;
-}
-
-function walkingConnection(map: WorldMapState, from: string, to: string) {
-  return map.connections.find(item => item.modes.includes('walk') && ((item.fromSegmentId === from && item.toSegmentId === to) || (item.bidirectional && item.fromSegmentId === to && item.toSegmentId === from)));
 }
 
 function points(geometry: WorldMapGeometry) { return geometry.polygon.map(point => `${point.x},${point.y}`).join(' '); }

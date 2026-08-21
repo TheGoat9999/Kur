@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type DragEvent } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties, type DragEvent, type MouseEvent as ReactMouseEvent } from 'react';
 import type {
   BootstrapState,
   InventoryContainer,
@@ -26,6 +26,14 @@ interface Props {
 
 type CategoryFilter = ItemCategory | 'all';
 
+interface InventoryThemeSettings {
+  accent: string;
+  surface: string;
+  panelOpacity: number;
+  backdropOpacity: number;
+  itemScale: number;
+}
+
 interface InventoryModalCopy {
   title: string;
   subtitle: string;
@@ -49,11 +57,9 @@ interface InventoryModalCopy {
   totalWeight: string;
   value: string;
   condition: string;
-  legality: string;
   effects: string;
   type: string;
   noDirectUse: string;
-  use: string;
   split: string;
   move: string;
   clear: string;
@@ -72,6 +78,15 @@ interface InventoryModalCopy {
   usedMessage: string;
   splitDoneTitle: string;
   splitDoneMessage: string;
+  customize: string;
+  appearance: string;
+  accent: string;
+  surface: string;
+  panelOpacity: string;
+  backdropOpacity: string;
+  itemSize: string;
+  reset: string;
+  outsideClose: string;
   health: string;
   energy: string;
   satiety: string;
@@ -84,10 +99,25 @@ const CATEGORY_ORDER: readonly ItemCategory[] = [
   'personal', 'food', 'drink', 'tool', 'material', 'electronics', 'medical', 'weapon'
 ];
 
+const LEGACY_ITEM_ALIASES: Readonly<Record<string, string>> = Object.freeze({
+  water: 'water_bottle',
+  gloves: 'work_gloves'
+});
+
+const ITEM_ASSET_REV = '20260821-rainmad-2';
+const THEME_STORAGE_KEY = 'sd_inventory_theme_v2';
+const DEFAULT_THEME: InventoryThemeSettings = {
+  accent: '#e7be73',
+  surface: '#0b171c',
+  panelOpacity: 0.96,
+  backdropOpacity: 0.46,
+  itemScale: 1
+};
+
 const COPY: Record<'bg' | 'en', InventoryModalCopy> = {
   bg: {
     title: 'Инвентар',
-    subtitle: 'Премествай с drag & drop. Двоен клик използва предмета веднага, когато е възможно.',
+    subtitle: 'Клик за действия. Двоен клик използва храна, напитка или медицински предмет веднага.',
     close: 'Затвори инвентара',
     carried: 'Носиш със себе си',
     nearby: 'Контекст',
@@ -100,22 +130,20 @@ const COPY: Record<'bg' | 'en', InventoryModalCopy> = {
       personal: 'Лични', food: 'Храна', drink: 'Напитки', tool: 'Инструменти', material: 'Материали',
       electronics: 'Електроника', medical: 'Медицински', weapon: 'Оръжия'
     },
-    hoverHint: 'Задръж курсора върху предмет за бърза информация.',
-    clickHint: 'Кликни предмет, за да отключиш действията.',
-    quickUseHint: 'Двоен клик за бързо използване',
+    hoverHint: 'Задръж курсора върху предмет за информация.',
+    clickHint: 'Кликни предмета, за да видиш действията.',
+    quickUseHint: 'Двоен клик = бързо използване',
     selected: 'Избран предмет',
-    preview: 'Преглед',
+    preview: 'Бърз преглед',
     quantity: 'Количество',
     stack: 'Стак',
     unitWeight: 'Тегло / бр.',
     totalWeight: 'Общо тегло',
     value: 'Стойност',
     condition: 'Състояние',
-    legality: 'Статус',
     effects: 'Ефекти',
     type: 'Тип',
-    noDirectUse: 'Предметът няма директно действие от инвентара.',
-    use: 'Използвай',
+    noDirectUse: 'Този предмет няма директно действие от инвентара.',
     split: 'Раздели',
     move: 'Премести',
     clear: 'Откажи избора',
@@ -134,11 +162,20 @@ const COPY: Record<'bg' | 'en', InventoryModalCopy> = {
     usedMessage: 'Предметът е използван.',
     splitDoneTitle: 'Стакът е разделен',
     splitDoneMessage: 'Създаден е отделен стак в свободен слот.',
+    customize: 'Персонализирай',
+    appearance: 'Външен вид на инвентара',
+    accent: 'Акцентен цвят',
+    surface: 'Цвят на панела',
+    panelOpacity: 'Плътност на панела',
+    backdropOpacity: 'Затъмняване на картата',
+    itemSize: 'Размер на предметите',
+    reset: 'Върни стандартните',
+    outsideClose: 'Клик извън прозореца го затваря',
     health: 'Здраве', energy: 'Енергия', satiety: 'Ситост', hydration: 'Хидратация', stress: 'Стрес', policeHeat: 'Police heat'
   },
   en: {
     title: 'Inventory',
-    subtitle: 'Drag & drop to move items. Double-click a usable item for immediate use.',
+    subtitle: 'Click for actions. Double-click food, drinks or medical items for immediate use.',
     close: 'Close inventory',
     carried: 'Carried inventory',
     nearby: 'Context',
@@ -152,21 +189,19 @@ const COPY: Record<'bg' | 'en', InventoryModalCopy> = {
       electronics: 'Electronics', medical: 'Medical', weapon: 'Weapons'
     },
     hoverHint: 'Hover an item for instant information.',
-    clickHint: 'Click an item to unlock its actions.',
-    quickUseHint: 'Double-click for quick use',
+    clickHint: 'Click an item to show its actions.',
+    quickUseHint: 'Double-click = quick use',
     selected: 'Selected item',
-    preview: 'Preview',
+    preview: 'Quick preview',
     quantity: 'Quantity',
     stack: 'Stack',
     unitWeight: 'Weight / unit',
     totalWeight: 'Total weight',
     value: 'Value',
     condition: 'Condition',
-    legality: 'Status',
     effects: 'Effects',
     type: 'Type',
     noDirectUse: 'This item has no direct inventory action.',
-    use: 'Use',
     split: 'Split',
     move: 'Move',
     clear: 'Clear selection',
@@ -185,6 +220,15 @@ const COPY: Record<'bg' | 'en', InventoryModalCopy> = {
     usedMessage: 'The item was used.',
     splitDoneTitle: 'Stack split',
     splitDoneMessage: 'A separate stack was created in a free slot.',
+    customize: 'Customize',
+    appearance: 'Inventory appearance',
+    accent: 'Accent color',
+    surface: 'Panel color',
+    panelOpacity: 'Panel opacity',
+    backdropOpacity: 'Map dimming',
+    itemSize: 'Item size',
+    reset: 'Reset defaults',
+    outsideClose: 'Click outside the popup to close it',
     health: 'Health', energy: 'Energy', satiety: 'Satiety', hydration: 'Hydration', stress: 'Stress', policeHeat: 'Police heat'
   }
 };
@@ -204,6 +248,8 @@ export function InventoryView({ onStateChange, onClose }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [splitOpen, setSplitOpen] = useState(false);
   const [splitQuantity, setSplitQuantity] = useState(1);
+  const [customizeOpen, setCustomizeOpen] = useState(false);
+  const [theme, setTheme] = useState<InventoryThemeSettings>(loadTheme);
 
   useEffect(() => {
     let active = true;
@@ -213,6 +259,14 @@ export function InventoryView({ onStateChange, onClose }: Props) {
         setInventory(nextInventory);
         setExternalKey(nextInventory.selectedExternalKey);
         setCatalog(nextCatalog.items);
+
+        const playerContainer = nextInventory.containers.find(container => container.key === 'player');
+        const nextMap = new Map(nextCatalog.items.map(item => [item.key, item]));
+        const firstUsable = playerContainer?.items.find(item => {
+          const definition = resolveDefinition(nextMap, item.itemKey);
+          return Boolean(definition && Object.keys(definition.useEffects).length > 0);
+        });
+        setSelectedId(firstUsable?.id ?? playerContainer?.items[0]?.id ?? null);
       })
       .catch(reason => {
         if (!active) return;
@@ -224,16 +278,21 @@ export function InventoryView({ onStateChange, onClose }: Props) {
   }, [copy.title, locale, push]);
 
   useEffect(() => {
+    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(theme));
+  }, [theme]);
+
+  useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        if (splitOpen) setSplitOpen(false);
+        if (customizeOpen) setCustomizeOpen(false);
+        else if (splitOpen) setSplitOpen(false);
         else onClose();
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onClose, splitOpen]);
+  }, [customizeOpen, onClose, splitOpen]);
 
   const catalogByKey = useMemo(() => new Map(catalog.map(item => [item.key, item])), [catalog]);
   const allInventoryItems = useMemo(
@@ -243,8 +302,8 @@ export function InventoryView({ onStateChange, onClose }: Props) {
   const selected = allInventoryItems.find(item => item.id === selectedId) ?? null;
   const hovered = allInventoryItems.find(item => item.id === hoveredId) ?? null;
   const preview = hovered ?? selected;
-  const previewDefinition = preview ? catalogByKey.get(preview.itemKey) ?? null : null;
-  const selectedDefinition = selected ? catalogByKey.get(selected.itemKey) ?? null : null;
+  const previewDefinition = preview ? resolveDefinition(catalogByKey, preview.itemKey) : null;
+  const selectedDefinition = selected ? resolveDefinition(catalogByKey, selected.itemKey) : null;
   const player = inventory?.containers.find(container => container.key === 'player');
   const external = inventory?.containers.find(container => container.key === externalKey);
 
@@ -252,7 +311,7 @@ export function InventoryView({ onStateChange, onClose }: Props) {
     const counts = new Map<ItemCategory, number>();
     if (!player) return counts;
     for (const item of player.items) {
-      const category = catalogByKey.get(item.itemKey)?.category;
+      const category = resolveDefinition(catalogByKey, item.itemKey)?.category;
       if (category) counts.set(category, (counts.get(category) ?? 0) + 1);
     }
     return counts;
@@ -280,7 +339,7 @@ export function InventoryView({ onStateChange, onClose }: Props) {
     try {
       const next = await moveInventoryItem(itemId, target, slot);
       setInventory(next);
-      setSelectedId(null);
+      setSelectedId(next.containers.find(container => container.key === 'player')?.items[0]?.id ?? null);
       setHoveredId(null);
       setSplitOpen(false);
       push({ tone: 'info', title: copy.movedTitle, message: copy.movedMessage });
@@ -295,7 +354,7 @@ export function InventoryView({ onStateChange, onClose }: Props) {
 
   async function useItem(item: InventoryItem) {
     if (busy || item.containerKey !== 'player') return;
-    const definition = catalogByKey.get(item.itemKey) ?? null;
+    const definition = resolveDefinition(catalogByKey, item.itemKey);
     if (!isUsable(item, definition)) return;
     setBusy(true);
     setError(null);
@@ -303,8 +362,9 @@ export function InventoryView({ onStateChange, onClose }: Props) {
       const result = await useInventoryItem(item.id);
       setInventory(result.inventory);
       onStateChange(result.state);
-      const stillExists = result.inventory.containers.some(container => container.items.some(next => next.id === item.id));
-      if (!stillExists) setSelectedId(current => current === item.id ? null : current);
+      const carried = result.inventory.containers.find(container => container.key === 'player');
+      const stillExists = carried?.items.some(next => next.id === item.id) ?? false;
+      if (!stillExists) setSelectedId(carried?.items[0]?.id ?? null);
       setHoveredId(null);
       push({ tone: 'success', title: copy.usedTitle, message: copy.usedMessage });
     } catch (reason) {
@@ -320,6 +380,7 @@ export function InventoryView({ onStateChange, onClose }: Props) {
     if (!selected || !selected.stackable || selected.quantity <= 1) return;
     setSplitQuantity(Math.max(1, Math.floor(selected.quantity / 2)));
     setSplitOpen(true);
+    setCustomizeOpen(false);
   }
 
   async function confirmSplit() {
@@ -341,32 +402,43 @@ export function InventoryView({ onStateChange, onClose }: Props) {
     }
   }
 
+  function closeFromBackdrop(event: ReactMouseEvent<HTMLDivElement>) {
+    if (event.target === event.currentTarget) onClose();
+  }
+
+  const themeStyle = {
+    '--inventory-accent': theme.accent,
+    '--inventory-surface-rgb': hexToRgbTriplet(theme.surface),
+    '--inventory-panel-opacity': String(theme.panelOpacity),
+    '--inventory-backdrop-opacity': String(theme.backdropOpacity),
+    '--inventory-item-scale': String(theme.itemScale)
+  } as CSSProperties;
+
   if (!inventory || !player || !external) {
     return (
-      <div className="inventory-modal-layer" role="dialog" aria-modal="true" aria-label={copy.title}>
+      <div className="inventory-modal-layer" style={themeStyle} role="dialog" aria-modal="true" aria-label={copy.title} onMouseDown={closeFromBackdrop}>
         <div className="inventory-modal inventory-modal-loading">
-          <GameIcon name="package" size={28} />
+          <GameIcon name="package" size={30} />
           <b>{copy.title}</b>
           <span>{error ?? 'Loading...'}</span>
-          <button className="inventory-close" onClick={onClose} aria-label={copy.close}><GameIcon name="x" size={18} /></button>
+          <button className="inventory-close" onClick={onClose} aria-label={copy.close}><GameIcon name="x" size={19} /></button>
         </div>
       </div>
     );
   }
 
   const playerWeightPct = Math.min(100, player.weightGrams / player.capacityGrams * 100);
-  const selectedSource = selected ? inventory.containers.find(container => container.key === selected.containerKey) ?? null : null;
   const moveTarget = selected?.containerKey === 'player' ? external : player;
   const previewIsSelected = Boolean(preview && selected && preview.id === selected.id);
   const selectedUsable = Boolean(selected && isUsable(selected, selectedDefinition));
   const selectedSplittable = Boolean(selected?.stackable && selected.quantity > 1);
 
   return (
-    <div className="inventory-modal-layer" role="dialog" aria-modal="true" aria-label={copy.title}>
-      <section className="inventory-modal">
+    <div className="inventory-modal-layer" style={themeStyle} role="dialog" aria-modal="true" aria-label={copy.title} onMouseDown={closeFromBackdrop}>
+      <section className="inventory-modal" onMouseDown={event => event.stopPropagation()}>
         <header className="inventory-modal-header">
           <div className="inventory-modal-heading">
-            <span className="inventory-modal-icon"><GameIcon name="package" size={20} /></span>
+            <span className="inventory-modal-icon"><GameIcon name="package" size={22} /></span>
             <div>
               <span className="eyebrow">SOL DORADO</span>
               <h1>{copy.title}</h1>
@@ -386,20 +458,39 @@ export function InventoryView({ onStateChange, onClose }: Props) {
             </div>
           </div>
 
-          <button className="inventory-close" onClick={onClose} aria-label={copy.close} title={`${copy.close} · Esc`}>
-            <GameIcon name="x" size={18} />
-          </button>
+          <div className="inventory-header-actions">
+            <button
+              className={`inventory-customize-button ${customizeOpen ? 'inventory-customize-button-active' : ''}`}
+              onClick={() => { setCustomizeOpen(value => !value); setSplitOpen(false); }}
+              aria-expanded={customizeOpen}
+            >
+              <GameIcon name="sparkles" size={16} />
+              <span>{copy.customize}</span>
+            </button>
+            <button className="inventory-close" onClick={onClose} aria-label={copy.close} title={`${copy.close} · Esc`}>
+              <GameIcon name="x" size={19} />
+            </button>
+          </div>
+
+          {customizeOpen && (
+            <ThemeControls
+              copy={copy}
+              theme={theme}
+              onChange={setTheme}
+              onReset={() => setTheme(DEFAULT_THEME)}
+            />
+          )}
         </header>
 
-        {error && <div className="inventory-modal-error"><GameIcon name="alert-triangle" size={15} /> {error}</div>}
+        {error && <div className="inventory-modal-error"><GameIcon name="alert-triangle" size={16} /> {error}</div>}
 
         <div className="inventory-modal-body">
           <section className="inventory-player-column">
             <div className="inventory-toolbar">
               <label className="inventory-search">
-                <GameIcon name="search" size={15} />
+                <GameIcon name="search" size={16} />
                 <input value={query} onChange={event => setQuery(event.target.value)} placeholder={copy.searchPlaceholder} />
-                {query && <button type="button" onClick={() => setQuery('')} aria-label={copy.clear}><GameIcon name="x" size={13} /></button>}
+                {query && <button type="button" onClick={() => setQuery('')} aria-label={copy.clear}><GameIcon name="x" size={14} /></button>}
               </label>
 
               <div className="inventory-filterbar" aria-label="Item categories">
@@ -446,8 +537,8 @@ export function InventoryView({ onStateChange, onClose }: Props) {
             </div>
 
             <div className="inventory-grid-footer">
-              <span><GameIcon name="mouse-pointer" size={14} /> {copy.hoverHint}</span>
-              <span><GameIcon name="sparkles" size={14} /> {copy.quickUseHint}</span>
+              <span><GameIcon name="mouse-pointer" size={15} /> {copy.hoverHint}</span>
+              <span><GameIcon name="sparkles" size={15} /> {copy.quickUseHint}</span>
             </div>
           </section>
 
@@ -473,7 +564,7 @@ export function InventoryView({ onStateChange, onClose }: Props) {
               <div className="inventory-split-panel">
                 <div className="inventory-split-heading">
                   <div><span className="eyebrow">{copy.splitTitle}</span><b>{runtime(selected.displayName)}</b></div>
-                  <button onClick={() => setSplitOpen(false)} aria-label={copy.cancel}><GameIcon name="x" size={14} /></button>
+                  <button onClick={() => setSplitOpen(false)} aria-label={copy.cancel}><GameIcon name="x" size={15} /></button>
                 </div>
                 <p>{copy.splitHelp}</p>
                 <label>
@@ -512,9 +603,9 @@ export function InventoryView({ onStateChange, onClose }: Props) {
                     title={runtime(container.accessReason)}
                     onClick={() => { setExternalKey(container.key); setSelectedId(null); setHoveredId(null); setSplitOpen(false); }}
                   >
-                    <GameIcon name={containerIcon(container.key)} size={14} />
+                    <GameIcon name={containerIcon(container.key)} size={15} />
                     <span>{shortContainerLabel(container.key, locale)}</span>
-                    {!container.accessible && <GameIcon name="lock" size={11} />}
+                    {!container.accessible && <GameIcon name="lock" size={12} />}
                   </button>
                 ))}
               </div>
@@ -540,8 +631,74 @@ export function InventoryView({ onStateChange, onClose }: Props) {
             </section>
           </aside>
         </div>
+
+        <footer className="inventory-modal-footer">
+          <span>{copy.outsideClose}</span>
+          <span><kbd>I</kbd> {locale === 'bg' ? 'затваря' : 'closes'} · <kbd>Esc</kbd> {locale === 'bg' ? 'затваря' : 'closes'}</span>
+        </footer>
       </section>
     </div>
+  );
+}
+
+function ThemeControls({
+  copy,
+  theme,
+  onChange,
+  onReset
+}: {
+  copy: InventoryModalCopy;
+  theme: InventoryThemeSettings;
+  onChange: (next: InventoryThemeSettings) => void;
+  onReset: () => void;
+}) {
+  function patch(next: Partial<InventoryThemeSettings>) {
+    onChange({ ...theme, ...next });
+  }
+
+  return (
+    <div className="inventory-theme-panel">
+      <div className="inventory-theme-heading">
+        <div><span className="eyebrow">UI</span><b>{copy.appearance}</b></div>
+        <button onClick={onReset}>{copy.reset}</button>
+      </div>
+      <div className="inventory-theme-colors">
+        <label>
+          <span>{copy.accent}</span>
+          <input type="color" value={theme.accent} onChange={event => patch({ accent: event.target.value })} />
+        </label>
+        <label>
+          <span>{copy.surface}</span>
+          <input type="color" value={theme.surface} onChange={event => patch({ surface: event.target.value })} />
+        </label>
+      </div>
+      <ThemeRange label={copy.panelOpacity} value={Math.round(theme.panelOpacity * 100)} min={72} max={100} suffix="%" onChange={value => patch({ panelOpacity: value / 100 })} />
+      <ThemeRange label={copy.backdropOpacity} value={Math.round(theme.backdropOpacity * 100)} min={10} max={72} suffix="%" onChange={value => patch({ backdropOpacity: value / 100 })} />
+      <ThemeRange label={copy.itemSize} value={Math.round(theme.itemScale * 100)} min={90} max={125} suffix="%" onChange={value => patch({ itemScale: value / 100 })} />
+    </div>
+  );
+}
+
+function ThemeRange({
+  label,
+  value,
+  min,
+  max,
+  suffix,
+  onChange
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  suffix: string;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <label className="inventory-theme-range">
+      <span><b>{label}</b><em>{value}{suffix}</em></span>
+      <input type="range" min={min} max={max} value={value} onChange={event => onChange(Number(event.target.value))} />
+    </label>
   );
 }
 
@@ -570,6 +727,7 @@ function ContainerGrid({
   onQuickUse,
   quickSlots = false
 }: ContainerGridProps) {
+  const { runtime } = useI18n();
   const slots = Array.from({ length: container.slotCount }, (_, slotIndex) =>
     container.items.find(item => item.slotIndex === slotIndex) ?? null
   );
@@ -583,7 +741,7 @@ function ContainerGrid({
   return (
     <div className={container.key === 'player' ? 'inventory-slot-grid inventory-slot-grid-player' : 'inventory-slot-grid inventory-slot-grid-external'}>
       {slots.map((item, slotIndex) => {
-        const definition = item ? catalogByKey.get(item.itemKey) ?? null : null;
+        const definition = item ? resolveDefinition(catalogByKey, item.itemKey) : null;
         const filteredOut = Boolean(item && !isVisible(item, definition));
         const usable = Boolean(item && isUsable(item, definition));
         return (
@@ -611,7 +769,7 @@ function ContainerGrid({
             onDragEnd={() => onHover(null)}
             onDragOver={event => { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; }}
             onDrop={event => drop(event, slotIndex)}
-            aria-label={item?.displayName ?? `Slot ${slotIndex + 1}`}
+            aria-label={item ? runtime(item.displayName) : `Slot ${slotIndex + 1}`}
           >
             <span className="inventory-slot-index">{String(slotIndex + 1).padStart(2, '0')}</span>
             {item && <SlotContents item={item} definition={definition} />}
@@ -624,13 +782,17 @@ function ContainerGrid({
 }
 
 function SlotContents({ item, definition }: { item: InventoryItem; definition: ItemDefinition | null }) {
-  const { runtime } = useI18n();
+  const { locale, runtime } = useI18n();
   const condition = readCondition(item.metadata);
+  const usable = isUsable(item, definition);
   return (
     <>
       <span className="inventory-slot-name">{runtime(item.displayName)}</span>
       <ItemThumbnail item={item} definition={definition} />
-      {item.quantity > 1 && <b className="inventory-slot-quantity">×{item.quantity}</b>}
+      <span className="inventory-slot-bottom">
+        {usable && definition ? <span className="inventory-slot-use-hint">{useLabel(definition, locale)}</span> : <span />}
+        {item.quantity > 1 && <b className="inventory-slot-quantity">×{item.quantity}</b>}
+      </span>
       {definition && definition.legality !== 'legal' && <span className={`inventory-legality-dot inventory-legality-dot-${definition.legality}`} />}
       {condition !== null && <span className="inventory-slot-condition"><i style={{ width: `${condition}%` }} /></span>}
     </>
@@ -672,7 +834,7 @@ function ItemPreview({
   if (!item) {
     return (
       <section className="inventory-preview inventory-preview-empty">
-        <GameIcon name="info" size={20} />
+        <GameIcon name="info" size={24} />
         <b>{copy.hoverHint}</b>
         <span>{copy.clickHint}</span>
       </section>
@@ -694,6 +856,13 @@ function ItemPreview({
         </div>
       </div>
 
+      {canUse && definition && (
+        <button className="inventory-primary-action" disabled={busy} onClick={onUse}>
+          <GameIcon name="sparkles" size={17} />
+          <span><b>{useLabel(definition, locale)}</b><small>{useEffectSummary(definition, copy)}</small></span>
+        </button>
+      )}
+
       <div className="inventory-preview-meta">
         <Meta label={copy.quantity} value={String(item.quantity)} />
         <Meta label={copy.stack} value={definition ? `${item.quantity} / ${definition.maxStack}` : item.stackable ? 'Stackable' : 'Single'} />
@@ -714,32 +883,45 @@ function ItemPreview({
       {!definition?.useEffects || Object.keys(definition.useEffects).length === 0 ? <p className="inventory-passive-note">{copy.noDirectUse}</p> : null}
 
       <div className="inventory-preview-location">
-        <GameIcon name="map-pin" size={13} />
+        <GameIcon name="map-pin" size={14} />
         <span>{source ? runtime(source.label) : item.containerKey}</span>
       </div>
 
       {selected ? (
         <div className="inventory-preview-actions">
-          {canUse && <button className="primary-button" disabled={busy} onClick={onUse}>{useLabel(definition!, locale)}</button>}
           {canSplit && <button className="secondary-button" disabled={busy} onClick={onSplit}>{copy.split}</button>}
           {moveTarget?.accessible && <button className="secondary-button" disabled={busy} onClick={onMove}>{copy.move} · {runtime(moveTarget.label)}</button>}
           <button className="inventory-clear-selection" disabled={busy} onClick={onClear}>{copy.clear}</button>
         </div>
       ) : (
-        <div className="inventory-hover-action-hint"><GameIcon name="mouse-pointer" size={13} /> {copy.clickHint}</div>
+        <div className="inventory-hover-action-hint"><GameIcon name="mouse-pointer" size={14} /> {copy.clickHint}</div>
       )}
     </section>
   );
 }
 
 function ItemThumbnail({ item, definition, large = false }: { item: InventoryItem; definition: ItemDefinition | null; large?: boolean }) {
-  const [failed, setFailed] = useState(false);
-  const src = definition?.image.localPath;
-  useEffect(() => setFailed(false), [src]);
+  const baseSrc = definition?.image.localPath;
+  const src = baseSrc ? `${baseSrc}?v=${ITEM_ASSET_REV}` : null;
+  const [status, setStatus] = useState<'loading' | 'loaded' | 'failed'>(src ? 'loading' : 'failed');
+
+  useEffect(() => setStatus(src ? 'loading' : 'failed'), [src]);
+
   return (
     <span className={large ? 'inventory-item-thumb inventory-item-thumb-large' : 'inventory-item-thumb'}>
-      <span className="inventory-item-fallback">{item.symbol}</span>
-      {src && !failed && <img src={src} alt="" draggable={false} onError={() => setFailed(true)} />}
+      {status !== 'loaded' && <span className="inventory-item-fallback">{item.symbol}</span>}
+      {src && status !== 'failed' && (
+        <img
+          className={status === 'loaded' ? 'inventory-item-image-loaded' : ''}
+          src={src}
+          alt=""
+          draggable={false}
+          loading="lazy"
+          decoding="async"
+          onLoad={() => setStatus('loaded')}
+          onError={() => setStatus('failed')}
+        />
+      )}
     </span>
   );
 }
@@ -777,6 +959,10 @@ function EffectList({ definition, copy }: { definition: ItemDefinition; copy: In
   );
 }
 
+function resolveDefinition(catalogByKey: Map<string, ItemDefinition>, itemKey: string): ItemDefinition | null {
+  return catalogByKey.get(itemKey) ?? catalogByKey.get(LEGACY_ITEM_ALIASES[itemKey] ?? '') ?? null;
+}
+
 function isUsable(item: InventoryItem, definition: ItemDefinition | null) {
   return item.containerKey === 'player' && Boolean(definition && Object.keys(definition.useEffects).length > 0);
 }
@@ -791,11 +977,26 @@ function useLabel(definition: ItemDefinition, locale: 'bg' | 'en') {
   if (locale === 'bg') {
     if (definition.category === 'drink') return 'Изпий';
     if (definition.category === 'food') return 'Изяж';
+    if (definition.category === 'medical') return 'Използвай';
     return 'Използвай';
   }
   if (definition.category === 'drink') return 'Drink';
   if (definition.category === 'food') return 'Eat';
   return 'Use';
+}
+
+function useEffectSummary(definition: ItemDefinition, copy: InventoryModalCopy) {
+  const labels: Partial<Record<keyof ItemDefinition['useEffects'], string>> = {
+    health: copy.health,
+    energy: copy.energy,
+    satiety: copy.satiety,
+    hydration: copy.hydration,
+    stress: copy.stress
+  };
+  const first = (Object.entries(definition.useEffects) as Array<[keyof ItemDefinition['useEffects'], number]>)[0];
+  if (!first) return '';
+  const [key, value] = first;
+  return `${labels[key] ?? key} ${value > 0 ? '+' : ''}${value}`;
 }
 
 function containerIcon(key: InventoryContainerKey) {
@@ -822,6 +1023,38 @@ function formatMoney(cents: number) {
 
 function titleCase(value: string) {
   return value.replace(/[_-]+/g, ' ').replace(/\b\w/g, letter => letter.toUpperCase());
+}
+
+function loadTheme(): InventoryThemeSettings {
+  try {
+    const stored = JSON.parse(localStorage.getItem(THEME_STORAGE_KEY) ?? 'null') as Partial<InventoryThemeSettings> | null;
+    if (!stored) return DEFAULT_THEME;
+    return {
+      accent: isHexColor(stored.accent) ? stored.accent : DEFAULT_THEME.accent,
+      surface: isHexColor(stored.surface) ? stored.surface : DEFAULT_THEME.surface,
+      panelOpacity: clampNumber(stored.panelOpacity, 0.72, 1, DEFAULT_THEME.panelOpacity),
+      backdropOpacity: clampNumber(stored.backdropOpacity, 0.1, 0.72, DEFAULT_THEME.backdropOpacity),
+      itemScale: clampNumber(stored.itemScale, 0.9, 1.25, DEFAULT_THEME.itemScale)
+    };
+  } catch {
+    return DEFAULT_THEME;
+  }
+}
+
+function isHexColor(value: unknown): value is string {
+  return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value);
+}
+
+function clampNumber(value: unknown, min: number, max: number, fallback: number) {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return fallback;
+  return Math.min(max, Math.max(min, value));
+}
+
+function hexToRgbTriplet(hex: string) {
+  const normalized = hex.replace('#', '');
+  const value = Number.parseInt(normalized, 16);
+  if (!Number.isFinite(value)) return '11 23 28';
+  return `${(value >> 16) & 255} ${(value >> 8) & 255} ${value & 255}`;
 }
 
 function humanizeError(reason: unknown, locale: 'bg' | 'en') {

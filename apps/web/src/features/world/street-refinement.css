@@ -1,0 +1,320 @@
+/* Street refinement: responsive routing, vehicle blockers, readable exits and coherent top-down traffic. */
+
+.world-screen .street-scene { cursor: crosshair; }
+.world-screen .street-population-layer { pointer-events: none; }
+
+/* Pedestrians are ambient world population, never navigation blockers. */
+.world-screen .street-npc-actor {
+  width: clamp(25px, 2vw, 31px);
+  pointer-events: none !important;
+}
+
+.world-screen .street-collision-actor {
+  pointer-events: auto;
+  cursor: not-allowed;
+}
+
+.world-screen .street-npc-actor .world-character,
+.world-screen .street-player .street-player-avatar { aspect-ratio: 40 / 72; }
+
+.world-character {
+  width: 30px;
+  height: auto;
+  aspect-ratio: 40 / 72;
+}
+
+.character-stage .world-character-profile { aspect-ratio: 40 / 72; }
+
+.world-screen .street-npc-actor .world-character-svg,
+.world-screen .street-player .world-character-svg {
+  filter: drop-shadow(0 4px 3px rgb(0 0 0 / .42));
+}
+
+/* Kenney Racing Pack sprite renderer. The source asset points north; rotate it into the lane. */
+.world-screen .street-vehicle-actor {
+  min-width: 64px;
+  max-width: 122px;
+}
+
+.world-vehicle-sprite {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 131 / 71;
+  pointer-events: none;
+}
+
+.world-vehicle-sprite-image {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 54.2%;
+  max-width: none;
+  height: auto;
+  transform-origin: center;
+  image-rendering: auto;
+  filter: hue-rotate(var(--vehicle-hue)) saturate(.82) brightness(.86) contrast(1.08) drop-shadow(0 6px 5px rgb(0 0 0 / .38));
+}
+
+.world-vehicle-east .world-vehicle-sprite-image {
+  transform: translate(-50%, -50%) rotate(90deg) scale(var(--vehicle-scale-y), var(--vehicle-scale-x));
+}
+
+.world-vehicle-west .world-vehicle-sprite-image {
+  transform: translate(-50%, -50%) rotate(-90deg) scale(var(--vehicle-scale-y), var(--vehicle-scale-x));
+}
+
+.world-vehicle-roof-badge,
+.world-vehicle-service-label,
+.world-vehicle-lightbar {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.world-vehicle-roof-badge {
+  display: grid;
+  min-width: 18px;
+  height: 9px;
+  place-items: center;
+  border: 1px solid rgb(8 18 21 / .72);
+  border-radius: 3px;
+  background: #e6bc56;
+  color: #172327;
+  font-size: 4px;
+  font-weight: 950;
+  letter-spacing: .04em;
+  box-shadow: 0 2px 3px rgb(0 0 0 / .26);
+}
+
+.world-vehicle-roof-badge-ems {
+  min-width: 11px;
+  color: #b74444;
+  background: #e8eeee;
+  font-size: 8px;
+}
+
+.world-vehicle-lightbar {
+  display: flex;
+  width: 22px;
+  height: 6px;
+  overflow: hidden;
+  border: 1px solid #172327;
+  border-radius: 3px;
+  background: #172327;
+}
+.world-vehicle-lightbar i { flex: 1; }
+.world-vehicle-lightbar i:first-child { background: #4f90ca; }
+.world-vehicle-lightbar i:last-child { background: #c74d4d; }
+
+.world-vehicle-service-label {
+  top: 67%;
+  max-width: 52px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: rgb(6 17 20 / .76);
+  padding: 2px 4px;
+  color: #efdaa4;
+  font-size: 4px;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.world-screen .street-vehicle-actor-parked {
+  transform: translate(-50%, -50%) rotate(90deg) scale(.88);
+  opacity: .92;
+}
+
+.world-screen .street-vehicle-actor-moving { will-change: left, opacity; }
+
+@keyframes world-vehicle-traffic {
+  0% { left: var(--vehicle-x); opacity: 0; }
+  3% { opacity: .98; }
+  96% { opacity: .98; }
+  100% { left: var(--vehicle-to-x); opacity: 0; }
+}
+
+.world-screen .street-move-cursor {
+  transition: none !important;
+  will-change: left, top;
+}
+
+.world-screen .street-move-cursor > span {
+  box-shadow: 0 4px 14px rgb(0 0 0 / .34), 0 0 0 1px rgb(255 255 255 / .03) inset;
+}
+.world-screen .street-scene-route-blocked { cursor: not-allowed; }
+
+/* Exit affordances sit on the road continuation rather than floating as detached UI cards. */
+.world-screen .street-object-exit {
+  top: 55% !important;
+  z-index: 24;
+  width: min(218px, 22vw);
+  min-width: 176px;
+  height: 86px;
+  transform: translateY(-50%) !important;
+}
+
+.world-screen .street-object-exit:hover,
+.world-screen .street-object-exit:focus-visible,
+.world-screen .street-object-exit-selected {
+  transform: translateY(-50%) !important;
+}
+
+.world-screen .street-object-exit-left { left: 5px !important; }
+.world-screen .street-object-exit-right { right: 5px; left: auto !important; }
+
+.world-screen .street-object-exit .street-object-marker {
+  position: absolute;
+  top: 50%;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  transform: translateY(-50%);
+}
+
+.world-screen .street-object-exit-left .street-object-marker {
+  left: 0;
+  justify-content: flex-start;
+}
+
+.world-screen .street-object-exit-right .street-object-marker {
+  right: 0;
+  left: auto;
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+}
+
+.world-screen .street-object-exit .street-object-icon {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border: 1px solid rgb(232 194 117 / .5);
+  border-radius: 50%;
+  background: rgb(9 24 27 / .88);
+  color: #f0d28e;
+  box-shadow: 0 6px 18px rgb(0 0 0 / .38), 0 0 0 4px rgb(219 183 104 / .06);
+}
+
+.world-screen .street-object-exit .street-object-anchor-dot { display: none; }
+
+.world-screen .street-object-exit .street-object-label {
+  position: static;
+  display: grid;
+  min-width: 0;
+  max-width: none;
+  flex: 1;
+  gap: 2px;
+  transform: none !important;
+  opacity: 1 !important;
+  border: 0;
+  border-top: 1px solid rgb(232 194 117 / .22);
+  border-bottom: 1px solid rgb(232 194 117 / .22);
+  border-radius: 0;
+  background: linear-gradient(90deg, rgb(6 19 23 / .82), rgb(6 19 23 / .28));
+  padding: 8px 10px;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.world-screen .street-object-exit-right .street-object-label {
+  text-align: right;
+  background: linear-gradient(270deg, rgb(6 19 23 / .82), rgb(6 19 23 / .28));
+}
+
+.world-screen .street-object-exit .street-object-label b {
+  color: #f3e4be;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .015em;
+  text-shadow: 0 2px 8px rgb(0 0 0 / .72);
+}
+
+.world-screen .street-object-exit .street-object-label small {
+  color: #a9b9bc;
+  font-size: 7px;
+  line-height: 1.25;
+  text-shadow: 0 2px 7px rgb(0 0 0 / .75);
+}
+
+.world-screen .street-object-exit:hover .street-object-label,
+.world-screen .street-object-exit:focus-visible .street-object-label,
+.world-screen .street-object-exit-selected .street-object-label {
+  border-color: rgb(242 205 127 / .68);
+  background: linear-gradient(90deg, rgb(41 37 27 / .92), rgb(15 27 27 / .34));
+}
+
+.world-screen .street-object-exit-right:hover .street-object-label,
+.world-screen .street-object-exit-right:focus-visible .street-object-label,
+.world-screen .street-object-exit-right.street-object-selected .street-object-label {
+  background: linear-gradient(270deg, rgb(41 37 27 / .92), rgb(15 27 27 / .34));
+}
+
+.world-screen .street-object-exit-left .street-object-icon > svg { transform: rotate(180deg); }
+.world-screen .street-object-exit-right .street-object-icon > svg { transform: none; }
+
+/* Global map is a primary world control, not a tiny decorative pill. */
+.world-map-launch {
+  top: 13px;
+  min-height: 42px;
+  gap: 9px;
+  border-color: rgb(226 184 99 / .42);
+  border-radius: 13px;
+  background: linear-gradient(180deg, rgb(21 40 43 / .96), rgb(7 21 25 / .94));
+  padding: 0 15px 0 11px;
+  color: #f0d390;
+  font-size: 9px;
+  letter-spacing: .1em;
+  box-shadow: 0 10px 28px rgb(0 0 0 / .38), inset 0 1px rgb(255 255 255 / .07);
+  backdrop-filter: blur(14px);
+}
+
+.world-map-launch > svg {
+  width: 21px;
+  height: 21px;
+  padding: 3px;
+  overflow: visible;
+  border: 1px solid rgb(231 193 116 / .24);
+  border-radius: 7px;
+  background: rgb(231 193 116 / .08);
+}
+
+.world-map-launch:hover:not(:disabled),
+.world-map-launch:focus-visible {
+  border-color: rgb(238 200 123 / .72);
+  background: linear-gradient(180deg, rgb(39 49 42 / .98), rgb(20 30 27 / .96));
+  color: #ffe2a2;
+  transform: translateX(-50%) translateY(-1px);
+}
+
+.world-map-launch:focus-visible {
+  outline: 2px solid rgb(235 197 119 / .35);
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .world-screen .street-npc-actor { width: 25px; }
+  .world-screen .street-vehicle-actor { min-width: 58px; max-width: 92px; }
+  .world-screen .street-object-exit {
+    width: min(152px, 43vw);
+    min-width: 128px;
+    height: 68px;
+  }
+  .world-screen .street-object-exit-left { left: 3px !important; }
+  .world-screen .street-object-exit-right { right: 3px; }
+  .world-screen .street-object-exit .street-object-icon { width: 34px; height: 34px; flex-basis: 34px; }
+  .world-screen .street-object-exit .street-object-label { padding: 6px 7px; }
+  .world-screen .street-object-exit .street-object-label b { font-size: 8px; }
+  .world-screen .street-object-exit .street-object-label small { display: none; }
+  .world-map-launch { top: 8px; min-height: 40px; padding-inline: 10px 13px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-screen .street-vehicle-actor-moving { animation: none !important; }
+}

@@ -2,8 +2,10 @@ import type { Pool, PoolClient } from 'pg';
 import {
   WorldMapStateSchema,
   WorldMapTravelResultSchema,
+  resolveWorldConnectionRoute,
   type WorldMapState,
-  type WorldMapTravelResult
+  type WorldMapTravelResult,
+  type WorldStreetConnection
 } from '@sol-dorado/contracts/world-map';
 import { getStreetSpawnPosition } from '@sol-dorado/contracts/world-position';
 
@@ -105,24 +107,23 @@ export async function travelFromWorldMap(db: Pool, playerId: string, destination
     if (!destination) throw new WorldMapTravelError('world_destination_not_found', 404);
     if (!destination.playable) throw new WorldMapTravelError('world_destination_not_playable', 409);
 
-    const connectionResult = await client.query({
-      text: `
-        SELECT distance_meters
-        FROM world_street_connections
-        WHERE 'walk' = ANY(modes)
-          AND (
-            (from_segment_id = $1 AND to_segment_id = $2)
-            OR (bidirectional = true AND from_segment_id = $2 AND to_segment_id = $1)
-          )
-        ORDER BY distance_meters
-        LIMIT 1
-      `,
-      values: [currentSegmentId, destinationSegmentId]
-    });
-    const connection = connectionResult.rows[0];
-    if (!connection) throw new WorldMapTravelError('world_map_route_unavailable', 409);
+    const connectionResult = await client.query(`
+      SELECT from_segment_id,to_segment_id,distance_meters,bidirectional,modes
+      FROM world_street_connections
+      WHERE 'walk' = ANY(modes)
+      ORDER BY from_segment_id,to_segment_id
+    `);
+    const connections: WorldStreetConnection[] = connectionResult.rows.map(row => ({
+      fromSegmentId: String(row.from_segment_id),
+      toSegmentId: String(row.to_segment_id),
+      distanceMeters: Number(row.distance_meters),
+      bidirectional: Boolean(row.bidirectional),
+      modes: row.modes
+    }));
+    const route = resolveWorldConnectionRoute(connections, currentSegmentId, destinationSegmentId, 'walk');
+    if (!route) throw new WorldMapTravelError('world_map_route_unavailable', 409);
 
-    const distanceMeters = Number(connection.distance_meters);
+    const distanceMeters = route.distanceMeters;
     const energyCost = Math.max(1, Math.ceil(distanceMeters / 90));
     const hydrationCost = Math.max(1, Math.ceil(distanceMeters / 180));
     const stateResult = await client.query('SELECT energy,hydration FROM player_state WHERE player_id = $1 FOR UPDATE', [playerId]);

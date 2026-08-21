@@ -8,10 +8,12 @@
   "exports": {
     ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
     "./world-position": { "types": "./dist/world-position.d.ts", "import": "./dist/world-position.js" },
+    "./street-routing": { "types": "./dist/street-routing.d.ts", "import": "./dist/street-routing.js" },
     "./world-map": { "types": "./dist/world-map.d.ts", "import": "./dist/world-map.js" },
     "./navigation": { "types": "./dist/navigation.d.ts", "import": "./dist/navigation.js" },
     "./items": { "types": "./dist/items.d.ts", "import": "./dist/items.js" },
-    "./inventory": { "types": "./dist/inventory.d.ts", "import": "./dist/inventory.js" }
+    "./inventory": { "types": "./dist/inventory.d.ts", "import": "./dist/inventory.js" },
+    "./phone": { "types": "./dist/phone.d.ts", "import": "./dist/phone.js" }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

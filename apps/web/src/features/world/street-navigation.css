@@ -105,8 +105,15 @@
   stroke-width: 7;
   pointer-events: stroke;
 }
+.world-map-level-district .world-map-segment-route .world-map-segment-focus {
+  stroke: rgb(105 196 210 / .78);
+  stroke-width: 1.05;
+  stroke-dasharray: 1.8 .9;
+  filter: drop-shadow(0 0 2px rgb(84 189 210 / .22));
+}
 .world-map-level-district .world-map-segment:hover .world-map-segment-focus,
-.world-map-level-district .world-map-segment:focus-visible .world-map-segment-focus {
+.world-map-level-district .world-map-segment:focus-visible .world-map-segment-focus,
+.world-map-level-district .world-map-segment-route.world-map-selected .world-map-segment-focus {
   stroke: #e2bd6c;
   stroke-width: 1.35;
 }

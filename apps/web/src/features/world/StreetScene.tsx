@@ -1,8 +1,8 @@
-import { useState, type CSSProperties, type MouseEvent, type PointerEvent } from 'react';
+import { useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent } from 'react';
 import type { CharacterRecipe, StreetState, WorldActionId } from '@sol-dorado/contracts';
+import { getResponsiveStreetRoute } from '@sol-dorado/contracts/street-routing';
 import {
   getStreetActionAnchor,
-  getStreetRoute,
   isStreetActionWithinReach,
   streetDistance,
   type StreetMoveResult,
@@ -37,6 +37,7 @@ export function StreetScene({ street, position, moving, activeRoute, characterRe
 }) {
   const { t } = useI18n();
   const [preview, setPreview] = useState<MovementPreview | null>(null);
+  const previewFrame = useRef<number | null>(null);
   const scene = STREET_SCENES[street.currentSegmentId];
   const visibleObjects = scene.objects.filter(object => street.visibleObjectIds.includes(object.id));
   const selected = visibleObjects.find(object => object.id === selectedObjectId) ?? null;
@@ -54,7 +55,7 @@ export function StreetScene({ street, position, moving, activeRoute, characterRe
   }
 
   function isUiTarget(target: EventTarget | null) {
-    return (target as HTMLElement | null)?.closest('button, .street-interaction-panel, .street-scene-meta, .street-danger-chip, .street-route');
+    return (target as HTMLElement | null)?.closest('button, .street-interaction-panel, .street-scene-meta, .street-danger-chip, .street-route, .street-collision-actor');
   }
 
   function updateMovementPreview(event: PointerEvent<HTMLDivElement>) {
@@ -62,19 +63,30 @@ export function StreetScene({ street, position, moving, activeRoute, characterRe
       if (!moving) setPreview(null);
       return;
     }
+
     const requestedPosition = eventPosition(event);
-    const route = getStreetRoute(street.currentSegmentId, position, requestedPosition);
-    if (!route) {
-      setPreview({ requestedPosition, position: requestedPosition, route: [], blocked: true });
-      return;
-    }
-    setPreview({ requestedPosition, position: route.position, route: route.route, blocked: false });
+    if (previewFrame.current !== null) window.cancelAnimationFrame(previewFrame.current);
+    previewFrame.current = window.requestAnimationFrame(() => {
+      previewFrame.current = null;
+      const route = getResponsiveStreetRoute(street.currentSegmentId, position, requestedPosition);
+      if (!route) {
+        setPreview({ requestedPosition, position: requestedPosition, route: [], blocked: true });
+        return;
+      }
+      setPreview({ requestedPosition, position: route.position, route: route.route, blocked: false });
+    });
+  }
+
+  function clearPreview() {
+    if (previewFrame.current !== null) window.cancelAnimationFrame(previewFrame.current);
+    previewFrame.current = null;
+    if (!moving) setPreview(null);
   }
 
   function moveFromScene(event: MouseEvent<HTMLDivElement>) {
-    if (moving || isUiTarget(event.target)) return;
+    if (moving || isUiTarget(event.target) || event.button !== 0) return;
     const requestedPosition = eventPosition(event);
-    const route = getStreetRoute(street.currentSegmentId, position, requestedPosition);
+    const route = getResponsiveStreetRoute(street.currentSegmentId, position, requestedPosition);
     if (!route) {
       setPreview({ requestedPosition, position: requestedPosition, route: [], blocked: true });
       return;
@@ -92,7 +104,7 @@ export function StreetScene({ street, position, moving, activeRoute, characterRe
   }
 
   const routeToRender = activeRoute ?? (!moving && preview && !preview.blocked ? preview.route : null);
-  const destination = activeRoute?.[activeRoute.length - 1] ?? preview?.position ?? null;
+  const destination = activeRoute?.[activeRoute.length - 1] ?? preview?.requestedPosition ?? null;
 
   return (
     <div className="street-scene-shell">
@@ -101,7 +113,7 @@ export function StreetScene({ street, position, moving, activeRoute, characterRe
         aria-label={t('world.sceneLabel', { street: t(scene.nameKey) })}
         onClick={moveFromScene}
         onPointerMove={updateMovementPreview}
-        onPointerLeave={() => !moving && setPreview(null)}
+        onPointerLeave={clearPreview}
       >
         <StreetBackdrop theme={scene.theme} alerted={street.flags.cornerStoreAlerted} />
         <StreetPopulation segmentId={street.currentSegmentId} visibleObjectIds={street.visibleObjectIds} />

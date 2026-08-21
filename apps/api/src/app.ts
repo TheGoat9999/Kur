@@ -5,11 +5,13 @@ import { requireSession } from './middleware/session.js';
 import { healthRoutes } from './routes/health.js';
 import { sessionRoutes } from './routes/session.js';
 import { bootstrapRoutes } from './routes/bootstrap.js';
+import { characterRoutes } from './routes/character.js';
 import { worldActionRoutes } from './routes/world-actions.js';
 import { worldMapRoutes } from './routes/world-map.js';
 import { inventoryRoutes } from './routes/inventory.js';
 import { financeRoutes } from './routes/finance.js';
 import { itemRoutes } from './routes/items.js';
+import { phoneRoutes } from './routes/phone.js';
 
 export function createApp(services: AppServices) {
   const app = express();
@@ -20,11 +22,13 @@ export function createApp(services: AppServices) {
   app.use(sessionRoutes(services));
   app.use(requireSession(services.redis));
   app.use(bootstrapRoutes(services));
+  app.use(characterRoutes(services));
   app.use(worldMapRoutes(services));
   app.use(worldActionRoutes(services));
   app.use(inventoryRoutes(services));
   app.use(itemRoutes());
   app.use(financeRoutes(services));
+  app.use(phoneRoutes(services));
   app.use((error: unknown, _request: Request, response: Response, _next: NextFunction) => {
     console.error(error);
     response.status(500).json({ error: 'internal_server_error' });

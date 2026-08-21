@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { BootstrapState, StreetObjectId, StreetState, WorldActionId, WorldNoticeId } from '@sol-dorado/contracts';
 import type { WorldMapState } from '@sol-dorado/contracts/world-map';
-import { getStreetRoute, getStreetSpawnPosition, streetDistance, type StreetPosition } from '@sol-dorado/contracts/world-position';
+import { getResponsiveStreetRoute } from '@sol-dorado/contracts/street-routing';
+import { getStreetSpawnPosition, streetDistance, type StreetPosition } from '@sol-dorado/contracts/world-position';
 import { GameIcon } from '../../components/GameIcon';
 import { useNotifications, type NotificationTone } from '../../components/Notifications';
 import { useI18n, type TranslationKey } from '../../i18n';
 import { ApiCommandError, getBootstrap, getStreetPosition, getStreetState, getWorldMap, moveStreetPlayer, runWorldAction, travelWorldMap } from '../../lib/api';
 import { StreetScene } from './StreetScene';
+import { WorldMapIcon } from './WorldMapIcon';
 import { WorldMapView } from './WorldMapView';
 import { worldMapCopy } from './world-map-copy';
 
@@ -110,16 +112,32 @@ export function WorldView({ state, onStateChange }: Props) {
   async function move(target: StreetPosition) {
     if (moving || !street || !position) return;
     const previous = position;
-    const planned = getStreetRoute(street.currentSegmentId, position, target);
+    const planned = getResponsiveStreetRoute(street.currentSegmentId, position, target);
     if (!planned) {
       push({ tone: 'error', title: t('common.actionBlocked'), message: worldError('world_position_blocked', t) });
       return;
     }
+
     setMoving(true);
     setActiveRoute(planned.route);
     try {
+      const animation = await animateStreetRoute(position, planned.route, next => setPosition(next));
+      if (animation.collided) {
+        if (streetDistance(previous, animation.position) > 0.35) {
+          const saved = await moveStreetPlayer(animation.position);
+          setPosition(saved.position);
+        } else {
+          setPosition(previous);
+        }
+        push({
+          tone: 'info',
+          title: t('common.actionBlocked'),
+          message: locale === 'bg' ? 'Пътят ти е блокиран от човек или автомобил.' : 'Your path is blocked by a pedestrian or vehicle.'
+        });
+        return;
+      }
+
       const result = await moveStreetPlayer(target);
-      await animateStreetRoute(position, planned.route, next => setPosition(next));
       setPosition(result.position);
     } catch (reason) {
       setPosition(previous);
@@ -162,26 +180,49 @@ export function WorldView({ state, onStateChange }: Props) {
 
   return <section className="world-screen">
     <StreetScene street={street} position={position} moving={moving} activeRoute={activeRoute} characterRecipe={state.character?.recipe} selectedObjectId={selectedObjectId} busy={busy} onMove={target => void move(target)} onSelectObject={objectId => setSelectedObjectId(objectId as StreetObjectId)} onAction={actionId => void act(actionId)} onCloseSelection={() => setSelectedObjectId(null)} />
-    <button type="button" className="world-map-launch" disabled={mapBusy} onClick={() => void openMap()}><GameIcon name="world" size={14} />{mapCopy.openMap}</button>
+    <button type="button" className="world-map-launch" disabled={mapBusy} onClick={() => void openMap()}><WorldMapIcon size={19} />{mapCopy.openMap}</button>
   </section>;
 }
 
 async function animateStreetRoute(start: StreetPosition, route: StreetPosition[], apply: (position: StreetPosition) => void) {
   let from = start;
+  let lastSafe = start;
   for (const destination of route) {
     const distance = streetDistance(from, destination);
     if (distance < 0.25) { from = destination; continue; }
-    const steps = Math.max(1, Math.ceil(distance / 2.4));
+    const steps = Math.max(1, Math.ceil(distance / 1.65));
     for (let step = 1; step <= steps; step += 1) {
       const progress = step / steps;
-      apply({
+      const next = {
         x: from.x + (destination.x - from.x) * progress,
         y: from.y + (destination.y - from.y) * progress
-      });
-      await delay(28);
+      };
+      if (hasStreetActorCollision(next)) return { position: lastSafe, collided: true };
+      apply(next);
+      lastSafe = next;
+      await delay(22);
     }
     from = destination;
   }
+  return { position: lastSafe, collided: false };
+}
+
+function hasStreetActorCollision(position: StreetPosition) {
+  const scene = document.querySelector<HTMLElement>('.street-scene');
+  if (!scene) return false;
+  const sceneRect = scene.getBoundingClientRect();
+  const px = sceneRect.left + (position.x / 100) * sceneRect.width;
+  const py = sceneRect.top + (position.y / 100) * sceneRect.height;
+  const playerRadius = 9;
+
+  for (const actor of scene.querySelectorAll<HTMLElement>('.street-collision-actor')) {
+    const rect = actor.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) continue;
+    const nearestX = Math.max(rect.left, Math.min(px, rect.right));
+    const nearestY = Math.max(rect.top, Math.min(py, rect.bottom));
+    if (Math.hypot(px - nearestX, py - nearestY) <= playerRadius) return true;
+  }
+  return false;
 }
 
 function delay(ms: number) { return new Promise<void>(resolve => window.setTimeout(resolve, ms)); }

@@ -1,14 +1,18 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, MouseEvent, PointerEvent } from 'react';
 import type { StreetObjectId, StreetSegmentId } from '@sol-dorado/contracts';
-import { WorldCharacter, visualFromSeed } from '../../components/WorldCharacter';
+import { WorldCharacter, visualFromSeed, type WorldCharacterDirection } from '../../components/WorldCharacter';
 import { WorldVehicle } from '../../components/WorldVehicle';
-import { STREET_POPULATION } from './street-population';
+import { STREET_POPULATION, type StreetNpcSlot } from './street-population';
 
 export function StreetPopulation({ segmentId, visibleObjectIds }: {
   segmentId: StreetSegmentId;
   visibleObjectIds: StreetObjectId[];
 }) {
   const definition = STREET_POPULATION[segmentId];
+
+  function stopVehicleEvent(event: MouseEvent<HTMLElement> | PointerEvent<HTMLElement>) {
+    event.stopPropagation();
+  }
 
   return (
     <div className="street-population-layer" aria-hidden="true">
@@ -27,7 +31,14 @@ export function StreetPopulation({ segmentId, visibleObjectIds }: {
           ...(vehicle.serviceLabel ? { serviceLabel: vehicle.serviceLabel } : {})
         };
         return (
-          <span key={vehicle.id} className={`street-vehicle-actor ${moving ? 'street-vehicle-actor-moving' : ''}`} style={style}>
+          <span
+            key={vehicle.id}
+            className={`street-vehicle-actor street-collision-actor ${moving ? 'street-vehicle-actor-moving' : ''} ${vehicle.parked ? 'street-vehicle-actor-parked' : ''}`}
+            style={style}
+            data-actor-kind="vehicle"
+            onPointerDown={stopVehicleEvent}
+            onClick={stopVehicleEvent}
+          >
             <WorldVehicle type={vehicle.type} color={vehicle.color} heading={vehicle.heading} {...serviceProps} />
           </span>
         );
@@ -46,11 +57,25 @@ export function StreetPopulation({ segmentId, visibleObjectIds }: {
             '--npc-delay': `${npc.delaySeconds ?? 0}s`
           } as CSSProperties;
           return (
-            <span key={npc.id} className={`street-npc-actor ${moving ? 'street-npc-actor-moving' : ''} ${npc.namedObjectId ? 'street-npc-actor-named' : ''}`} style={style}>
-              <WorldCharacter visual={npc.visual ?? visualFromSeed(`${segmentId}:${npc.id}`)} direction={npc.direction ?? 'south'} moving={moving} />
+            <span
+              key={npc.id}
+              className={`street-npc-actor ${moving ? 'street-npc-actor-moving' : ''} ${npc.namedObjectId ? 'street-npc-actor-named' : ''}`}
+              style={style}
+              data-actor-kind="npc"
+            >
+              <WorldCharacter visual={npc.visual ?? visualFromSeed(`${segmentId}:${npc.id}`)} direction={npcDirection(npc)} moving={moving} />
             </span>
           );
         })}
     </div>
   );
+}
+
+function npcDirection(npc: StreetNpcSlot): WorldCharacterDirection {
+  if (npc.direction) return npc.direction;
+  const dx = (npc.toX ?? npc.x) - npc.x;
+  const dy = (npc.toY ?? npc.y) - npc.y;
+  if (Math.abs(dx) >= Math.abs(dy) && Math.abs(dx) > 0.01) return dx > 0 ? 'east' : 'west';
+  if (Math.abs(dy) > 0.01) return dy > 0 ? 'south' : 'north';
+  return 'south';
 }

@@ -22,14 +22,17 @@
 .world-screen .street-npc-actor { position: absolute; left: var(--npc-x); top: var(--npc-y); width: clamp(28px, 2.45vw, 37px); transform: translate(-50%, -88%); pointer-events: none; }
 .world-screen .street-npc-actor .world-character { width: 100%; height: auto; aspect-ratio: 36 / 58; }
 .world-screen .street-npc-actor-named::after { content: ""; position: absolute; left: 50%; bottom: 3px; width: 18px; height: 5px; transform: translateX(-50%); border-radius: 50%; background: rgb(224 189 119 / .22); filter: blur(2px); }
-.world-screen .street-npc-actor-moving { animation: world-npc-route var(--npc-duration) ease-in-out var(--npc-delay) infinite alternate; }
+.world-screen .street-npc-actor-moving {
+  animation: world-npc-route var(--npc-duration) linear var(--npc-delay) infinite both;
+  will-change: left, top;
+}
 @keyframes world-npc-route {
   from { left: var(--npc-x); top: var(--npc-y); }
   to { left: var(--npc-to-x); top: var(--npc-to-y); }
 }
 
 .world-screen .street-vehicle-actor { position: absolute; left: var(--vehicle-x); top: var(--vehicle-y); width: var(--vehicle-width); min-width: 70px; max-width: 145px; transform: translate(-50%, -50%); opacity: .98; pointer-events: none; }
-.world-screen .street-vehicle-actor-moving { animation: world-vehicle-traffic var(--vehicle-duration) linear var(--vehicle-delay) infinite; }
+.world-screen .street-vehicle-actor-moving { animation: world-vehicle-traffic var(--vehicle-duration) linear var(--vehicle-delay) infinite; will-change: left; }
 @keyframes world-vehicle-traffic {
   from { left: var(--vehicle-x); }
   to { left: var(--vehicle-to-x); }
