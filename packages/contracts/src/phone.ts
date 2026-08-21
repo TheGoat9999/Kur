@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const PhoneAppIdSchema = z.enum([
-  'phone', 'messages', 'contacts', 'maps', 'bank', 'tasks',
+  'phone', 'messages', 'contacts', 'maps', 'vehicles', 'bank', 'tasks',
   'jobs', 'mail', 'notes', 'camera', 'gallery', 'settings'
 ]);
 
@@ -19,7 +19,7 @@ export const PhoneSettingsSchema = z.object({
   doNotDisturb: z.boolean(),
   airplaneMode: z.boolean(),
   showNotificationPreviews: z.boolean(),
-  homeLayout: z.array(PhoneAppIdSchema).min(4).max(12)
+  homeLayout: z.array(PhoneAppIdSchema).min(4).max(13)
 });
 
 export const PhoneDeviceSchema = z.object({
