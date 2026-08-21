@@ -4,11 +4,12 @@ export function StreetBackdrop({ theme, alerted }: { theme: StreetSceneDefinitio
   return (
     <svg className={`street-backdrop street-backdrop-${theme}`} viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <defs>
-        <linearGradient id="sd-road-v2" x1="0" y1="0" x2="0" y2="1"><stop stopColor="#35454b" /><stop offset="1" stopColor="#202e33" /></linearGradient>
+        <linearGradient id="sd-road-v2" x1="0" y1="0" x2="0" y2="1"><stop stopColor="#34444a" /><stop offset=".5" stopColor="#2b3b40" /><stop offset="1" stopColor="#202e33" /></linearGradient>
         <linearGradient id="sd-sidewalk-v2"><stop stopColor="#bbb6aa" /><stop offset="1" stopColor="#8d8b82" /></linearGradient>
         <linearGradient id="sd-cool-v2" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#3e5962" /><stop offset="1" stopColor="#263b42" /></linearGradient>
         <linearGradient id="sd-warm-v2" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#664d44" /><stop offset="1" stopColor="#3b3330" /></linearGradient>
         <linearGradient id="sd-glass-v2" x1="0" y1="0" x2="0" y2="1"><stop stopColor="#93c8cf" stopOpacity=".72" /><stop offset="1" stopColor="#31515a" stopOpacity=".9" /></linearGradient>
+        <linearGradient id="sd-edge-fade-v2" x1="0" y1="0" x2="1" y2="0"><stop stopColor="#0e2025" stopOpacity=".7" /><stop offset="1" stopColor="#0e2025" stopOpacity="0" /></linearGradient>
         <filter id="sd-drop-v2" x="-20%" y="-20%" width="150%" height="160%"><feDropShadow dx="0" dy="8" stdDeviation="7" floodColor="#02080a" floodOpacity=".42" /></filter>
         <pattern id="sd-asphalt-v2" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="4" cy="8" r="1" fill="#fff" opacity=".025" /><circle cx="21" cy="23" r="1" fill="#000" opacity=".08" /></pattern>
       </defs>
@@ -24,12 +25,20 @@ export function StreetBackdrop({ theme, alerted }: { theme: StreetSceneDefinitio
 
 function StreetBase({ crosswalkX = 555 }: { crosswalkX?: number }) {
   return <>
-    <rect x="0" y="220" width="1200" height="62" fill="url(#sd-sidewalk-v2)" />
-    <rect x="0" y="282" width="1200" height="184" fill="url(#sd-road-v2)" />
-    <rect x="0" y="466" width="1200" height="62" fill="url(#sd-sidewalk-v2)" />
-    <path d="M0 282h1200M0 466h1200" stroke="#e1dbcf" strokeWidth="5" opacity=".58" />
-    <path d="M0 374h1200" stroke="#d7bf70" strokeWidth="4" strokeDasharray="34 31" opacity=".7" />
-    <Crosswalk x={crosswalkX} y={291} width={120} height={166} />
+    <rect x="0" y="220" width="1200" height="90" fill="url(#sd-sidewalk-v2)" />
+    <rect x="0" y="310" width="1200" height="138" fill="url(#sd-road-v2)" />
+    <rect x="0" y="448" width="1200" height="80" fill="url(#sd-sidewalk-v2)" />
+    <SidewalkSeams />
+    <path d="M0 310h1200M0 448h1200" stroke="#e1dbcf" strokeWidth="5" opacity=".68" />
+    <path d="M0 379h1200" stroke="#d7bf70" strokeWidth="4" strokeDasharray="34 31" opacity=".72" />
+    <path d="M0 335h1200M0 423h1200" stroke="#e8e3d8" strokeWidth="2" strokeDasharray="18 28" opacity=".16" />
+    <RoadArrow x={230} y={351} direction="east" />
+    <RoadArrow x={970} y={407} direction="west" />
+    <Crosswalk x={crosswalkX} y={319} width={108} height={120} />
+    <CurbRamp x={crosswalkX} side="north" width={108} />
+    <CurbRamp x={crosswalkX} side="south" width={108} />
+    <EdgeContinuation side="left" />
+    <EdgeContinuation side="right" />
   </>;
 }
 
@@ -41,11 +50,12 @@ function MarketScene({ alerted }: { alerted: boolean }) {
     <Building x={805} y={36} w={300} h={184} sign="MERCADO 24" tone="warm" entranceX={955} shop={alerted ? 'ALERT' : 'OPEN'} alert={alerted} />
     <Building x={24} y={528} w={245} h={148} sign="LAVANDERIA" tone="warm" entranceX={188} side="south" />
     <Building x={292} y={528} w={260} h={148} sign="DORADO OFFICES" tone="cool" entranceX={420} side="south" />
+    <Driveway x={607} width={148} />
     <ParkingLot x={575} y={540} w={210} />
     <Building x={812} y={528} w={350} h={148} sign="PALMAS MARKET" tone="cool" entranceX={950} side="south" />
     <Tree x={330} y={244} /><Tree x={716} y={244} /><Tree x={1118} y={244} /><Tree x={286} y={503} /><Tree x={803} y={503} />
     <Lamp x={377} y={271} /><Lamp x={761} y={271} /><Lamp x={1100} y={515} /><Bench x={1010} y={508} />
-    <Hydrant x={132} y={273} /><Mailbox x={998} y={273} /><Bicycle x={736} y={506} />
+    <Hydrant x={132} y={273} /><Mailbox x={998} y={273} />
     <StreetSign x={690} y={272} top="MARKET ST" bottom="BLOCK 3" />
     <ServiceGate x={1060} y={535} />
   </>;
@@ -59,6 +69,7 @@ function CornerScene() {
     <Building x={755} y={42} w={390} h={178} sign="LOCAL SHOPS" tone="warm" entranceX={960} shop="NEIGHBORHOOD" />
     <Building x={24} y={528} w={250} h={148} sign="TOWNHOUSES" tone="cool" entranceX={155} side="south" />
     <Building x={300} y={528} w={245} h={148} sign="BODEGA" tone="warm" entranceX={420} side="south" />
+    <Driveway x={625} width={160} />
     <ParkingLot x={576} y={540} w={260} />
     <Building x={866} y={528} w={305} h={148} sign="PALMAS OFFICES" tone="cool" entranceX={1015} side="south" />
     <BusShelter x={598} y={504} /><Bench x={504} y={506} /><Bench x={705} y={506} />
@@ -76,7 +87,9 @@ function AlleyScene() {
     <Building x={720} y={36} w={330} h={184} sign="EL CAMINO" tone="warm" entranceX={948} shop="BACK DOOR" />
     <Building x={1070} y={52} w={105} h={168} sign="UTIL" tone="cool" entranceX={1125} />
     <Building x={20} y={528} w={255} h={148} sign="STORAGE" tone="cool" entranceX={150} side="south" />
+    <Driveway x={340} width={210} industrial />
     <LoadingYard x={300} y={540} w={300} />
+    <Driveway x={680} width={150} industrial />
     <ParkingLot x={630} y={540} w={255} />
     <Building x={910} y={528} w={265} h={148} sign="WAREHOUSE B" tone="warm" entranceX={1040} side="south" />
     <Dumpster x={278} y={486} /><Pallets x={410} y={500} /><UtilityBox x={654} y={246} /><TrashBags x={870} y={502} />
@@ -100,8 +113,51 @@ function Building({ x, y, w, h, sign, tone, entranceX, side = 'north', shop, ale
   </g>;
 }
 
+function SidewalkSeams() {
+  return <g stroke="#625f59" strokeWidth="1.4" opacity=".24">
+    {Array.from({ length: 17 }, (_, index) => <path key={`n-${index}`} d={`M${index * 76} 220v90`} />)}
+    {Array.from({ length: 17 }, (_, index) => <path key={`s-${index}`} d={`M${index * 76} 448v80`} />)}
+    <path d="M0 260h1200M0 488h1200" />
+  </g>;
+}
+
+function Crosswalk({x,y,width,height}:{x:number;y:number;width:number;height:number}) {
+  return <g opacity=".78">
+    <rect x={x-12} y={y} width="5" height={height} fill="#ece8dd" opacity=".62" />
+    <rect x={x+width+7} y={y} width="5" height={height} fill="#ece8dd" opacity=".62" />
+    {Array.from({length:8},(_,i)=><rect key={i} x={x} y={y+i*(height/8)} width={width} height={height/15} rx="2" fill="#dedbd2" />)}
+  </g>;
+}
+
+function CurbRamp({ x, side, width }: { x: number; side: 'north' | 'south'; width: number }) {
+  const y = side === 'north' ? 294 : 448;
+  return <g>
+    <rect x={x-5} y={y} width={width+10} height="16" rx="5" fill="#a49f92" />
+    <path d={`M${x+7} ${y+8}h${width-14}`} stroke="#d8d1c2" strokeWidth="2" strokeDasharray="5 5" opacity=".45" />
+  </g>;
+}
+
+function RoadArrow({ x, y, direction }: { x: number; y: number; direction: 'east' | 'west' }) {
+  const sign = direction === 'east' ? 1 : -1;
+  return <path d={`M${x-sign*28} ${y}h${sign*42}m0 0l${-sign*15} -12m${sign*15} 12l${-sign*15} 12`} fill="none" stroke="#dcd8cb" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" opacity=".3" />;
+}
+
+function EdgeContinuation({ side }: { side: 'left' | 'right' }) {
+  const left = side === 'left';
+  return <g opacity=".64">
+    <rect x={left ? 0 : 1050} y="310" width="150" height="138" fill="url(#sd-edge-fade-v2)" transform={left ? undefined : 'rotate(180 1125 379)'} />
+    <path d={left ? 'M66 350L36 379l30 29M110 350L80 379l30 29' : 'M1134 350l30 29-30 29M1090 350l30 29-30 29'} fill="none" stroke="#e7d08a" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" opacity=".7" />
+  </g>;
+}
+
+function Driveway({ x, width, industrial = false }: { x: number; width: number; industrial?: boolean }) {
+  return <g>
+    <rect x={x} y="448" width={width} height="80" fill={industrial ? '#596062' : '#77766f'} opacity=".52" />
+    <path d={`M${x} 448h${width}`} stroke="#d9d3c7" strokeWidth="3" strokeDasharray="12 9" opacity=".36" />
+  </g>;
+}
+
 function Park({x,y,w,h}:{x:number;y:number;w:number;h:number}) { return <g><rect x={x} y={y} width={w} height={h} rx="16" fill="#294b41" /><path d={`M${x+25} ${y+h-25}C${x+90} ${y+45} ${x+210} ${y+135} ${x+w-24} ${y+28}`} fill="none" stroke="#b9ad8e" strokeWidth="18" opacity=".65" /><Tree x={x+75} y={y+52} /><Tree x={x+178} y={y+72} /><Tree x={x+270} y={y+48} /><Bench x={x+120} y={y+h-35} /></g>; }
-function Crosswalk({x,y,width,height}:{x:number;y:number;width:number;height:number}) { return <g opacity=".82">{Array.from({length:7},(_,i)=><rect key={i} x={x+i*(width/7)} y={y} width={width/12} height={height} fill="#dedbd2" />)}</g>; }
 function Tree({x,y}:{x:number;y:number}) { return <g><rect x={x-4} y={y+15} width="8" height="28" fill="#5a4234" /><circle cx={x} cy={y} r="23" fill="#315b4e" /><circle cx={x-13} cy={y+3} r="14" fill="#3c6b59" /><circle cx={x+14} cy={y-5} r="14" fill="#294f44" /></g>; }
 function Lamp({x,y}:{x:number;y:number}) { return <g><path d={`M${x} ${y}v-42`} stroke="#182a2e" strokeWidth="6" /><circle cx={x} cy={y-46} r="7" fill="#f0d181" /></g>; }
 function Bench({x,y}:{x:number;y:number}) { return <g><rect x={x} y={y} width="64" height="10" rx="3" fill="#35484c" /><path d={`M${x+9} ${y+10}v17M${x+55} ${y+10}v17M${x+10} ${y-10}v10M${x+32} ${y-10}v10M${x+54} ${y-10}v10`} stroke="#1b2c30" strokeWidth="4" /></g>; }
@@ -111,7 +167,6 @@ function LoadingYard({x,y,w}:{x:number;y:number;w:number}) { return <g><rect x={
 function BusShelter({x,y}:{x:number;y:number}) { return <g><rect x={x} y={y-42} width="102" height="42" rx="5" fill="#2b444b" /><rect x={x+8} y={y-34} width="86" height="27" fill="url(#sd-glass-v2)" /><path d={`M${x+16} ${y}v20M${x+87} ${y}v20`} stroke="#1c2c31" strokeWidth="5" /></g>; }
 function Hydrant({x,y}:{x:number;y:number}) { return <g><rect x={x-5} y={y-19} width="10" height="19" rx="3" fill="#b85b4e" /><circle cx={x} cy={y-21} r="7" fill="#d77462" /></g>; }
 function Mailbox({x,y}:{x:number;y:number}) { return <g><rect x={x-10} y={y-25} width="20" height="24" rx="4" fill="#385a6b" /><rect x={x-3} y={y-1} width="6" height="19" fill="#1c2c33" /></g>; }
-function Bicycle({x,y}:{x:number;y:number}) { return <g fill="none" stroke="#273d44" strokeWidth="4"><circle cx={x} cy={y} r="12" /><circle cx={x+32} cy={y} r="12" /><path d={`M${x} ${y}l13-17 10 17H${x}m13-17 19 17m-22-24h10`} /></g>; }
 function ServiceGate({x,y}:{x:number;y:number}) { return <g><rect x={x} y={y} width="98" height="116" fill="#2a3a3f" /><path d={`M${x+12} ${y}v116M${x+38} ${y}v116M${x+64} ${y}v116M${x+90} ${y}v116`} stroke="#132429" strokeWidth="6" /></g>; }
 function Dumpster({x,y}:{x:number;y:number}) { return <g filter="url(#sd-drop-v2)"><rect x={x} y={y} width="68" height="37" rx="5" fill="#31565a" /><path d={`M${x-3} ${y+5}h74M${x+12} ${y}l6-10h34l6 10`} stroke="#15292e" strokeWidth="5" /></g>; }
 function Pallets({x,y}:{x:number;y:number}) { return <g><rect x={x} y={y} width="75" height="14" fill="#735743" /><rect x={x+6} y={y-16} width="63" height="14" fill="#806249" /><path d={`M${x+12} ${y-16}v30M${x+38} ${y-16}v30M${x+63} ${y-16}v30`} stroke="#4e392d" strokeWidth="4" /></g>; }

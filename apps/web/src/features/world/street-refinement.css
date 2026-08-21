@@ -139,9 +139,6 @@
   100% { left: var(--vehicle-to-x); opacity: 0; }
 }
 
-/* Remove the decorative bicycle; it read as an oversized gameplay object. */
-.world-screen .street-backdrop g[stroke="#1d3136"] { display: none; }
-
 .world-screen .street-move-cursor {
   transition: none !important;
   will-change: left, top;
@@ -152,13 +149,13 @@
 }
 .world-screen .street-scene-route-blocked { cursor: not-allowed; }
 
-/* Side-street destinations are navigation controls. They stay visible and readable at both edges. */
+/* Exit affordances sit on the road continuation rather than floating as detached UI cards. */
 .world-screen .street-object-exit {
   top: 55% !important;
   z-index: 24;
-  width: min(238px, 24vw);
-  min-width: 190px;
-  height: 76px;
+  width: min(218px, 22vw);
+  min-width: 176px;
+  height: 86px;
   transform: translateY(-50%) !important;
 }
 
@@ -168,14 +165,8 @@
   transform: translateY(-50%) !important;
 }
 
-.world-screen .street-object-exit-left {
-  left: 8px !important;
-}
-
-.world-screen .street-object-exit-right {
-  right: 8px;
-  left: auto !important;
-}
+.world-screen .street-object-exit-left { left: 5px !important; }
+.world-screen .street-object-exit-right { right: 5px; left: auto !important; }
 
 .world-screen .street-object-exit .street-object-marker {
   position: absolute;
@@ -183,7 +174,7 @@
   display: flex;
   width: 100%;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   transform: translateY(-50%);
 }
 
@@ -201,19 +192,17 @@
 
 .world-screen .street-object-exit .street-object-icon {
   position: relative;
-  width: 42px;
-  height: 42px;
-  flex: 0 0 42px;
-  border: 1px solid rgb(232 194 117 / .44);
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border: 1px solid rgb(232 194 117 / .5);
   border-radius: 50%;
-  background: linear-gradient(180deg, rgb(42 54 51 / .97), rgb(11 25 28 / .96));
+  background: rgb(9 24 27 / .88);
   color: #f0d28e;
-  box-shadow: 0 8px 24px rgb(0 0 0 / .38), 0 0 0 4px rgb(219 183 104 / .06);
+  box-shadow: 0 6px 18px rgb(0 0 0 / .38), 0 0 0 4px rgb(219 183 104 / .06);
 }
 
-.world-screen .street-object-exit .street-object-anchor-dot {
-  display: none;
-}
+.world-screen .street-object-exit .street-object-anchor-dot { display: none; }
 
 .world-screen .street-object-exit .street-object-label {
   position: static;
@@ -221,37 +210,50 @@
   min-width: 0;
   max-width: none;
   flex: 1;
-  gap: 3px;
+  gap: 2px;
   transform: none !important;
   opacity: 1 !important;
-  border: 1px solid rgb(122 194 203 / .2);
-  border-radius: 11px;
-  background: linear-gradient(180deg, rgb(6 19 23 / .97), rgb(5 15 18 / .94));
-  padding: 9px 11px;
-  box-shadow: 0 8px 24px rgb(0 0 0 / .34), inset 0 1px rgb(255 255 255 / .04);
-  backdrop-filter: blur(12px);
+  border: 0;
+  border-top: 1px solid rgb(232 194 117 / .22);
+  border-bottom: 1px solid rgb(232 194 117 / .22);
+  border-radius: 0;
+  background: linear-gradient(90deg, rgb(6 19 23 / .82), rgb(6 19 23 / .28));
+  padding: 8px 10px;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
-.world-screen .street-object-exit-right .street-object-label { text-align: right; }
+.world-screen .street-object-exit-right .street-object-label {
+  text-align: right;
+  background: linear-gradient(270deg, rgb(6 19 23 / .82), rgb(6 19 23 / .28));
+}
 
 .world-screen .street-object-exit .street-object-label b {
   color: #f3e4be;
   font-size: 10px;
   font-weight: 900;
   letter-spacing: .015em;
+  text-shadow: 0 2px 8px rgb(0 0 0 / .72);
 }
 
 .world-screen .street-object-exit .street-object-label small {
-  color: #93a8ac;
+  color: #a9b9bc;
   font-size: 7px;
   line-height: 1.25;
+  text-shadow: 0 2px 7px rgb(0 0 0 / .75);
 }
 
 .world-screen .street-object-exit:hover .street-object-label,
 .world-screen .street-object-exit:focus-visible .street-object-label,
 .world-screen .street-object-exit-selected .street-object-label {
-  border-color: rgb(232 194 117 / .48);
-  background: linear-gradient(180deg, rgb(36 39 31 / .98), rgb(13 24 24 / .97));
+  border-color: rgb(242 205 127 / .68);
+  background: linear-gradient(90deg, rgb(41 37 27 / .92), rgb(15 27 27 / .34));
+}
+
+.world-screen .street-object-exit-right:hover .street-object-label,
+.world-screen .street-object-exit-right:focus-visible .street-object-label,
+.world-screen .street-object-exit-right.street-object-selected .street-object-label {
+  background: linear-gradient(270deg, rgb(41 37 27 / .92), rgb(15 27 27 / .34));
 }
 
 .world-screen .street-object-exit-left .street-object-icon > svg { transform: rotate(180deg); }
@@ -300,14 +302,14 @@
   .world-screen .street-npc-actor { width: 25px; }
   .world-screen .street-vehicle-actor { min-width: 58px; max-width: 92px; }
   .world-screen .street-object-exit {
-    width: min(168px, 45vw);
-    min-width: 138px;
-    height: 66px;
+    width: min(152px, 43vw);
+    min-width: 128px;
+    height: 68px;
   }
-  .world-screen .street-object-exit-left { left: 5px !important; }
-  .world-screen .street-object-exit-right { right: 5px; }
-  .world-screen .street-object-exit .street-object-icon { width: 36px; height: 36px; flex-basis: 36px; }
-  .world-screen .street-object-exit .street-object-label { padding: 7px 8px; }
+  .world-screen .street-object-exit-left { left: 3px !important; }
+  .world-screen .street-object-exit-right { right: 3px; }
+  .world-screen .street-object-exit .street-object-icon { width: 34px; height: 34px; flex-basis: 34px; }
+  .world-screen .street-object-exit .street-object-label { padding: 6px 7px; }
   .world-screen .street-object-exit .street-object-label b { font-size: 8px; }
   .world-screen .street-object-exit .street-object-label small { display: none; }
   .world-map-launch { top: 8px; min-height: 40px; padding-inline: 10px 13px; }
