@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { CORE_ITEM_CATALOG, CORE_ITEM_CATEGORY_COUNTS, ITEM_BY_KEY } from '../src/domain/items/index.js';
+import {
+  CORE_ITEM_CATALOG,
+  CORE_ITEM_CATEGORY_COUNTS,
+  getItemDefinition,
+  ITEM_BY_KEY,
+  resolveItemKey
+} from '../src/domain/items/index.js';
 
 const EXPECTED_COUNTS = {
   personal: 5,
@@ -27,6 +33,14 @@ describe('core item catalog', () => {
     for (const key of ['phone', 'water_bottle', 'sandwich', 'toolbox', 'steel_bar', 'medkit', 'compact_pistol']) {
       expect(ITEM_BY_KEY.has(key)).toBe(true);
     }
+  });
+
+  it('resolves legacy prototype keys to the canonical catalog', () => {
+    expect(resolveItemKey('water')).toBe('water_bottle');
+    expect(resolveItemKey('gloves')).toBe('work_gloves');
+    expect(getItemDefinition('water')?.category).toBe('drink');
+    expect(getItemDefinition('water')?.useEffects.hydration).toBe(22);
+    expect(getItemDefinition('gloves')?.key).toBe('work_gloves');
   });
 
   it('keeps non-stackable definitions at one item per stack', () => {
