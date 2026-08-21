@@ -67,7 +67,7 @@ export function App() {
           {inventoryOpen && <InventoryView onStateChange={setState} onClose={() => setInventoryOpen(false)} />}
         </div>
       )}
-      {screen === 'character' && <CharacterView state={state} />}
+      {screen === 'character' && <CharacterView state={state} onStateChange={setState} />}
       {screen === 'finance' && <FinanceView onStateChange={setState} />}
       {!['world', 'character', 'finance', 'inventory'].includes(screen) && <IntegrationView feature={screen as 'vehicles' | 'property' | 'jobs' | 'hospitality' | 'police'} />}
     </Shell>
