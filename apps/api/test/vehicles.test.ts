@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { VehicleStateSchema } from '@sol-dorado/contracts/vehicles';
+import { isStreetPositionWalkable, streetDistance } from '@sol-dorado/contracts/world-position';
+import { resolveVehicleExitPosition } from '../src/services/vehicles.js';
 
 const model = {
   id: 'bravura_compact_s',
@@ -139,5 +141,15 @@ describe('vehicle system contracts', () => {
     });
     expect(state.dealership.stock[0].priceCents).toBe(360000);
     expect(state.dealership.stock[0].model.reliability).toBe(91);
+  });
+
+  it.each([
+    ['market_block_3', { x: 25, y: 57 }],
+    ['cypress_corner', { x: 24, y: 58 }],
+    ['mira_alley', { x: 29, y: 61 }]
+  ] as const)('places the player on pedestrian navigation after exiting in %s', (segmentId, parkedPosition) => {
+    const exitPosition = resolveVehicleExitPosition(segmentId, parkedPosition);
+    expect(isStreetPositionWalkable(segmentId, exitPosition)).toBe(true);
+    expect(streetDistance(exitPosition, parkedPosition)).toBeGreaterThanOrEqual(8);
   });
 });

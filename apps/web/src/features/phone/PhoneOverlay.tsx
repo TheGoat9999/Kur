@@ -12,34 +12,36 @@ import {
   setPhoneTask
 } from '../../lib/api';
 import { useI18n } from '../../i18n';
+import { PhoneVehiclesApp } from './PhoneVehiclesApp';
 import './phone.css';
 
 interface PhoneOverlayProps {
   state: BootstrapState;
   onClose: () => void;
   onOpenFeature: (feature: 'finance' | 'jobs') => void;
+  onLocateVehicle: (vehicleId: string) => void;
 }
 
 const APP_ORDER: PhoneAppId[] = [
-  'messages', 'contacts', 'maps', 'bank', 'tasks', 'jobs',
+  'messages', 'contacts', 'maps', 'vehicles', 'bank', 'tasks', 'jobs',
   'mail', 'notes', 'camera', 'gallery', 'settings', 'phone'
 ];
 const DOCK_APPS: PhoneAppId[] = ['phone', 'messages', 'maps', 'bank'];
 const GALLERY_STORAGE = 'sd_phone_gallery_v1';
 
 const APP_COLORS: Record<PhoneAppId, string> = {
-  phone: '#3bc76b', messages: '#2e9bf4', contacts: '#8e7cf0', maps: '#56b68b',
+  phone: '#3bc76b', messages: '#2e9bf4', contacts: '#8e7cf0', maps: '#56b68b', vehicles: '#4f8f9a',
   bank: '#d4a84d', tasks: '#ef775f', jobs: '#cf8d43', mail: '#4f8be8',
   notes: '#f0bf49', camera: '#79848d', gallery: '#bc6dd6', settings: '#6d7780'
 };
 
 const APP_LABELS: Record<'bg' | 'en', Record<PhoneAppId, string>> = {
   bg: {
-    phone: 'Телефон', messages: 'Съобщения', contacts: 'Контакти', maps: 'Карти', bank: 'Банка', tasks: 'Задачи',
+    phone: 'Телефон', messages: 'Съобщения', contacts: 'Контакти', maps: 'Карти', vehicles: 'Моите коли', bank: 'Банка', tasks: 'Задачи',
     jobs: 'Работа', mail: 'Поща', notes: 'Бележки', camera: 'Камера', gallery: 'Галерия', settings: 'Настройки'
   },
   en: {
-    phone: 'Phone', messages: 'Messages', contacts: 'Contacts', maps: 'Maps', bank: 'Bank', tasks: 'Tasks',
+    phone: 'Phone', messages: 'Messages', contacts: 'Contacts', maps: 'Maps', vehicles: 'My Cars', bank: 'Bank', tasks: 'Tasks',
     jobs: 'Work', mail: 'Mail', notes: 'Notes', camera: 'Camera', gallery: 'Gallery', settings: 'Settings'
   }
 };
@@ -54,7 +56,7 @@ export function PhoneLauncher({ onOpen }: { onOpen: () => void }) {
   );
 }
 
-export function PhoneOverlay({ state, onClose, onOpenFeature }: PhoneOverlayProps) {
+export function PhoneOverlay({ state, onClose, onOpenFeature, onLocateVehicle }: PhoneOverlayProps) {
   const { locale } = useI18n();
   const labels = APP_LABELS[locale];
   const [phone, setPhone] = useState<PhoneState | null>(null);
@@ -192,6 +194,7 @@ export function PhoneOverlay({ state, onClose, onOpenFeature }: PhoneOverlayProp
                     onOpenApp={openApp}
                     onSettings={patch => void applySettings(patch)}
                     onOpenFeature={feature => { onClose(); onOpenFeature(feature); }}
+                    onLocateVehicle={vehicleId => { onClose(); onLocateVehicle(vehicleId); }}
                   />
                 ) : (
                   <HomeScreen
@@ -330,12 +333,13 @@ function HomeScreen({
 }
 
 function PhoneAppView({
-  appId, phone, state, locale, selectedThreadId, callTarget, onThread, onState, onCall, onHome, onOpenApp, onSettings, onOpenFeature
+  appId, phone, state, locale, selectedThreadId, callTarget, onThread, onState, onCall, onHome, onOpenApp, onSettings, onOpenFeature, onLocateVehicle
 }: {
   appId: PhoneAppId; phone: PhoneState; state: BootstrapState; locale: 'bg' | 'en'; selectedThreadId: string | null;
   callTarget: string | null; onThread: (id: string | null) => void; onState: (state: PhoneState) => void;
   onCall: (target: string | null) => void; onHome: () => void; onOpenApp: (id: PhoneAppId) => void;
   onSettings: (patch: Partial<PhoneSettings>) => void; onOpenFeature: (feature: 'finance' | 'jobs') => void;
+  onLocateVehicle: (vehicleId: string) => void;
 }) {
   const labels = APP_LABELS[locale];
   return (
@@ -346,6 +350,7 @@ function PhoneAppView({
         {appId === 'messages' && <MessagesApp phone={phone} locale={locale} selectedThreadId={selectedThreadId} onThread={onThread} onState={onState} onCall={onCall} />}
         {appId === 'contacts' && <ContactsApp phone={phone} locale={locale} onCall={onCall} onThread={thread => { onThread(thread); onOpenApp('messages'); }} />}
         {appId === 'maps' && <MapsApp state={state} locale={locale} />}
+        {appId === 'vehicles' && <PhoneVehiclesApp locale={locale} onLocateVehicle={onLocateVehicle} />}
         {appId === 'bank' && <BankApp locale={locale} onOpenFull={() => onOpenFeature('finance')} />}
         {appId === 'tasks' && <TasksApp phone={phone} locale={locale} onState={onState} />}
         {appId === 'jobs' && <JobsApp locale={locale} onOpenFull={() => onOpenFeature('jobs')} />}
@@ -491,7 +496,6 @@ function MailApp({ phone, locale }: { phone: PhoneState; locale: 'bg' | 'en' }) 
 
 function NotesApp({ phone, locale, onState }: { phone: PhoneState; locale: 'bg' | 'en'; onState: (state: PhoneState) => void }) {
   const [editingId, setEditingId] = useState<string | null>(null);
-  const current = phone.notes.find(note => note.id === editingId) ?? null;
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [saving, setSaving] = useState(false);
@@ -646,6 +650,7 @@ function PhoneGlyph({ name }: { name: GlyphName }) {
     case 'messages': body = <><path d="M4 5h16v11H9l-5 4V5Z" /><path d="M8 9h8M8 12h5" /></>; break;
     case 'contacts': body = <><circle cx="12" cy="8" r="3" /><path d="M6 19c1-4 3-6 6-6s5 2 6 6M4 4h16v16H4Z" /></>; break;
     case 'maps': body = <><path d="m4 5 5-2 6 2 5-2v16l-5 2-6-2-5 2V5Z" /><path d="M9 3v16M15 5v16" /></>; break;
+    case 'vehicles': body = <><path d="M5 16h14l-1.4-5.2A2 2 0 0 0 15.7 9H8.3a2 2 0 0 0-1.9 1.8L5 16Z" /><path d="M4 16v3m16-3v3M7 19h10M7.5 13h.01M16.5 13h.01" /></>; break;
     case 'bank': body = <><path d="m3 9 9-5 9 5H3ZM5 10h14M6 10v7M10 10v7M14 10v7M18 10v7M4 18h16M3 21h18" /></>; break;
     case 'tasks': body = <><path d="M9 5h11M9 12h11M9 19h11" /><path d="m3 5 1 1 2-2m-3 8 1 1 2-2m-3 8 1 1 2-2" /></>; break;
     case 'jobs': body = <><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M8 7V5h8v2M3 12h18M10 12v2h4v-2" /></>; break;
