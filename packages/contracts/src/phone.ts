@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const PhoneAppIdSchema = z.enum([
-  'phone', 'messages', 'contacts', 'maps', 'bank', 'tasks',
+  'phone', 'messages', 'contacts', 'maps', 'vehicles', 'bank', 'tasks',
   'jobs', 'mail', 'notes', 'camera', 'gallery', 'settings'
 ]);
 
@@ -19,7 +19,7 @@ export const PhoneSettingsSchema = z.object({
   doNotDisturb: z.boolean(),
   airplaneMode: z.boolean(),
   showNotificationPreviews: z.boolean(),
-  homeLayout: z.array(PhoneAppIdSchema).min(4).max(12)
+  homeLayout: z.array(PhoneAppIdSchema).min(4).max(13)
 });
 
 export const PhoneDeviceSchema = z.object({
@@ -132,4 +132,3 @@ export type PhoneThread = z.infer<typeof PhoneThreadSchema>;
 export type PhoneNotification = z.infer<typeof PhoneNotificationSchema>;
 export type PhoneTask = z.infer<typeof PhoneTaskSchema>;
 export type PhoneNote = z.infer<typeof PhoneNoteSchema>;
-export type PhoneState = z.infer<typeof PhoneStateSchema>;
