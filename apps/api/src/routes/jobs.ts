@@ -1,7 +1,23 @@
 import { Router } from 'express';
-import { JobChoiceRequestSchema, JobFinishRequestSchema, JobStartRequestSchema, JobTaskRequestSchema } from '@sol-dorado/contracts/jobs';
+import {
+  JobAbandonRequestSchema,
+  JobChoiceRequestSchema,
+  JobFinishRequestSchema,
+  JobQualificationRequestSchema,
+  JobStartRequestSchema,
+  JobTaskRequestSchema
+} from '@sol-dorado/contracts/jobs';
 import type { AppServices } from '../types.js';
-import { chooseJobEvent, completeJobTask, finishJobShift, getJobsState, JobCommandError, startJobShift } from '../services/jobs.js';
+import {
+  abandonJobShift,
+  chooseJobEvent,
+  claimJobQualification,
+  completeJobTask,
+  finishJobShift,
+  getJobsState,
+  JobCommandError,
+  startJobShift
+} from '../services/jobs.js';
 
 export function jobRoutes(services: AppServices) {
   const router = Router();
@@ -13,7 +29,7 @@ export function jobRoutes(services: AppServices) {
   router.post('/v1/jobs/start', async (request, response) => {
     const parsed = JobStartRequestSchema.safeParse(request.body);
     if (!parsed.success) return response.status(400).json({ error: 'invalid_job_start', issues: parsed.error.issues });
-    try { response.json(await startJobShift(services.db, request.playerId!, parsed.data.jobId)); }
+    try { response.json(await startJobShift(services.db, request.playerId!, parsed.data.jobId, parsed.data.offerId)); }
     catch (error) { if (error instanceof JobCommandError) return response.status(error.status).json({ error: error.code }); throw error; }
   });
 
@@ -35,6 +51,20 @@ export function jobRoutes(services: AppServices) {
     const parsed = JobFinishRequestSchema.safeParse(request.body);
     if (!parsed.success) return response.status(400).json({ error: 'invalid_job_finish', issues: parsed.error.issues });
     try { response.json(await finishJobShift(services.db, request.playerId!, parsed.data.shiftId)); }
+    catch (error) { if (error instanceof JobCommandError) return response.status(error.status).json({ error: error.code }); throw error; }
+  });
+
+  router.post('/v1/jobs/abandon', async (request, response) => {
+    const parsed = JobAbandonRequestSchema.safeParse(request.body);
+    if (!parsed.success) return response.status(400).json({ error: 'invalid_job_abandon', issues: parsed.error.issues });
+    try { response.json(await abandonJobShift(services.db, request.playerId!, parsed.data.shiftId)); }
+    catch (error) { if (error instanceof JobCommandError) return response.status(error.status).json({ error: error.code }); throw error; }
+  });
+
+  router.post('/v1/jobs/qualification', async (request, response) => {
+    const parsed = JobQualificationRequestSchema.safeParse(request.body);
+    if (!parsed.success) return response.status(400).json({ error: 'invalid_job_qualification', issues: parsed.error.issues });
+    try { response.json(await claimJobQualification(services.db, request.playerId!, parsed.data.qualificationKey)); }
     catch (error) { if (error instanceof JobCommandError) return response.status(error.status).json({ error: error.code }); throw error; }
   });
 
