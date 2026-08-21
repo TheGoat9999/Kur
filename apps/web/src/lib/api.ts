@@ -66,6 +66,15 @@ export async function getBootstrap(): Promise<BootstrapState> {
   return BootstrapStateSchema.parse(await response.json());
 }
 
+export async function saveCharacter(displayName: string, recipe: unknown): Promise<BootstrapState> {
+  const response = await authenticatedFetch('/v1/character', {
+    method: 'PUT',
+    body: JSON.stringify({ displayName, recipe })
+  });
+  if (!response.ok) throw new Error(await apiError(response, 'Character save failed'));
+  return BootstrapStateSchema.parse(await response.json());
+}
+
 export async function getStreetState(): Promise<StreetState> {
   const response = await authenticatedFetch('/v1/world');
   if (!response.ok) throw new ApiCommandError(await responseErrorCode(response, 'world_load_failed'));
