@@ -125,11 +125,17 @@ export type WorldZone = z.infer<typeof WorldZoneSchema>;
 export type WorldDistrict = z.infer<typeof WorldDistrictSchema>;
 export type WorldStreet = z.infer<typeof WorldStreetSchema>;
 export type WorldStreetSegment = z.infer<typeof WorldStreetSegmentSchema>;
+export type WorldTravelMode = z.infer<typeof WorldTravelModeSchema>;
 export type WorldStreetConnection = z.infer<typeof WorldStreetConnectionSchema>;
 export type WorldParcel = z.infer<typeof WorldParcelSchema>;
 export type WorldMapCurrent = z.infer<typeof WorldMapCurrentSchema>;
 export type WorldMapState = z.infer<typeof WorldMapStateSchema>;
 export type WorldMapTravelResult = z.infer<typeof WorldMapTravelResultSchema>;
+
+export interface WorldConnectionRoute {
+  segmentIds: string[];
+  distanceMeters: number;
+}
 
 export function resolveWorldPath(map: WorldMapState, segmentId: string): WorldMapCurrent | null {
   const segment = map.segments.find(item => item.id === segmentId);
@@ -152,4 +158,80 @@ export function resolveWorldPath(map: WorldMapState, segmentId: string): WorldMa
     streetId: street.id,
     segmentId: segment.id
   };
+}
+
+export function resolveWorldRoute(
+  map: WorldMapState,
+  originSegmentId: string,
+  destinationSegmentId: string,
+  mode: WorldTravelMode = 'walk'
+): WorldConnectionRoute | null {
+  return resolveWorldConnectionRoute(map.connections, originSegmentId, destinationSegmentId, mode);
+}
+
+export function resolveWorldConnectionRoute(
+  connections: WorldStreetConnection[],
+  originSegmentId: string,
+  destinationSegmentId: string,
+  mode: WorldTravelMode = 'walk'
+): WorldConnectionRoute | null {
+  if (originSegmentId === destinationSegmentId) return { segmentIds: [originSegmentId], distanceMeters: 0 };
+
+  const adjacency = new Map<string, Array<{ to: string; distanceMeters: number }>>();
+  const push = (from: string, to: string, distanceMeters: number) => {
+    const edges = adjacency.get(from) ?? [];
+    edges.push({ to, distanceMeters });
+    adjacency.set(from, edges);
+  };
+
+  for (const connection of connections) {
+    if (!connection.modes.includes(mode)) continue;
+    push(connection.fromSegmentId, connection.toSegmentId, connection.distanceMeters);
+    if (connection.bidirectional) push(connection.toSegmentId, connection.fromSegmentId, connection.distanceMeters);
+  }
+
+  const distances = new Map<string, number>([[originSegmentId, 0]]);
+  const previous = new Map<string, string>();
+  const unvisited = new Set<string>([originSegmentId, destinationSegmentId]);
+  for (const [from, edges] of adjacency) {
+    unvisited.add(from);
+    for (const edge of edges) unvisited.add(edge.to);
+  }
+
+  while (unvisited.size > 0) {
+    let current: string | null = null;
+    let currentDistance = Number.POSITIVE_INFINITY;
+    for (const candidate of unvisited) {
+      const distance = distances.get(candidate) ?? Number.POSITIVE_INFINITY;
+      if (distance < currentDistance) {
+        current = candidate;
+        currentDistance = distance;
+      }
+    }
+    if (!current || !Number.isFinite(currentDistance)) break;
+    unvisited.delete(current);
+    if (current === destinationSegmentId) break;
+
+    for (const edge of adjacency.get(current) ?? []) {
+      if (!unvisited.has(edge.to)) continue;
+      const nextDistance = currentDistance + edge.distanceMeters;
+      if (nextDistance < (distances.get(edge.to) ?? Number.POSITIVE_INFINITY)) {
+        distances.set(edge.to, nextDistance);
+        previous.set(edge.to, current);
+      }
+    }
+  }
+
+  const distanceMeters = distances.get(destinationSegmentId);
+  if (distanceMeters === undefined) return null;
+
+  const segmentIds = [destinationSegmentId];
+  let cursor = destinationSegmentId;
+  while (cursor !== originSegmentId) {
+    const prior = previous.get(cursor);
+    if (!prior) return null;
+    segmentIds.unshift(prior);
+    cursor = prior;
+  }
+  return { segmentIds, distanceMeters };
 }
