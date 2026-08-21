@@ -1,0 +1,73 @@
+import { useEffect, useState, type ReactNode } from 'react';
+import type { BootstrapState } from '@sol-dorado/contracts';
+import type { CrimeState } from '@sol-dorado/contracts/crime';
+import { useI18n } from '../../i18n';
+import { useNotifications } from '../../components/Notifications';
+import { getBootstrap } from '../../lib/api';
+import { commandCrime, getCrime } from './crime-api';
+
+type CommandInput =
+  | { command:'attempt'; opportunityId:string }
+  | { command:'fence'; contactId:string; itemId:string }
+  | { command:'launder'; contactId:string; amountCents:number }
+  | { command:'buy_contraband'; contactId:string; itemKey:'lockpick_set'|'scanner_radio'|'burner_phone' }
+  | { command:'dispose_vehicle'; contactId:string; vehicleId:string };
+
+export function CrimeOverlay({ state, onStateChange }: { state:BootstrapState; onStateChange:(state:BootstrapState)=>void }) {
+  const { locale }=useI18n();
+  const { push }=useNotifications();
+  const copy=locale==='bg'?bg:en;
+  const [crime,setCrime]=useState<CrimeState|null>(null);
+  const [open,setOpen]=useState(false);
+  const [busy,setBusy]=useState(false);
+  const [streetVisible,setStreetVisible]=useState(true);
+
+  useEffect(()=>{let cancelled=false;void getCrime().then(value=>{if(!cancelled)setCrime(value);}).catch(()=>{});return()=>{cancelled=true;};},[state.location.streetSegment]);
+  useEffect(()=>{const sync=()=>setStreetVisible(Boolean(document.querySelector('.street-scene')));sync();const observer=new MutationObserver(sync);observer.observe(document.body,{childList:true,subtree:true});return()=>observer.disconnect();},[]);
+
+  async function run(command:CommandInput){
+    if(busy)return;
+    setBusy(true);
+    try{
+      const result=await commandCrime(command);
+      setCrime(result.state);
+      onStateChange(await getBootstrap());
+      push({tone:result.outcome.success?'warning':'error',title:copy.consequence,message:outcome(result.outcome.messageKey,result.outcome.amountCents,locale)});
+    }catch(reason){
+      push({tone:'error',title:copy.blocked,message:errorCopy(reason instanceof Error?reason.message:String(reason),locale)});
+    }finally{setBusy(false);}
+  }
+
+  if(!streetVisible||!crime)return null;
+  const localContacts=crime.contacts.filter(contact=>contact.discovered&&contact.segmentId===crime.currentSegmentId);
+  const fence=localContacts.find(contact=>contact.kind==='fence');
+  const launderer=localContacts.find(contact=>contact.kind==='launderer');
+  const market=localContacts.find(contact=>contact.kind==='black_market');
+
+  return <>
+    {!open&&<button type="button" onClick={()=>setOpen(true)} className="absolute right-4 top-20 z-30 min-h-11 rounded-xl border border-rose-300/25 bg-[#0b171d]/95 px-4 text-left text-xs font-black text-rose-100 shadow-xl backdrop-blur"><small className="block text-[9px] uppercase tracking-[.18em] text-rose-300">{copy.underworld}</small>{copy.launch}</button>}
+    {open&&<aside className="absolute inset-x-3 bottom-3 z-50 max-h-[78%] overflow-y-auto rounded-2xl border border-rose-300/20 bg-[#071116]/[.98] p-4 shadow-2xl backdrop-blur md:left-auto md:right-4 md:w-[430px]">
+      <header className="flex items-start justify-between gap-3"><div><small className="font-black uppercase tracking-[.2em] text-rose-300">{copy.underworld}</small><h2 className="mt-1 text-lg font-black text-slate-50">{copy.title}</h2><p className="mt-1 text-xs leading-5 text-slate-400">{copy.lead}</p></div><button className="min-h-10 min-w-10 rounded-lg border border-white/10 text-slate-300" onClick={()=>setOpen(false)}>×</button></header>
+      <div className="mt-4 grid grid-cols-3 gap-2"><Metric label={copy.trust} value={`${crime.profile.underworldTrust}/100`}/><Metric label={copy.dirty} value={usd(crime.profile.dirtyCashCents)}/><Metric label={copy.recognition} value={`${crime.profile.recognition}%`}/></div>
+      <Section title={copy.opportunities} empty={!crime.opportunities.length?copy.noneHere:null}>{crime.opportunities.map(item=>{const text=opportunityText(item.id,item.title,item.description,locale);return <div key={item.id} className="rounded-xl border border-white/10 bg-white/[.03] p-3"><div className="flex items-center justify-between gap-2"><b className="text-sm text-slate-100">{text.title}</b><small className="font-black uppercase text-rose-200">{risk(item.risk,locale)}</small></div><p className="mt-1 text-xs leading-5 text-slate-400">{text.description}</p><div className="mt-2 flex items-center justify-between gap-2"><small className="text-slate-500">{item.requiredItemKey?`${copy.requires}: ${itemLabel(item.requiredItemKey,locale)}`:copy.noTool} · ~{usd(item.estimatedValueCents)}</small><button disabled={busy} onClick={()=>void run({command:'attempt',opportunityId:item.id})} className="min-h-10 rounded-lg bg-rose-300/10 px-3 text-xs font-black text-rose-100 disabled:opacity-40">{copy.act}</button></div></div>})}</Section>
+      <Section title={copy.stolenGoods} empty={!crime.stolenGoods.length?copy.noGoods:null}>{crime.stolenGoods.map(item=><div key={item.itemId} className="flex items-center justify-between gap-3 rounded-xl border border-white/10 p-3"><div><b className="text-sm text-slate-100">{itemLabel(item.itemKey,locale,item.displayName)}</b><small className="block text-slate-500">~{usd(item.estimatedValueCents)}</small></div>{fence?<button disabled={busy} onClick={()=>void run({command:'fence',contactId:fence.id,itemId:item.itemId})} className="min-h-10 rounded-lg border border-white/10 px-3 text-xs font-bold text-slate-200">{copy.fence}</button>:<small className="text-slate-600">{copy.needFence}</small>}</div>)}</Section>
+      <Section title={copy.stolenVehicles} empty={!crime.stolenVehicles.length?copy.noVehicles:null}>{crime.stolenVehicles.map(vehicle=><div key={vehicle.vehicleId} className="flex items-center justify-between gap-3 rounded-xl border border-white/10 p-3"><div><b className="text-sm text-slate-100">{vehicle.displayName}</b><small className="block text-rose-200">{copy.illegalControl} · ~{usd(vehicle.estimatedValueCents)}</small></div>{fence&&<button disabled={busy} onClick={()=>void run({command:'dispose_vehicle',contactId:fence.id,vehicleId:vehicle.vehicleId})} className="min-h-10 rounded-lg border border-white/10 px-3 text-xs font-bold text-slate-200">{copy.dispose}</button>}</div>)}</Section>
+      <Section title={copy.contacts} empty={!localContacts.length?copy.noContacts:null}>{localContacts.map(contact=><div key={contact.id} className="rounded-xl border border-white/10 p-3"><div className="flex justify-between gap-2"><b className="text-sm text-slate-100">{contact.name}</b><small className="text-slate-500">{contactKind(contact.kind,locale)} · {copy.fee} {contact.feePercent}%</small></div></div>)}</Section>
+      {launderer&&crime.profile.dirtyCashCents>0&&<button disabled={busy} onClick={()=>void run({command:'launder',contactId:launderer.id,amountCents:Math.min(50000,crime.profile.dirtyCashCents)})} className="mt-3 min-h-11 w-full rounded-xl bg-amber-300/10 text-xs font-black text-amber-100">{copy.process} {usd(Math.min(50000,crime.profile.dirtyCashCents))}</button>}
+      {market&&<div className="mt-3 grid grid-cols-3 gap-2">{(['lockpick_set','scanner_radio','burner_phone'] as const).map(itemKey=><button key={itemKey} disabled={busy} onClick={()=>void run({command:'buy_contraband',contactId:market.id,itemKey})} className="min-h-11 rounded-xl border border-white/10 px-2 text-[10px] font-bold text-slate-200">{itemLabel(itemKey,locale)}</button>)}</div>}
+      <div className="mt-4 rounded-xl border border-cyan-300/10 bg-cyan-300/[.03] p-3 text-xs leading-5 text-slate-400"><b className="text-cyan-100">{copy.knowledgeTitle}</b><p className="mt-1">{copy.knowledge}</p><small className="mt-2 block text-slate-500">{copy.witnesses}: {crime.witnesses.length} · {copy.traces}: {crime.traces.length}</small></div>
+    </aside>}
+  </>;
+}
+
+function Section({title,empty,children}:{title:string;empty:string|null;children:ReactNode}){return <section className="mt-4"><h3 className="mb-2 text-[10px] font-black uppercase tracking-[.18em] text-slate-400">{title}</h3><div className="grid gap-2">{empty?<p className="rounded-xl border border-dashed border-white/10 p-3 text-xs text-slate-500">{empty}</p>:children}</div></section>}
+function Metric({label,value}:{label:string;value:string}){return <span className="rounded-xl border border-white/10 bg-white/[.03] p-2 text-center"><small className="block text-[9px] uppercase text-slate-500">{label}</small><b className="text-xs text-slate-100">{value}</b></span>}
+function usd(cents:number){return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(cents/100)}
+function risk(value:string,locale:'bg'|'en'){return locale==='bg'?({low:'нисък',medium:'среден',high:'висок'} as Record<string,string>)[value]??value:value}
+function opportunityText(id:string,title:string,description:string,locale:'bg'|'en'){if(locale==='en')return{title,description};const values:Record<string,{title:string;description:string}>={market_shoplift:{title:'Сляпа зона в кварталния магазин',description:'Дребна стока, кратък прозорец и риск от служител или камера.'},market_street_theft:{title:'Разсеян минувач',description:'Бърза улична кражба с несигурно внимание от свидетели.'},cypress_burglary:{title:'Заден служебен вход',description:'Заключено търговско помещение. Инструментът намалява риска от провал, но може да остави следи.'},cypress_vehicle:{title:'Паркиран градски седан',description:'Паркиран автомобил с аларма и неизвестно кога собственикът ще се върне.'},alley_burglary:{title:'Страничен вход на склад',description:'Малко пешеходци, по-сериозно заключване и ценна електроника вътре.'}};return values[id]??{title,description};}
+function itemLabel(key:string,locale:'bg'|'en',fallback?:string){if(locale==='en')return fallback??key.replaceAll('_',' ');const values:Record<string,string>={lockpick_set:'Комплект шперцове',scanner_radio:'Радиоскенер',burner_phone:'Предплатен телефон',smartphone:'Смартфон',smartwatch:'Смарт часовник',laptop:'Лаптоп',crowbar:'Лост'};return values[key]??fallback??key.replaceAll('_',' ');}
+function contactKind(kind:string,locale:'bg'|'en'){if(locale==='en')return kind.replaceAll('_',' ');return({fence:'пласьор',launderer:'посредник',black_market:'черен пазар'} as Record<string,string>)[kind]??kind;}
+function outcome(key:string,amount:number|undefined,locale:'bg'|'en'){const messages=locale==='bg'?{'crime.attempt.failed':'Неуспех. Свидетели и следи могат да останат.','crime.attempt.vehicleSuccess':'Автомобилът е под твой контрол, но не е законно твой.','crime.attempt.lootSuccess':'Крадената вещ вече е в инвентара.','crime.fence.success':'Вещта е пласирана срещу мръсни постъпления.','crime.launder.success':'Постъпленията са обработени през Finance след такса.','crime.contraband.success':'Предметът е добавен в инвентара.','crime.vehicle.disposed':'Автомобилът е предаден и напуска света.'}:{'crime.attempt.failed':'Failed. Witnesses and traces may remain.','crime.attempt.vehicleSuccess':'The vehicle is controlled, but it is not legally yours.','crime.attempt.lootSuccess':'The stolen item is now in inventory.','crime.fence.success':'The item was fenced for dirty proceeds.','crime.launder.success':'Proceeds were processed into Finance after fees.','crime.contraband.success':'The item was added to inventory.','crime.vehicle.disposed':'The vehicle was handed over and leaves the world.'};const message=(messages as Record<string,string>)[key]??key;return amount?`${message} · ${usd(amount)}`:message;}
+function errorCopy(code:string,locale:'bg'|'en'){if(locale==='en')return 'The action is blocked.';const errors:Record<string,string>={crime_wrong_location:'Това не е на текущата улица.',crime_contact_wrong_location:'Контактът не е на тази улица.',crime_contact_locked:'Още нямаш достъп до този контакт.',crime_not_enough_dirty_cash:'Нямаш достатъчно мръсни постъпления.',crime_not_enough_cash:'Нямаш достатъчно кеш.',inventory_container_full:'Инвентарът е пълен.',inventory_capacity_exceeded:'Инвентарът е твърде тежък.',crime_exit_vehicle_first:'Първо излез от автомобила.'};return errors[code]??'Действието е блокирано.'}
+const bg={underworld:'Нелегална икономика',launch:'Улични възможности',title:'Подземен слой',lead:'Действията са физически вързани към улицата и оставят различни последствия.',trust:'Доверие',dirty:'Мръсни',recognition:'Разпознаване',opportunities:'На тази улица',noneHere:'Няма активна възможност тук.',requires:'Изисква',noTool:'Без инструмент',act:'Действай',stolenGoods:'Крадени вещи',noGoods:'Нямаш крадени вещи.',fence:'Пласирай',needFence:'Търси контакт',stolenVehicles:'Откраднати автомобили',noVehicles:'Няма откраднат автомобил под твой контрол.',illegalControl:'Незаконен контрол',dispose:'Предай',contacts:'Контакти наблизо',noContacts:'Няма открит контакт на тази улица.',fee:'такса',process:'Обработи',knowledgeTitle:'Полицейско знание',knowledge:'Полицейският Heat не е доказателство. Свидетелското разпознаване, физическите следи и полицейската информация са отделни състояния. Dispatch възниква само когато информация стигне до полицията.',witnesses:'Свидетели',traces:'Следи',consequence:'Последствие',blocked:'Действието е блокирано'};
+const en={underworld:'Illegal economy',launch:'Street opportunities',title:'Underworld layer',lead:'Actions are physically tied to the street and leave distinct consequences.',trust:'Trust',dirty:'Dirty',recognition:'Recognition',opportunities:'On this street',noneHere:'No active opportunity here.',requires:'Requires',noTool:'No tool',act:'Act',stolenGoods:'Stolen goods',noGoods:'You have no stolen goods.',fence:'Fence',needFence:'Find a contact',stolenVehicles:'Stolen vehicles',noVehicles:'No stolen vehicle is under your control.',illegalControl:'Illegal control',dispose:'Hand over',contacts:'Nearby contacts',noContacts:'No discovered contact is on this street.',fee:'fee',process:'Process',knowledgeTitle:'Police knowledge',knowledge:'Heat is not evidence. Witness recognition, physical traces and police intelligence remain separate states. Dispatch only exists when information reaches police.',witnesses:'Witnesses',traces:'Traces',consequence:'Consequence',blocked:'Action blocked'};
