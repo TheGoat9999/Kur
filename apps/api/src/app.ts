@@ -21,6 +21,7 @@ import { realEstateRoutes } from './routes/real-estate.js';
 import { hoodWalkRoutes } from './routes/hood-walk.js';
 import { adminRoutes } from './routes/admin.js';
 import { needsRoutes } from './routes/needs.js';
+import { crimeRoutes } from './routes/crime.js';
 
 export function createApp(services: AppServices) {
   const app = express();
@@ -43,6 +44,7 @@ export function createApp(services: AppServices) {
   app.use(vehicleRoutes(services));
   app.use(jobRoutes(services));
   app.use(policeRoutes(services));
+  app.use(crimeRoutes(services));
   app.use(emsRoutes(services));
   app.use(realEstateRoutes(services));
   app.use(needsRoutes(services));
