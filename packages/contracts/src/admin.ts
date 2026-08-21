@@ -74,7 +74,7 @@ export const AdminStateSchema = z.object({
 });
 
 export const AdminMutationSchema = z.discriminatedUnion('action', [
-  z.object({ action: z.literal('set_cash'), amountCents: z.number().int().min(0).max(1_000_000_000_00) }),
+  z.object({ action: z.literal('set_cash'), amountCents: z.number().int().min(0).max(100_000_000_000) }),
   z.object({ action: z.literal('grant_item'), itemKey: z.string().min(1), quantity: z.number().int().min(1).max(1000) }),
   z.object({ action: z.literal('grant_vehicle'), modelId: z.string().min(1) }),
   z.object({ action: z.literal('remove_vehicle'), vehicleId: z.uuid() }),
@@ -83,6 +83,9 @@ export const AdminMutationSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('set_permission'), permissionKey: z.string().min(1), allowed: z.boolean().nullable() })
 ]);
 
+export type CoreJobKind = z.infer<typeof CoreJobKindSchema>;
+export type CoreJobDefinition = z.infer<typeof CoreJobDefinitionSchema>;
+export type CoreVehicleDefinition = z.infer<typeof CoreVehicleDefinitionSchema>;
 export type CoreRegistry = z.infer<typeof CoreRegistrySchema>;
 export type AdminState = z.infer<typeof AdminStateSchema>;
 export type AdminMutation = z.infer<typeof AdminMutationSchema>;
