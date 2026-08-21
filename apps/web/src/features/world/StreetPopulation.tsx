@@ -10,7 +10,7 @@ export function StreetPopulation({ segmentId, visibleObjectIds }: {
 }) {
   const definition = STREET_POPULATION[segmentId];
 
-  function stopCollisionEvent(event: MouseEvent<HTMLElement> | PointerEvent<HTMLElement>) {
+  function stopVehicleEvent(event: MouseEvent<HTMLElement> | PointerEvent<HTMLElement>) {
     event.stopPropagation();
   }
 
@@ -36,8 +36,8 @@ export function StreetPopulation({ segmentId, visibleObjectIds }: {
             className={`street-vehicle-actor street-collision-actor ${moving ? 'street-vehicle-actor-moving' : ''} ${vehicle.parked ? 'street-vehicle-actor-parked' : ''}`}
             style={style}
             data-actor-kind="vehicle"
-            onPointerDown={stopCollisionEvent}
-            onClick={stopCollisionEvent}
+            onPointerDown={stopVehicleEvent}
+            onClick={stopVehicleEvent}
           >
             <WorldVehicle type={vehicle.type} color={vehicle.color} heading={vehicle.heading} {...serviceProps} />
           </span>
@@ -59,11 +59,9 @@ export function StreetPopulation({ segmentId, visibleObjectIds }: {
           return (
             <span
               key={npc.id}
-              className={`street-npc-actor street-collision-actor ${moving ? 'street-npc-actor-moving' : ''} ${npc.namedObjectId ? 'street-npc-actor-named' : ''}`}
+              className={`street-npc-actor ${moving ? 'street-npc-actor-moving' : ''} ${npc.namedObjectId ? 'street-npc-actor-named' : ''}`}
               style={style}
               data-actor-kind="npc"
-              onPointerDown={stopCollisionEvent}
-              onClick={stopCollisionEvent}
             >
               <WorldCharacter visual={npc.visual ?? visualFromSeed(`${segmentId}:${npc.id}`)} direction={npcDirection(npc)} moving={moving} />
             </span>
