@@ -1,6 +1,7 @@
 import { defineCategory } from './catalog-helpers.js';
+import { QUATERNIUS_WEAPON_ITEMS } from './quaternius-weapon-items.js';
 
-export const WEAPON_ITEMS = defineCategory('weapon', [
+const CORE_WEAPON_ITEMS = defineCategory('weapon', [
   ['kitchen_knife', 'Kitchen Knife', 'melee', 320, 1, 1200],
   ['pocket_knife', 'Pocket Knife', 'melee', 180, 1, 1800],
   ['combat_knife', 'Combat Knife', 'melee', 420, 1, 4200, 'restricted'],
@@ -27,3 +28,5 @@ export const WEAPON_ITEMS = defineCategory('weapon', [
   ['rifle_magazine', 'Rifle Magazine', 'weapon_part', 320, 5, 5200, 'regulated'],
   ['weapon_cleaning_kit', 'Weapon Cleaning Kit', 'maintenance', 850, 5, 4200, 'restricted']
 ]);
+
+export const WEAPON_ITEMS = [...CORE_WEAPON_ITEMS, ...QUATERNIUS_WEAPON_ITEMS];
