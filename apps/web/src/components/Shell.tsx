@@ -4,14 +4,12 @@ import { Hud } from './Hud';
 import { GameIcon, type GameIconName } from './GameIcon';
 import { useI18n, type TranslationKey } from '../i18n';
 
-export type Screen = 'world' | 'character' | 'inventory' | 'finance' | 'vehicles' | 'property' | 'jobs' | 'hospitality' | 'police';
+export type Screen = 'world' | 'character' | 'inventory' | 'finance' | 'businesses' | 'vehicles' | 'property' | 'jobs' | 'hospitality' | 'police';
 type FeatureStage = 'live' | 'foundation' | 'migration';
 type RightNavDensity = 'compact' | 'comfortable' | 'large';
+type NavItem = { id: Screen; icon: GameIconName; label: TranslationKey; stage: FeatureStage; labelBg?: string; labelEn?: string };
 
-const groups: ReadonlyArray<{
-  label: TranslationKey;
-  items: ReadonlyArray<{ id: Screen; icon: GameIconName; label: TranslationKey; stage: FeatureStage }>;
-}> = [
+const groups: ReadonlyArray<{ label: TranslationKey; items: ReadonlyArray<NavItem> }> = [
   { label: 'nav.city', items: [
     { id: 'world', icon: 'world', label: 'nav.world', stage: 'live' },
     { id: 'character', icon: 'user', label: 'nav.character', stage: 'foundation' },
@@ -19,7 +17,8 @@ const groups: ReadonlyArray<{
   ] },
   { label: 'nav.progression', items: [
     { id: 'finance', icon: 'landmark', label: 'nav.finance', stage: 'live' },
-    { id: 'jobs', icon: 'briefcase', label: 'nav.jobs', stage: 'migration' }
+    { id: 'jobs', icon: 'briefcase', label: 'nav.jobs', stage: 'migration' },
+    { id: 'businesses', icon: 'building', label: 'nav.finance', labelBg: 'Бизнеси и компании', labelEn: 'Businesses & Companies', stage: 'live' }
   ] },
   { label: 'nav.assets', items: [
     { id: 'vehicles', icon: 'car', label: 'nav.vehicles', stage: 'migration' },
@@ -49,6 +48,7 @@ const DEFAULT_RIGHT_NAV: RightNavPreferences = {
     character: true,
     inventory: true,
     finance: true,
+    businesses: true,
     vehicles: true,
     property: true,
     jobs: true,
@@ -76,6 +76,7 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
   const [rightNavEditorOpen, setRightNavEditorOpen] = useState(false);
   const active = navItems.find(item => item.id === screen)!;
   const serverTime = new Date(state.serverTime);
+  const labelFor = (item: NavItem) => item.labelBg && item.labelEn ? (locale === 'bg' ? item.labelBg : item.labelEn) : t(item.label);
   const rightCopy = locale === 'bg'
     ? {
         customize: 'Настрой дясната навигация', title: 'Дясна навигация', subtitle: 'Избери кои секции да виждаш и в какъв ред.',
@@ -128,7 +129,7 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
 
   const orderedRightItems = rightNav.order
     .map(id => navItems.find(item => item.id === id))
-    .filter((item): item is (typeof navItems)[number] => Boolean(item));
+    .filter((item): item is NavItem => Boolean(item));
 
   return (
     <div className={`game-shell ${collapsed ? 'game-shell-collapsed' : ''}`}>
@@ -138,7 +139,7 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
         <button className="desktop-menu-button" onClick={() => onMenu(true)} aria-label={t('shell.openNavigation')}>☰</button>
         <div className="header-context header-context-screen">
           <span>SOL DORADO</span>
-          <b>{t(active.label)}</b>
+          <b>{labelFor(active)}</b>
         </div>
         <div className="header-spacer" />
         <div className="language-toggle" role="group" aria-label={t('common.language')}>
@@ -166,11 +167,11 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
                 <button
                   key={item.id}
                   className={`game-nav-item ${isNavItemActive(item.id) ? 'game-nav-item-active' : ''}`}
-                  title={item.id === 'inventory' ? `${t(item.label)} · I` : collapsed ? t(item.label) : undefined}
+                  title={item.id === 'inventory' ? `${labelFor(item)} · I` : collapsed ? labelFor(item) : undefined}
                   onClick={() => navigate(item.id)}
                 >
                   <span className="nav-icon"><GameIcon name={item.icon} size={18} /></span>
-                  <span className="nav-copy"><b>{t(item.label)}</b><small>{item.id === 'inventory' ? `${stageLabel(item.stage, t)} · I` : stageLabel(item.stage, t)}</small></span>
+                  <span className="nav-copy"><b>{labelFor(item)}</b><small>{item.id === 'inventory' ? `${stageLabel(item.stage, t)} · I` : stageLabel(item.stage, t)}</small></span>
                   <span className={`stage-dot stage-dot-${item.stage}`} />
                 </button>
               ))}
@@ -201,12 +202,12 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
               key={item.id}
               className={`right-nav-item ${isNavItemActive(item.id) ? 'right-nav-item-active' : ''}`}
               onClick={() => navigate(item.id)}
-              aria-label={t(item.label)}
-              title={t(item.label)}
+              aria-label={labelFor(item)}
+              title={labelFor(item)}
             >
               <GameIcon name={item.icon} size={rightNav.density === 'large' ? 21 : rightNav.density === 'compact' ? 17 : 19} />
               {rightNav.showStages && <span className={`right-nav-stage right-nav-stage-${item.stage}`} />}
-              <span className="right-nav-tooltip">{t(item.label)}</span>
+              <span className="right-nav-tooltip">{labelFor(item)}</span>
             </button>
           ))}
         </div>
@@ -235,10 +236,10 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
             {orderedRightItems.map((item, index) => (
               <div className="right-nav-editor-row" key={item.id}>
                 <span className="right-nav-editor-icon"><GameIcon name={item.icon} size={16} /></span>
-                <span className="right-nav-editor-copy"><b>{t(item.label)}</b><small>{stageLabel(item.stage, t)}</small></span>
-                <button className={`right-nav-visibility ${rightNav.visible[item.id] ? 'right-nav-visibility-active' : ''}`} onClick={() => toggleRightItem(item.id)} aria-label={`${rightCopy.visible}: ${t(item.label)}`}><span /></button>
-                <button disabled={index === 0} onClick={() => moveRightItem(item.id, -1)} aria-label={`${rightCopy.up}: ${t(item.label)}`}>↑</button>
-                <button disabled={index === orderedRightItems.length - 1} onClick={() => moveRightItem(item.id, 1)} aria-label={`${rightCopy.down}: ${t(item.label)}`}>↓</button>
+                <span className="right-nav-editor-copy"><b>{labelFor(item)}</b><small>{stageLabel(item.stage, t)}</small></span>
+                <button className={`right-nav-visibility ${rightNav.visible[item.id] ? 'right-nav-visibility-active' : ''}`} onClick={() => toggleRightItem(item.id)} aria-label={`${rightCopy.visible}: ${labelFor(item)}`}><span /></button>
+                <button disabled={index === 0} onClick={() => moveRightItem(item.id, -1)} aria-label={`${rightCopy.up}: ${labelFor(item)}`}>↑</button>
+                <button disabled={index === orderedRightItems.length - 1} onClick={() => moveRightItem(item.id, 1)} aria-label={`${rightCopy.down}: ${labelFor(item)}`}>↓</button>
               </div>
             ))}
           </div>
