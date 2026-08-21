@@ -7,6 +7,11 @@ import {
   type VehicleWorldLocation,
   type VehicleWorldPosition
 } from '@sol-dorado/contracts/vehicles';
+import {
+  StreetSpatialSegmentIdSchema,
+  resolveStreetNavigationTarget,
+  streetDistance
+} from '@sol-dorado/contracts/world-position';
 import { resolveWorldConnectionRoute, type WorldStreetConnection } from '@sol-dorado/contracts/world-map';
 import type { Database } from '../db.js';
 
@@ -14,6 +19,7 @@ const DEALERSHIP_KEY = 'dorado_motors';
 const DEALERSHIP_NAME = 'Dorado Motors';
 const DEALERSHIP_SEGMENT_ID = 'cypress_corner';
 const VEHICLE_INTERACTION_RADIUS = 14;
+const VEHICLE_EXIT_CLEARANCE = 8;
 
 const PARKING_SPOTS: Record<string, VehicleWorldPosition[]> = {
   market_block_3: [{ x: 25, y: 57 }, { x: 67, y: 57 }, { x: 82, y: 57 }],
@@ -65,6 +71,33 @@ function parkingPosition(segmentId: string, ordinal = 0): VehicleWorldPosition {
 
 function distanceBetween(a: VehicleWorldPosition, b: VehicleWorldPosition) {
   return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+/**
+ * Parked vehicle coordinates intentionally sit on the carriageway. A character must never
+ * respawn at that same coordinate after leaving the vehicle because that places the player
+ * inside the vehicle interaction hitbox and off the pedestrian navigation graph.
+ */
+export function resolveVehicleExitPosition(segmentId: string, parkedPosition: VehicleWorldPosition): VehicleWorldPosition {
+  const parsed = StreetSpatialSegmentIdSchema.safeParse(segmentId);
+  if (!parsed.success) return { x: Math.max(0, Math.min(100, parkedPosition.x)), y: Math.max(0, Math.min(100, parkedPosition.y + 10)) };
+
+  const candidates: VehicleWorldPosition[] = [
+    { x: parkedPosition.x, y: parkedPosition.y + 12 },
+    { x: parkedPosition.x - 12, y: parkedPosition.y },
+    { x: parkedPosition.x + 12, y: parkedPosition.y },
+    { x: parkedPosition.x, y: parkedPosition.y - 12 }
+  ];
+
+  const walkable = candidates
+    .map(candidate => resolveStreetNavigationTarget(parsed.data, candidate)?.position ?? null)
+    .filter((candidate): candidate is VehicleWorldPosition => Boolean(candidate))
+    .filter(candidate => streetDistance(candidate, parkedPosition) >= VEHICLE_EXIT_CLEARANCE)
+    .sort((a, b) => streetDistance(a, candidates[0]!) - streetDistance(b, candidates[0]!));
+
+  if (walkable[0]) return walkable[0];
+  const fallback = resolveStreetNavigationTarget(parsed.data, candidates[0]!)?.position;
+  return fallback ?? { x: parkedPosition.x, y: Math.max(0, Math.min(100, parkedPosition.y + 10)) };
 }
 
 export async function getVehicleState(db: Queryable, playerId: string): Promise<VehicleState> {
@@ -319,10 +352,12 @@ export async function vehicleAction(
       await client.query('UPDATE player_vehicles SET active = true, occupied = true, updated_at = now() WHERE id = $1', [vehicleId]);
     } else if (action === 'exit') {
       if (!vehicle.occupied) throw new VehicleCommandError('vehicle_not_occupied', 409);
+      const parkedPosition = { x: Number(vehicle.parked_position_x), y: Number(vehicle.parked_position_y) };
+      const exitPosition = resolveVehicleExitPosition(String(vehicle.parked_segment_id), parkedPosition);
       await client.query('UPDATE player_vehicles SET occupied = false, updated_at = now() WHERE id = $1', [vehicleId]);
       await client.query(
         'UPDATE player_street_state SET position_x = $2, position_y = $3, updated_at = now() WHERE player_id = $1',
-        [playerId, Number(vehicle.parked_position_x), Number(vehicle.parked_position_y)]
+        [playerId, exitPosition.x, exitPosition.y]
       );
     } else if (action === 'lock') {
       if (vehicle.occupied) throw new VehicleCommandError('vehicle_exit_before_locking', 409);
