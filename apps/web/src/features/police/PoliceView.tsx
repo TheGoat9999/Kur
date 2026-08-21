@@ -27,7 +27,7 @@ type Tab = 'overview' | 'dispatch' | 'field' | 'records' | 'evidence' | 'pursuit
 export function PoliceView() {
   const { locale } = useI18n();
   const bg = locale === 'bg';
-  const [state, setState] = useState<PoliceState | null>(null);
+  const [policeState, setState] = useState<PoliceState | null>(null);
   const [tab, setTab] = useState<Tab>('overview');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,14 +64,15 @@ export function PoliceView() {
   }, [bg]);
 
   useEffect(() => { refresh(); }, []);
-  useEffect(() => { if (state?.profile.callsign) setCallsign(state.profile.callsign); }, [state?.profile.callsign]);
+  useEffect(() => { if (policeState?.profile.callsign) setCallsign(policeState.profile.callsign); }, [policeState?.profile.callsign]);
 
   async function refresh() { try { setError(null); setState(await getPolice()); } catch (e) { setError(message(e)); } }
   async function run(action: () => Promise<PoliceState>) {
     try { setBusy(true); setError(null); setState(await action()); } catch (e) { setError(message(e)); } finally { setBusy(false); }
   }
 
-  if (!state) return <section className="police-shell"><div className="police-loading">{error ?? copy.loading}</div></section>;
+  if (!policeState) return <section className="police-shell"><div className="police-loading">{error ?? copy.loading}</div></section>;
+  const state = policeState;
   const operational = state.profile.careerStatus === 'officer' && state.profile.onDuty;
   const careerLabel = state.profile.careerStatus === 'applicant' ? copy.applicant : state.profile.careerStatus === 'cadet' ? copy.cadet : copy.officer;
 
