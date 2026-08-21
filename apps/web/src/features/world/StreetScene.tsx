@@ -20,16 +20,12 @@ import { StreetPopulation } from './StreetPopulation';
 import { STREET_SCENES } from './street-config';
 import './street-world.css';
 import './vehicle-world.css';
+import './vehicle-world-v03.css';
 
 const segmentOrder = ['market_block_3', 'cypress_corner', 'mira_alley'] as const;
+const VEHICLE_INTERACTION_RADIUS = 14;
 type VehicleAction = 'select' | 'enter' | 'exit' | 'lock' | 'unlock';
 type MovementPreview = Pick<StreetMoveResult, 'position' | 'route'> & { requestedPosition: StreetPosition; blocked: boolean };
-
-const PARKING_POSITIONS: Record<string, Array<{ x: number; y: number }>> = {
-  market_block_3: [{ x: 25, y: 57 }, { x: 67, y: 57 }, { x: 82, y: 57 }],
-  cypress_corner: [{ x: 24, y: 58 }, { x: 66, y: 58 }, { x: 82, y: 58 }],
-  mira_alley: [{ x: 29, y: 61 }, { x: 66, y: 61 }, { x: 82, y: 61 }]
-};
 
 export function StreetScene({ street, position, moving, activeRoute, characterRecipe, vehicles, vehicleBusy, selectedObjectId, busy, onMove, onSelectObject, onAction, onVehicleAction, onCloseSelection }: {
   street: StreetState;
@@ -115,9 +111,21 @@ export function StreetScene({ street, position, moving, activeRoute, characterRe
     setSelectedVehicleId(vehicle.id);
   }
 
+  function approachVehicle(vehicle: PlayerVehicle) {
+    if (moving || occupiedVehicle) return;
+    const dx = position.x - vehicle.parkedPosition.x;
+    const dy = position.y - vehicle.parkedPosition.y;
+    const length = Math.max(1, Math.hypot(dx, dy));
+    const target = {
+      x: clamp(vehicle.parkedPosition.x + (dx / length) * 10, 3, 97),
+      y: clamp(vehicle.parkedPosition.y + (dy / length) * 10, 3, 97)
+    };
+    onMove(target);
+  }
+
   const routeToRender = activeRoute ?? (!moving && preview && !preview.blocked ? preview.route : null);
   const destination = activeRoute?.[activeRoute.length - 1] ?? preview?.requestedPosition ?? null;
-  const parkingPositions = PARKING_POSITIONS[street.currentSegmentId] ?? PARKING_POSITIONS.market_block_3;
+  const selectedVehicleInRange = selectedVehicle ? isVehicleWithinReach(position, selectedVehicle) : false;
 
   return (
     <div className="street-scene-shell">
@@ -134,42 +142,69 @@ export function StreetScene({ street, position, moving, activeRoute, characterRe
 
         {visibleObjects.map(object => <StreetObject key={`${street.currentSegmentId}:${object.id}`} definition={object} selected={selectedObjectId === object.id} alerted={object.id === 'corner_store' && street.flags.cornerStoreAlerted} onSelect={() => { setSelectedVehicleId(null); onSelectObject(object.id); }} />)}
 
-        {parkedVehicles.map((vehicle, index) => {
-          const spot = parkingPositions[index % parkingPositions.length] ?? { x: 50, y: 58 };
-          return <button key={vehicle.id} type="button" className={`street-world-vehicle street-collision-actor ${vehicle.active ? 'active' : ''} ${vehicle.locked ? 'locked' : ''} ${selectedVehicleId === vehicle.id ? 'selected' : ''}`} style={{ left: `${spot.x}%`, top: `${spot.y}%` }} onClick={() => selectVehicle(vehicle)} aria-label={`${vehicle.model.displayName} · ${vehicle.locked ? copy.locked : copy.unlocked}`}><VehicleArtwork model={vehicle.model} compact /></button>;
+        {parkedVehicles.map(vehicle => {
+          const localRange = isVehicleWithinReach(position, vehicle);
+          return <button
+            key={vehicle.id}
+            type="button"
+            className={`street-world-vehicle street-collision-actor ${vehicle.active ? 'active' : ''} ${vehicle.locked ? 'locked' : ''} ${localRange ? 'near' : ''} ${selectedVehicleId === vehicle.id ? 'selected' : ''}`}
+            style={{ left: `${vehicle.parkedPosition.x}%`, top: `${vehicle.parkedPosition.y}%` }}
+            onClick={() => selectVehicle(vehicle)}
+            aria-label={`${vehicle.model.displayName} · ${vehicle.locked ? copy.locked : copy.unlocked}`}
+          >
+            <VehicleArtwork model={vehicle.model} compact />
+            <span className="street-world-vehicle-label"><b>{vehicle.model.brand} {vehicle.model.model}</b><small>{localRange ? copy.withinReach : copy.approach}</small></span>
+          </button>;
         })}
 
         <div className={`street-player ${occupiedVehicle ? 'street-player-hidden-in-vehicle' : ''}`} style={playerStyle} aria-label={t('world.you')}><WorldCharacter visual={playerVisual} direction={playerDirection} moving={moving} className="street-player-avatar" /><b>{t('world.you')}</b></div>
 
         {selected && !selectedVehicle && <InteractionPanel object={selected} actionStates={street.actionStates} busy={busy} inRange={inRange} moving={moving} onApproach={approachSelected} onAction={onAction} onClose={onCloseSelection} />}
-        {selectedVehicle && <VehicleWorldPanel vehicle={selectedVehicle} copy={copy} busy={vehicleBusy} onAction={onVehicleAction} onClose={() => setSelectedVehicleId(null)} />}
+        {selectedVehicle && <VehicleWorldPanel vehicle={selectedVehicle} copy={copy} busy={vehicleBusy} inRange={selectedVehicleInRange} moving={moving} onApproach={() => approachVehicle(selectedVehicle)} onAction={onVehicleAction} onClose={() => setSelectedVehicleId(null)} />}
       </div>
     </div>
   );
 }
 
-function VehicleWorldPanel({ vehicle, copy, busy, onAction, onClose }: { vehicle: PlayerVehicle; copy: typeof enVehicleCopy; busy: string | null; onAction: (vehicle: PlayerVehicle, action: VehicleAction) => void; onClose: () => void }) {
+function VehicleWorldPanel({ vehicle, copy, busy, inRange, moving, onApproach, onAction, onClose }: {
+  vehicle: PlayerVehicle;
+  copy: typeof enVehicleCopy;
+  busy: string | null;
+  inRange: boolean;
+  moving: boolean;
+  onApproach: () => void;
+  onAction: (vehicle: PlayerVehicle, action: VehicleAction) => void;
+  onClose: () => void;
+}) {
   const avgCondition = Math.round((vehicle.engineCondition + vehicle.bodyCondition + vehicle.tireCondition) / 3);
-  return <aside className="street-vehicle-panel" aria-label={vehicle.model.displayName}>
+  const canInteract = inRange || vehicle.occupied;
+  return <aside className="street-vehicle-panel street-vehicle-panel-v03" aria-label={vehicle.model.displayName}>
     <div className="street-vehicle-panel-head">
       <VehicleArtwork model={vehicle.model} compact />
-      <div className="street-vehicle-panel-copy"><span>{vehicle.active ? copy.active : copy.ownedVehicle}</span><h3>{vehicle.model.brand} {vehicle.model.model}</h3><p>{vehicle.model.year} · {vehicle.parkedDisplayName}</p></div>
+      <div className="street-vehicle-panel-copy"><span>{vehicle.active ? copy.active : copy.ownedVehicle}</span><h3>{vehicle.model.brand} {vehicle.model.model}</h3><p>{vehicle.model.year} · {vehicle.parkedLocation.district}</p><strong>{vehicle.parkedLocation.street} · {vehicle.parkedLocation.segment}</strong></div>
       <button type="button" className="street-vehicle-panel-close" onClick={onClose}><GameIcon name="x" size={15} /></button>
     </div>
+    <div className={`street-vehicle-range-state ${canInteract ? 'ready' : ''}`}><GameIcon name={canInteract ? 'check' : 'map-pin'} size={15} /><div><b>{canInteract ? copy.inRangeTitle : copy.tooFarTitle}</b><span>{canInteract ? copy.inRangeDetail : copy.tooFarDetail}</span></div></div>
     <div className="street-vehicle-status">
       <span><small>{copy.fuel}</small><b>{Math.round(vehicle.fuelPercent)}%</b></span>
       <span><small>{copy.condition}</small><b>{avgCondition}%</b></span>
       <span><small>{copy.security}</small><b>{vehicle.locked ? copy.locked : copy.unlocked}</b></span>
     </div>
     <div className="street-vehicle-actions">
-      {!vehicle.active && <button disabled={Boolean(busy)} onClick={() => onAction(vehicle, 'select')}><GameIcon name="check" size={14} />{copy.makeActive}</button>}
+      {!canInteract && <button className="primary" disabled={moving} onClick={onApproach}><GameIcon name="footprints" size={14} />{moving ? copy.approaching : copy.approachVehicle}</button>}
+      {!vehicle.active && <button disabled={!canInteract || Boolean(busy)} onClick={() => onAction(vehicle, 'select')}><GameIcon name="check" size={14} />{copy.makeActive}</button>}
       {vehicle.occupied
         ? <button className="primary" disabled={Boolean(busy)} onClick={() => onAction(vehicle, 'exit')}><GameIcon name="door-open" size={14} />{copy.exit}</button>
-        : <button className="primary" disabled={vehicle.locked || Boolean(busy)} onClick={() => onAction(vehicle, 'enter')}><GameIcon name="car" size={14} />{copy.enter}</button>}
-      <button disabled={vehicle.occupied || Boolean(busy)} onClick={() => onAction(vehicle, vehicle.locked ? 'unlock' : 'lock')}><GameIcon name="lock" size={14} />{vehicle.locked ? copy.unlock : copy.lock}</button>
+        : <button className="primary" disabled={!inRange || vehicle.locked || Boolean(busy)} onClick={() => onAction(vehicle, 'enter')}><GameIcon name="car" size={14} />{copy.enter}</button>}
+      <button disabled={!inRange || vehicle.occupied || Boolean(busy)} onClick={() => onAction(vehicle, vehicle.locked ? 'unlock' : 'lock')}><GameIcon name="lock" size={14} />{vehicle.locked ? copy.unlock : copy.lock}</button>
     </div>
-    <p className="vehicle-action-hint">{vehicle.occupied ? copy.driveHint : vehicle.locked ? copy.unlockHint : copy.enterHint}</p>
+    <p className="vehicle-action-hint">{vehicle.occupied ? copy.driveHint : !inRange ? copy.approachHint : vehicle.locked ? copy.unlockHint : copy.enterHint}</p>
   </aside>;
+}
+
+function isVehicleWithinReach(position: StreetPosition, vehicle: PlayerVehicle) {
+  if (vehicle.occupied) return true;
+  return Math.hypot(position.x - vehicle.parkedPosition.x, position.y - vehicle.parkedPosition.y) <= VEHICLE_INTERACTION_RADIUS;
 }
 
 function directionForRoute(position: StreetPosition, route: StreetPosition[] | null): WorldCharacterDirection {
@@ -182,5 +217,19 @@ function directionForRoute(position: StreetPosition, route: StreetPosition[] | n
   return dy >= 0 ? 'south' : 'north';
 }
 
-const enVehicleCopy = { active: 'ACTIVE VEHICLE', ownedVehicle: 'OWNED VEHICLE', fuel: 'Fuel', condition: 'Condition', security: 'Security', locked: 'Locked', unlocked: 'Unlocked', makeActive: 'Make active', enter: 'Enter', exit: 'Exit', lock: 'Lock', unlock: 'Unlock', driveHint: 'You are inside. Open the map and choose a destination to drive.', unlockHint: 'Unlock the car before entering.', enterHint: 'Enter the vehicle to enable driving from the map.' };
-const bgVehicleCopy: typeof enVehicleCopy = { active: 'АКТИВЕН АВТОМОБИЛ', ownedVehicle: 'ТВОЙ АВТОМОБИЛ', fuel: 'Гориво', condition: 'Състояние', security: 'Сигурност', locked: 'Заключена', unlocked: 'Отключена', makeActive: 'Направи активна', enter: 'Влез', exit: 'Излез', lock: 'Заключи', unlock: 'Отключи', driveHint: 'Вътре си. Отвори картата и избери дестинация, до която да караш.', unlockHint: 'Отключи колата, преди да влезеш.', enterHint: 'Влез в автомобила, за да активираш пътуването с кола от картата.' };
+function clamp(value: number, min: number, max: number) { return Math.max(min, Math.min(max, value)); }
+
+const enVehicleCopy = {
+  active: 'ACTIVE VEHICLE', ownedVehicle: 'OWNED VEHICLE', fuel: 'Fuel', condition: 'Condition', security: 'Security',
+  locked: 'Locked', unlocked: 'Unlocked', makeActive: 'Make active', enter: 'Enter', exit: 'Exit', lock: 'Lock', unlock: 'Unlock',
+  withinReach: 'Within reach', approach: 'Approach to interact', inRangeTitle: 'You are beside the car', inRangeDetail: 'Vehicle controls are available.',
+  tooFarTitle: 'Car found on this street', tooFarDetail: 'Walk up to the parked vehicle before using its controls.', approachVehicle: 'Approach vehicle', approaching: 'Approaching…',
+  driveHint: 'You are inside. Open the map and choose a destination to drive.', approachHint: 'Move next to the car first.', unlockHint: 'Unlock the car before entering.', enterHint: 'Enter the vehicle to enable driving from the map.'
+};
+const bgVehicleCopy: typeof enVehicleCopy = {
+  active: 'АКТИВЕН АВТОМОБИЛ', ownedVehicle: 'ТВОЙ АВТОМОБИЛ', fuel: 'Гориво', condition: 'Състояние', security: 'Сигурност',
+  locked: 'Заключена', unlocked: 'Отключена', makeActive: 'Направи активна', enter: 'Влез', exit: 'Излез', lock: 'Заключи', unlock: 'Отключи',
+  withinReach: 'До теб', approach: 'Приближи се за взаимодействие', inRangeTitle: 'Вече си до колата', inRangeDetail: 'Контролите на автомобила са достъпни.',
+  tooFarTitle: 'Колата е намерена на тази улица', tooFarDetail: 'Приближи се физически до паркирания автомобил, преди да използваш контролите.', approachVehicle: 'Приближи се до колата', approaching: 'Приближаване…',
+  driveHint: 'Вътре си. Отвори картата и избери дестинация, до която да караш.', approachHint: 'Първо се приближи до автомобила.', unlockHint: 'Отключи колата, преди да влезеш.', enterHint: 'Влез в автомобила, за да активираш пътуването с кола от картата.'
+};
