@@ -14,6 +14,8 @@ import { itemRoutes } from './routes/items.js';
 import { phoneRoutes } from './routes/phone.js';
 import { vehicleRoutes } from './routes/vehicles.js';
 import { jobRoutes } from './routes/jobs.js';
+import { npcRoutes } from './routes/npcs.js';
+import { policeRoutes } from './routes/police.js';
 import { emsRoutes } from './routes/ems.js';
 
 export function createApp(services: AppServices) {
@@ -28,12 +30,14 @@ export function createApp(services: AppServices) {
   app.use(characterRoutes(services));
   app.use(worldMapRoutes(services));
   app.use(worldActionRoutes(services));
+  app.use(npcRoutes(services));
   app.use(inventoryRoutes(services));
   app.use(itemRoutes());
   app.use(financeRoutes(services));
   app.use(phoneRoutes(services));
   app.use(vehicleRoutes(services));
   app.use(jobRoutes(services));
+  app.use(policeRoutes(services));
   app.use(emsRoutes(services));
   app.use((error: unknown, _request: Request, response: Response, _next: NextFunction) => {
     console.error(error);
