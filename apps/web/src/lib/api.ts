@@ -21,6 +21,12 @@ import {
 } from '@sol-dorado/contracts';
 import { ItemCatalogResponseSchema, type ItemCatalogResponse } from '@sol-dorado/contracts/items';
 import {
+  VehicleStateSchema,
+  VehicleTravelResultSchema,
+  type VehicleState,
+  type VehicleTravelResult
+} from '@sol-dorado/contracts/vehicles';
+import {
   StreetPositionResultSchema,
   type StreetPosition,
   type StreetPositionResult
@@ -135,15 +141,8 @@ export async function getInventory(): Promise<InventoryState> {
   return InventoryStateSchema.parse(await response.json());
 }
 
-export async function moveInventoryItem(
-  itemId: string,
-  toContainerKey: InventoryContainerKey,
-  toSlotIndex?: number
-): Promise<InventoryState> {
-  const response = await authenticatedFetch('/v1/inventory/move', {
-    method: 'POST',
-    body: JSON.stringify({ itemId, toContainerKey, toSlotIndex })
-  });
+export async function moveInventoryItem(itemId: string, toContainerKey: InventoryContainerKey, toSlotIndex?: number): Promise<InventoryState> {
+  const response = await authenticatedFetch('/v1/inventory/move', { method: 'POST', body: JSON.stringify({ itemId, toContainerKey, toSlotIndex }) });
   if (!response.ok) {
     const payload = await response.json().catch(() => null) as { error?: string } | null;
     throw new Error(payload?.error ?? `Inventory move failed (${response.status})`);
@@ -151,15 +150,8 @@ export async function moveInventoryItem(
   return InventoryStateSchema.parse(await response.json());
 }
 
-export async function splitInventoryItem(
-  itemId: string,
-  quantity: number,
-  toSlotIndex?: number
-): Promise<InventoryState> {
-  const response = await authenticatedFetch('/v1/inventory/split', {
-    method: 'POST',
-    body: JSON.stringify({ itemId, quantity, toSlotIndex })
-  });
+export async function splitInventoryItem(itemId: string, quantity: number, toSlotIndex?: number): Promise<InventoryState> {
+  const response = await authenticatedFetch('/v1/inventory/split', { method: 'POST', body: JSON.stringify({ itemId, quantity, toSlotIndex }) });
   if (!response.ok) {
     const payload = await response.json().catch(() => null) as { error?: string } | null;
     throw new Error(payload?.error ?? `Inventory split failed (${response.status})`);
@@ -168,10 +160,7 @@ export async function splitInventoryItem(
 }
 
 export async function useInventoryItem(itemId: string): Promise<InventoryMutationResult> {
-  const response = await authenticatedFetch('/v1/inventory/use', {
-    method: 'POST',
-    body: JSON.stringify({ itemId })
-  });
+  const response = await authenticatedFetch('/v1/inventory/use', { method: 'POST', body: JSON.stringify({ itemId }) });
   if (!response.ok) {
     const payload = await response.json().catch(() => null) as { error?: string } | null;
     throw new Error(payload?.error ?? `Inventory use failed (${response.status})`);
@@ -195,6 +184,30 @@ export function fundFinanceExchange(amountCents: number) { return financeCommand
 export function withdrawFinanceExchange() { return financeCommand('/v1/finance/exchange/withdraw'); }
 export function tradeFinanceCrypto(side: 'buy' | 'sell', symbol: FinanceAssetSymbol, usdCents: number) { return financeCommand('/v1/finance/crypto/trade', { side, symbol, usdCents }); }
 export function advanceFinanceMarket() { return financeCommand('/v1/finance/market/advance'); }
+
+export async function getVehicles(): Promise<VehicleState> {
+  const response = await authenticatedFetch('/v1/vehicles');
+  if (!response.ok) throw new Error(await apiError(response, 'Vehicles failed'));
+  return VehicleStateSchema.parse(await response.json());
+}
+
+export async function purchaseVehicle(stockKey: string): Promise<VehicleState> {
+  const response = await authenticatedFetch('/v1/vehicles/purchase', { method: 'POST', body: JSON.stringify({ stockKey }) });
+  if (!response.ok) throw new Error(await apiError(response, 'Vehicle purchase failed'));
+  return VehicleStateSchema.parse(await response.json());
+}
+
+export async function runVehicleAction(vehicleId: string, action: 'select' | 'enter' | 'exit' | 'lock' | 'unlock'): Promise<VehicleState> {
+  const response = await authenticatedFetch('/v1/vehicles/action', { method: 'POST', body: JSON.stringify({ vehicleId, action }) });
+  if (!response.ok) throw new Error(await apiError(response, 'Vehicle action failed'));
+  return VehicleStateSchema.parse(await response.json());
+}
+
+export async function driveVehicle(vehicleId: string, segmentId: string): Promise<VehicleTravelResult> {
+  const response = await authenticatedFetch('/v1/vehicles/travel', { method: 'POST', body: JSON.stringify({ vehicleId, segmentId }) });
+  if (!response.ok) throw new Error(await apiError(response, 'Vehicle travel failed'));
+  return VehicleTravelResultSchema.parse(await response.json());
+}
 
 async function financeCommand(path: string, body?: unknown): Promise<FinanceMutationResult> {
   const response = await authenticatedFetch(path, { method: 'POST', body: body === undefined ? undefined : JSON.stringify(body) });

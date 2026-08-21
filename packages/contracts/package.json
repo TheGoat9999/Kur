@@ -12,7 +12,8 @@
     "./world-map": { "types": "./dist/world-map.d.ts", "import": "./dist/world-map.js" },
     "./navigation": { "types": "./dist/navigation.d.ts", "import": "./dist/navigation.js" },
     "./items": { "types": "./dist/items.d.ts", "import": "./dist/items.js" },
-    "./inventory": { "types": "./dist/inventory.d.ts", "import": "./dist/inventory.js" }
+    "./inventory": { "types": "./dist/inventory.d.ts", "import": "./dist/inventory.js" },
+    "./vehicles": { "types": "./dist/vehicles.d.ts", "import": "./dist/vehicles.js" }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
