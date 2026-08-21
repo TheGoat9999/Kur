@@ -12,10 +12,10 @@ import {
   markPhoneNotificationRead,
   PhoneCommandError,
   savePhoneNote,
-  sendPhoneMessage,
   togglePhoneTask,
   updatePhoneSettings
 } from '../services/phone.js';
+import { sendPhoneMessageTransactional } from '../services/phone-messages.js';
 
 export function phoneRoutes(services: AppServices) {
   const router = Router();
@@ -35,7 +35,7 @@ export function phoneRoutes(services: AppServices) {
   router.post('/v1/phone/messages', async (request, response) => {
     const body = parse(PhoneSendMessageRequestSchema, request.body, response);
     if (!body) return;
-    try { response.json(await sendPhoneMessage(services.db, request.playerId!, body.threadId, body.body)); }
+    try { response.json(await sendPhoneMessageTransactional(services.db, request.playerId!, body.threadId, body.body)); }
     catch (error) { handlePhoneError(error, response); }
   });
 
