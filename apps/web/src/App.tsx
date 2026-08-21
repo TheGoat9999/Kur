@@ -4,7 +4,7 @@ import { Shell, type Screen } from './components/Shell';
 import { CharacterView } from './features/character/CharacterView';
 import { IntegrationView } from './features/integration/IntegrationView';
 import { WorldView } from './features/world/WorldView';
-import { InventoryView } from './features/inventory/InventoryView';
+import { InventoryModalV05 } from './features/inventory/InventoryModalV05';
 import { FinanceView } from './features/finance/FinanceView';
 import { getBootstrap } from './lib/api';
 import { useI18n } from './i18n';
@@ -64,7 +64,7 @@ export function App() {
       {screen === 'world' && (
         <div className="world-inventory-stage h-full min-h-0">
           <WorldView state={state} onStateChange={setState} />
-          {inventoryOpen && <InventoryView onStateChange={setState} onClose={() => setInventoryOpen(false)} />}
+          {inventoryOpen && <InventoryModalV05 onStateChange={setState} onClose={() => setInventoryOpen(false)} />}
         </div>
       )}
       {screen === 'character' && <CharacterView state={state} onStateChange={setState} />}
