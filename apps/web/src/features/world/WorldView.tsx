@@ -8,6 +8,7 @@ import { useNotifications, type NotificationTone } from '../../components/Notifi
 import { useI18n, type TranslationKey } from '../../i18n';
 import { ApiCommandError, getBootstrap, getStreetPosition, getStreetState, getWorldMap, moveStreetPlayer, runWorldAction, travelWorldMap } from '../../lib/api';
 import { StreetScene } from './StreetScene';
+import { WorldMapIcon } from './WorldMapIcon';
 import { WorldMapView } from './WorldMapView';
 import { worldMapCopy } from './world-map-copy';
 
@@ -179,7 +180,7 @@ export function WorldView({ state, onStateChange }: Props) {
 
   return <section className="world-screen">
     <StreetScene street={street} position={position} moving={moving} activeRoute={activeRoute} characterRecipe={state.character?.recipe} selectedObjectId={selectedObjectId} busy={busy} onMove={target => void move(target)} onSelectObject={objectId => setSelectedObjectId(objectId as StreetObjectId)} onAction={actionId => void act(actionId)} onCloseSelection={() => setSelectedObjectId(null)} />
-    <button type="button" className="world-map-launch" disabled={mapBusy} onClick={() => void openMap()}><GameIcon name="map" size={18} />{mapCopy.openMap}</button>
+    <button type="button" className="world-map-launch" disabled={mapBusy} onClick={() => void openMap()}><WorldMapIcon size={19} />{mapCopy.openMap}</button>
   </section>;
 }
 
