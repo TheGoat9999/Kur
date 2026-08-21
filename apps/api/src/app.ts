@@ -15,6 +15,7 @@ import { phoneRoutes } from './routes/phone.js';
 import { vehicleRoutes } from './routes/vehicles.js';
 import { jobRoutes } from './routes/jobs.js';
 import { npcRoutes } from './routes/npcs.js';
+import { policeRoutes } from './routes/police.js';
 
 export function createApp(services: AppServices) {
   const app = express();
@@ -35,6 +36,7 @@ export function createApp(services: AppServices) {
   app.use(phoneRoutes(services));
   app.use(vehicleRoutes(services));
   app.use(jobRoutes(services));
+  app.use(policeRoutes(services));
   app.use((error: unknown, _request: Request, response: Response, _next: NextFunction) => {
     console.error(error);
     response.status(500).json({ error: 'internal_server_error' });
