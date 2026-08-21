@@ -23,6 +23,7 @@ import { hoodWalkRoutes } from './routes/hood-walk.js';
 import { businessRoutes } from './routes/businesses.js';
 import { adminRoutes } from './routes/admin.js';
 import { needsRoutes } from './routes/needs.js';
+import { crimeRoutes } from './routes/crime.js';
 import { governmentRoutes } from './routes/government.js';
 
 export function createApp(services: AppServices) {
@@ -46,6 +47,7 @@ export function createApp(services: AppServices) {
   app.use(vehicleRoutes(services));
   app.use(jobRoutes(services));
   app.use(policeRoutes(services));
+  app.use(crimeRoutes(services));
   app.use(emsRoutes(services));
   app.use(justiceRoutes(services));
   app.use(realEstateRoutes(services));
