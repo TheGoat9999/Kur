@@ -1,0 +1,4 @@
+export type NeedVitals={health:number;energy:number;satiety:number;hydration:number;stress:number};
+export const NEEDS_TICK_MINUTES=15;
+export function applyNeedsTicks(vitals:NeedVitals,ticks:number,bleeding:number){const next={...vitals};for(let i=0;i<Math.max(0,Math.min(96,Math.floor(ticks)));i++){next.satiety=Math.max(0,next.satiety-1);next.hydration=Math.max(0,next.hydration-2);next.energy=Math.max(0,next.energy-1);let damage=bleeding===1?1:bleeding===2?2:bleeding>=3?4:0;if(next.satiety<=15&&i%2===0)damage+=1;if(next.hydration<=15)damage+=2;if(next.energy<=10)next.stress=Math.min(100,next.stress+1);if(next.satiety<=15||next.hydration<=15)next.stress=Math.min(100,next.stress+1);next.health=Math.max(0,next.health-damage);}return next;}
+export function shouldBeUnconscious(v:NeedVitals,bleeding:number){return v.health===0||(v.health<=12&&bleeding>=2)||(v.hydration===0&&v.energy===0);}
