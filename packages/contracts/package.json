@@ -15,6 +15,7 @@
     "./inventory": { "types": "./dist/inventory.d.ts", "import": "./dist/inventory.js" },
     "./phone": { "types": "./dist/phone.d.ts", "import": "./dist/phone.js" },
     "./vehicles": { "types": "./dist/vehicles.d.ts", "import": "./dist/vehicles.js" },
+    "./jobs": { "types": "./dist/jobs.d.ts", "import": "./dist/jobs.js" },
     "./npcs": { "types": "./dist/npcs.d.ts", "import": "./dist/npcs.js" }
   },
   "scripts": {
