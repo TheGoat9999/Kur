@@ -13,7 +13,12 @@ import { WorldMapIcon } from './WorldMapIcon';
 import { WorldMapView } from './WorldMapView';
 import { worldMapCopy } from './world-map-copy';
 
-interface Props { state: BootstrapState; onStateChange: (state: BootstrapState) => void; }
+interface Props {
+  state: BootstrapState;
+  onStateChange: (state: BootstrapState) => void;
+  focusVehicleId?: string | null;
+  onVehicleFocusHandled?: () => void;
+}
 type VehicleAction = 'select' | 'enter' | 'exit' | 'lock' | 'unlock';
 
 const notices: Record<WorldNoticeId, { title: TranslationKey; message: TranslationKey; tone: NotificationTone }> = {
@@ -35,7 +40,7 @@ const notices: Record<WorldNoticeId, { title: TranslationKey; message: Translati
   maya_tip: notice('world.notice.mayaTip.title', 'world.notice.mayaTip.message', 'info')
 };
 
-export function WorldView({ state, onStateChange }: Props) {
+export function WorldView({ state, onStateChange, focusVehicleId = null, onVehicleFocusHandled }: Props) {
   const { locale, t } = useI18n();
   const { push } = useNotifications();
   const [street, setStreet] = useState<StreetState | null>(null);
@@ -51,6 +56,7 @@ export function WorldView({ state, onStateChange }: Props) {
   const [mapOpen, setMapOpen] = useState(false);
   const [mapBusy, setMapBusy] = useState(false);
   const [mapTravelBusy, setMapTravelBusy] = useState(false);
+  const [mapVehicleFocusId, setMapVehicleFocusId] = useState<string | null>(null);
   const mapCopy = worldMapCopy(locale);
 
   const load = useCallback(async () => {
@@ -72,6 +78,38 @@ export function WorldView({ state, onStateChange }: Props) {
   }, [onStateChange]);
 
   useEffect(() => { void load(); }, [load]);
+
+  useEffect(() => {
+    if (!focusVehicleId) return;
+    let cancelled = false;
+    setMapBusy(true);
+    void Promise.all([getWorldMap(), getVehicles()])
+      .then(([nextMap, nextVehicles]) => {
+        if (cancelled) return;
+        const target = nextVehicles.ownedVehicles.find(vehicle => vehicle.id === focusVehicleId);
+        if (!target) throw new Error('vehicle_not_found');
+        setWorldMap(nextMap);
+        setVehicles(nextVehicles);
+        setMapVehicleFocusId(focusVehicleId);
+        setMapOpen(true);
+        push({
+          tone: 'info',
+          title: locale === 'bg' ? 'Колата е фокусирана на картата' : 'Vehicle focused on map',
+          message: `${target.parkedLocation.district} · ${target.parkedLocation.segment}`
+        });
+      })
+      .catch(() => {
+        if (!cancelled) push({ tone: 'error', title: t('common.actionBlocked'), message: mapCopy.mapLoadError });
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setMapBusy(false);
+          onVehicleFocusHandled?.();
+        }
+      });
+    return () => { cancelled = true; };
+  }, [focusVehicleId]);
+
   useEffect(() => {
     if (!street) return;
     const now = Date.now();
@@ -83,6 +121,7 @@ export function WorldView({ state, onStateChange }: Props) {
 
   async function openMap() {
     if (mapBusy) return;
+    setMapVehicleFocusId(null);
     if (worldMap) { setMapOpen(true); return; }
     setMapBusy(true);
     try {
@@ -107,6 +146,7 @@ export function WorldView({ state, onStateChange }: Props) {
       setVehicles(nextVehicles);
       setSelectedObjectId(null);
       setActiveRoute(null);
+      setMapVehicleFocusId(null);
       onStateChange(nextState);
       setMapOpen(false);
       push({ tone: 'success', title: mapCopy.travelHere, message: mapCopy.travelSuccess });
@@ -129,6 +169,7 @@ export function WorldView({ state, onStateChange }: Props) {
       setVehicles(result.state);
       setSelectedObjectId(null);
       setActiveRoute(null);
+      setMapVehicleFocusId(null);
       onStateChange(nextState);
       setMapOpen(false);
       push({ tone: 'success', title: locale === 'bg' ? 'Пристигна с автомобила' : 'Arrived by car', message: locale === 'bg' ? `${Math.round(result.distanceMeters)} м · -${result.fuelCostPercent.toFixed(1)}% гориво` : `${Math.round(result.distanceMeters)} m · -${result.fuelCostPercent.toFixed(1)}% fuel` });
@@ -202,7 +243,12 @@ export function WorldView({ state, onStateChange }: Props) {
     if (vehicleBusy) return;
     setVehicleBusy(`${vehicle.id}:${action}`);
     try {
-      setVehicles(await runVehicleAction(vehicle.id, action));
+      const nextVehicles = await runVehicleAction(vehicle.id, action);
+      setVehicles(nextVehicles);
+      if (action === 'exit') {
+        const spatial = await getStreetPosition();
+        setPosition(spatial.position);
+      }
       push({ tone: 'success', title: locale === 'bg' ? 'Автомобил' : 'Vehicle', message: vehicleActionMessage(action, vehicle.model.displayName, locale) });
     } catch (reason) {
       push({ tone: 'error', title: t('common.actionBlocked'), message: vehicleError(reason instanceof Error ? reason.message : String(reason), locale) });
@@ -212,7 +258,7 @@ export function WorldView({ state, onStateChange }: Props) {
   if ((!street || !position) && !loadError) return <div className="street-loading"><span><GameIcon name="map-pin" size={22} /></span><p>{t('world.loadingStreet')}</p></div>;
   if (!street || !position) return <div className="street-load-error"><GameIcon name="alert-triangle" size={24} /><h1>{t('world.loadFailed')}</h1><p>{t('world.loadFailedDetail')}</p><button className="primary-button" onClick={() => void load()}>{t('world.retry')}</button></div>;
 
-  if (mapOpen && worldMap) return <section className="world-screen"><WorldMapView map={worldMap} vehicles={vehicles} travelBusy={mapTravelBusy} onClose={() => setMapOpen(false)} onTravel={segmentId => void travelFromMap(segmentId)} onDrive={(vehicleId, segmentId) => void driveFromMap(vehicleId, segmentId)} /></section>;
+  if (mapOpen && worldMap) return <section className="world-screen"><WorldMapView map={worldMap} vehicles={vehicles} focusVehicleId={mapVehicleFocusId} travelBusy={mapTravelBusy} onClose={() => { setMapOpen(false); setMapVehicleFocusId(null); }} onTravel={segmentId => void travelFromMap(segmentId)} onDrive={(vehicleId, segmentId) => void driveFromMap(vehicleId, segmentId)} /></section>;
 
   return <section className="world-screen">
     <StreetScene street={street} position={position} moving={moving} activeRoute={activeRoute} characterRecipe={state.character?.recipe} vehicles={vehicles} vehicleBusy={vehicleBusy} selectedObjectId={selectedObjectId} busy={busy} onMove={target => void move(target)} onSelectObject={objectId => setSelectedObjectId(objectId as StreetObjectId)} onAction={actionId => void act(actionId)} onVehicleAction={(vehicle, action) => void handleVehicleAction(vehicle, action)} onCloseSelection={() => setSelectedObjectId(null)} />
@@ -262,8 +308,8 @@ function vehicleActionMessage(action: VehicleAction, name: string, locale: 'bg' 
   return `${name} · ${messages[action]}`;
 }
 function vehicleError(code: string, locale: 'bg' | 'en') {
-  const bg: Record<string, string> = { vehicle_not_at_player_location: 'Автомобилът не е на тази улица.', vehicle_locked: 'Първо отключи автомобила.', vehicle_enter_before_driving: 'Първо влез в активния автомобил.', vehicle_not_enough_fuel: 'Няма достатъчно гориво за този маршрут.', vehicle_route_unavailable: 'До тази улица няма достъпен автомобилен маршрут.', vehicle_exit_before_locking: 'Излез от автомобила, преди да го заключиш.' };
-  const en: Record<string, string> = { vehicle_not_at_player_location: 'The vehicle is not on this street.', vehicle_locked: 'Unlock the vehicle first.', vehicle_enter_before_driving: 'Enter the active vehicle before driving.', vehicle_not_enough_fuel: 'There is not enough fuel for this route.', vehicle_route_unavailable: 'There is no car route to that street.', vehicle_exit_before_locking: 'Exit the vehicle before locking it.' };
+  const bg: Record<string, string> = { vehicle_not_at_player_location: 'Автомобилът не е на тази улица.', vehicle_too_far: 'На правилната улица си, но трябва да се приближиш до автомобила.', vehicle_locked: 'Първо отключи автомобила.', vehicle_enter_before_driving: 'Първо влез в активния автомобил.', vehicle_not_enough_fuel: 'Няма достатъчно гориво за този маршрут.', vehicle_route_unavailable: 'До тази улица няма достъпен автомобилен маршрут.', vehicle_exit_before_locking: 'Излез от автомобила, преди да го заключиш.' };
+  const en: Record<string, string> = { vehicle_not_at_player_location: 'The vehicle is not on this street.', vehicle_too_far: 'You are on the correct street, but you need to approach the vehicle.', vehicle_locked: 'Unlock the vehicle first.', vehicle_enter_before_driving: 'Enter the active vehicle before driving.', vehicle_not_enough_fuel: 'There is not enough fuel for this route.', vehicle_route_unavailable: 'There is no car route to that street.', vehicle_exit_before_locking: 'Exit the vehicle before locking it.' };
   const dict = locale === 'bg' ? bg : en;
   return Object.entries(dict).find(([key]) => code.includes(key))?.[1] ?? (locale === 'bg' ? 'Действието с автомобила е блокирано.' : 'The vehicle action is blocked.');
 }
