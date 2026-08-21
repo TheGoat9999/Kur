@@ -11,9 +11,9 @@ import {
   getGovernmentState,
   issueDrivingLicense,
   issueIdCard,
-  payFine,
   updateCitizenProfile
 } from '../services/government.js';
+import { payCanonicalGovernmentFine } from '../services/government-fines.js';
 
 export function governmentRoutes(services: AppServices) {
   const router = Router();
@@ -54,7 +54,7 @@ export function governmentRoutes(services: AppServices) {
   router.post('/v1/government/fines/pay', async (request, response) => {
     const parsed = GovernmentFinePaymentRequestSchema.safeParse(request.body);
     if (!parsed.success) return response.status(400).json({ error: 'invalid_fine_payment', issues: parsed.error.issues });
-    try { response.json(await payFine(services.db, request.playerId!, parsed.data.fineId, parsed.data.amountCents)); }
+    try { response.json(await payCanonicalGovernmentFine(services.db, request.playerId!, parsed.data.fineId, parsed.data.amountCents)); }
     catch (error) { handle(response, error); }
   });
 
