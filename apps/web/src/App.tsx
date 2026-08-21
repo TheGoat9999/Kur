@@ -14,6 +14,7 @@ import { PoliceView } from './features/police/PoliceView';
 import { EmsView } from './features/ems/EmsView';
 import { Ems112Overlay } from './features/ems/Ems112Overlay';
 import { RealEstateView } from './features/real-estate/RealEstateView';
+import { BusinessesView } from './features/businesses/BusinessesView';
 import { AdminPanel } from './features/admin/AdminPanel';
 import { useNotifications } from './components/Notifications';
 import { getBootstrap, travelWorldMap } from './lib/api';
@@ -159,6 +160,7 @@ export function App() {
       )}
       {screen === 'character' && <CharacterView state={state} onStateChange={setState} />}
       {screen === 'finance' && <FinanceView onStateChange={setState} />}
+      {screen === 'businesses' && <BusinessesView />}
       {screen === 'jobs' && <>
         <section className="mb-4 flex flex-col gap-3 rounded-2xl border border-cyan-300/15 bg-[linear-gradient(135deg,rgba(8,28,36,.92),rgba(8,17,22,.96))] p-4 shadow-lg md:flex-row md:items-center md:justify-between">
           <div>
@@ -174,7 +176,7 @@ export function App() {
       {screen === 'property' && <RealEstateView onStateChange={setState} />}
       {screen === 'vehicles' && <VehiclesView state={state} mode={vehicleMode} onModeChange={setVehicleMode} onStateChange={setState} onWorld={() => { setVehicleMapFocusId(null); setScreen('world'); }} onLocateVehicle={locateVehicle} />}
       {screen === 'police' && <PoliceView />}
-      {!['world', 'character', 'finance', 'inventory', 'vehicles', 'jobs', 'property', 'police'].includes(screen) && <IntegrationView feature={screen as 'hospitality'} />}
+      {!['world', 'character', 'finance', 'businesses', 'inventory', 'vehicles', 'jobs', 'property', 'police'].includes(screen) && <IntegrationView feature={screen as 'hospitality'} />}
       {import.meta.env.DEV && <button onClick={() => setAdminOpen(true)} className="fixed bottom-4 right-4 z-[90] grid h-12 w-12 place-items-center rounded-full border border-amber-300/30 bg-[#0b171d]/95 text-lg text-amber-200 shadow-2xl backdrop-blur hover:border-amber-300/60" title={locale === 'bg' ? 'Администрация' : 'Administration'} aria-label={locale === 'bg' ? 'Отвори администрация' : 'Open administration'}>⚙</button>}
       {import.meta.env.DEV && <AdminPanel open={adminOpen} onClose={() => setAdminOpen(false)} onGameplayStateChanged={async () => setState(await getBootstrap())} />}
     </Shell>
