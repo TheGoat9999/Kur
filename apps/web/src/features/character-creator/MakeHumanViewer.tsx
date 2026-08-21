@@ -1,1 +1,1 @@
-export { MakeHumanViewer } from './MakeHumanViewerV2';
+export { StableCharacterViewer as MakeHumanViewer } from './StableCharacterViewer';
