@@ -4,6 +4,7 @@ import { Shell, type Screen } from './components/Shell';
 import { CharacterView } from './features/character/CharacterView';
 import { IntegrationView } from './features/integration/IntegrationView';
 import { WorldView } from './features/world/WorldView';
+import { HoodWalkOverlay } from './features/world/HoodWalkOverlay';
 import { InventoryModalV05 } from './features/inventory/InventoryModalV05';
 import { PhoneLauncher, PhoneOverlay } from './features/phone/PhoneOverlay';
 import { FinanceView } from './features/finance/FinanceView';
@@ -139,6 +140,7 @@ export function App() {
       {screen === 'world' && (
         <div className="world-inventory-stage h-full min-h-0">
           <WorldView state={state} onStateChange={setState} focusVehicleId={vehicleMapFocusId} onVehicleFocusHandled={() => setVehicleMapFocusId(null)} />
+          {!inventoryOpen && !phoneOpen && !emsOpen && <HoodWalkOverlay state={state} onStateChange={setState} />}
           {!inventoryOpen && !phoneOpen && !emsOpen && <PhoneLauncher onOpen={() => setPhoneOpen(true)} />}
           {!inventoryOpen && !phoneOpen && !emsOpen && <button onClick={() => setEmsOpen(true)} className="absolute bottom-4 left-4 z-30 min-h-11 rounded-xl border border-red-300/25 bg-[#0b171d]/95 px-4 text-xs font-black tracking-wide text-red-100 shadow-xl backdrop-blur hover:border-red-300/45">✚ EMS / 112</button>}
           {inventoryOpen && <InventoryModalV05 onStateChange={setState} onClose={() => setInventoryOpen(false)} />}
