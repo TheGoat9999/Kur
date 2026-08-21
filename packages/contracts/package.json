@@ -21,6 +21,7 @@
     "./ems": { "types": "./dist/ems.d.ts", "import": "./dist/ems.js" },
     "./real-estate": { "types": "./dist/real-estate.d.ts", "import": "./dist/real-estate.js" },
     "./hood-walk": { "types": "./dist/hood-walk.d.ts", "import": "./dist/hood-walk.js" },
+    "./businesses": { "types": "./dist/businesses.d.ts", "import": "./dist/businesses.js" },
     "./admin": { "types": "./dist/admin.d.ts", "import": "./dist/admin.js" }
   },
   "scripts": {
