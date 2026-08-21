@@ -12,6 +12,7 @@ import { VehiclesView, type VehicleViewMode } from './features/vehicles/Vehicles
 import { JobsView } from './features/jobs/JobsView';
 import { PoliceView } from './features/police/PoliceView';
 import { EmsView } from './features/ems/EmsView';
+import { Ems112Overlay } from './features/ems/Ems112Overlay';
 import { RealEstateView } from './features/real-estate/RealEstateView';
 import { useNotifications } from './components/Notifications';
 import { getBootstrap, travelWorldMap } from './lib/api';
@@ -26,7 +27,8 @@ export function App() {
   const [vehicleMapFocusId, setVehicleMapFocusId] = useState<string | null>(null);
   const [inventoryOpen, setInventoryOpen] = useState(false);
   const [phoneOpen, setPhoneOpen] = useState(false);
-  const [emsOpen, setEmsOpen] = useState(false);
+  const [emsWorkspaceOpen, setEmsWorkspaceOpen] = useState(false);
+  const [emergencyOpen, setEmergencyOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +44,8 @@ export function App() {
       setVehicleMapFocusId(null);
       setScreen('world');
       setMenuOpen(false);
-      setEmsOpen(false);
+      setEmsWorkspaceOpen(false);
+      setEmergencyOpen(false);
       if (key === 'i') {
         setPhoneOpen(false);
         setInventoryOpen(value => !value);
@@ -59,7 +62,8 @@ export function App() {
     function openDealer() {
       setInventoryOpen(false);
       setPhoneOpen(false);
-      setEmsOpen(false);
+      setEmsWorkspaceOpen(false);
+      setEmergencyOpen(false);
       setMenuOpen(false);
       setVehicleMapFocusId(null);
       setVehicleMode('dealer');
@@ -95,14 +99,16 @@ export function App() {
   function locateVehicle(vehicleId: string) {
     setInventoryOpen(false);
     setPhoneOpen(false);
-    setEmsOpen(false);
+    setEmsWorkspaceOpen(false);
+    setEmergencyOpen(false);
     setMenuOpen(false);
     setVehicleMapFocusId(vehicleId);
     setScreen('world');
   }
 
   function changeScreen(next: Screen) {
-    setEmsOpen(false);
+    setEmsWorkspaceOpen(false);
+    setEmergencyOpen(false);
     if (next === 'inventory') {
       setVehicleMapFocusId(null);
       setPhoneOpen(false);
@@ -126,7 +132,8 @@ export function App() {
     setVehicleMapFocusId(null);
     setPhoneOpen(false);
     setInventoryOpen(false);
-    setEmsOpen(false);
+    setEmsWorkspaceOpen(false);
+    setEmergencyOpen(false);
     setMenuOpen(false);
     setScreen(feature);
   }
@@ -140,17 +147,28 @@ export function App() {
       {screen === 'world' && (
         <div className="world-inventory-stage h-full min-h-0">
           <WorldView state={state} onStateChange={setState} focusVehicleId={vehicleMapFocusId} onVehicleFocusHandled={() => setVehicleMapFocusId(null)} />
-          {!inventoryOpen && !phoneOpen && !emsOpen && <HoodWalkOverlay state={state} onStateChange={setState} />}
-          {!inventoryOpen && !phoneOpen && !emsOpen && <PhoneLauncher onOpen={() => setPhoneOpen(true)} />}
-          {!inventoryOpen && !phoneOpen && !emsOpen && <button onClick={() => setEmsOpen(true)} className="absolute bottom-4 left-4 z-30 min-h-11 rounded-xl border border-red-300/25 bg-[#0b171d]/95 px-4 text-xs font-black tracking-wide text-red-100 shadow-xl backdrop-blur hover:border-red-300/45">✚ EMS / 112</button>}
+          {!inventoryOpen && !phoneOpen && !emergencyOpen && <HoodWalkOverlay state={state} onStateChange={setState} />}
+          {!inventoryOpen && !phoneOpen && !emergencyOpen && <PhoneLauncher onOpen={() => setPhoneOpen(true)} />}
+          {!inventoryOpen && !phoneOpen && !emergencyOpen && <button onClick={() => setEmergencyOpen(true)} className="absolute bottom-4 left-4 z-30 min-h-11 rounded-xl border border-red-300/25 bg-[#0b171d]/95 px-4 text-xs font-black tracking-wide text-red-100 shadow-xl backdrop-blur hover:border-red-300/45">112 · {locale === 'bg' ? 'Медицински сигнал' : 'Medical emergency'}</button>}
           {inventoryOpen && <InventoryModalV05 onStateChange={setState} onClose={() => setInventoryOpen(false)} />}
           {phoneOpen && <PhoneOverlay state={state} onClose={() => setPhoneOpen(false)} onOpenFeature={openPhoneFeature} />}
-          {emsOpen && <EmsView onStateChange={setState} onClose={() => setEmsOpen(false)} />}
+          {emergencyOpen && <Ems112Overlay onClose={() => setEmergencyOpen(false)} />}
         </div>
       )}
       {screen === 'character' && <CharacterView state={state} onStateChange={setState} />}
       {screen === 'finance' && <FinanceView onStateChange={setState} />}
-      {screen === 'jobs' && <JobsView onStateChange={setState} />}
+      {screen === 'jobs' && <>
+        <section className="mb-4 flex flex-col gap-3 rounded-2xl border border-cyan-300/15 bg-[linear-gradient(135deg,rgba(8,28,36,.92),rgba(8,17,22,.96))] p-4 shadow-lg md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="text-[10px] font-black uppercase tracking-[.2em] text-cyan-300">SOL DORADO MEDICAL</div>
+            <h2 className="mt-1 text-base font-black text-slate-50">{locale === 'bg' ? 'EMS · Служебен достъп' : 'EMS · Staff access'}</h2>
+            <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-400">{locale === 'bg' ? 'Диспечерът, активните случаи и медицинският MDT са служебни инструменти и вече се отварят от секцията за работа и кариера, а не от публичния 112 бутон.' : 'Dispatch, active cases and the medical MDT are staff tools and now open from Jobs & Careers instead of the public 112 button.'}</p>
+          </div>
+          <button onClick={() => setEmsWorkspaceOpen(true)} className="min-h-11 shrink-0 rounded-xl border border-cyan-300/25 bg-cyan-300/10 px-4 text-sm font-black text-cyan-100 hover:border-cyan-300/45">✚ {locale === 'bg' ? 'Отвори EMS / MDT' : 'Open EMS / MDT'}</button>
+        </section>
+        <JobsView onStateChange={setState} />
+        {emsWorkspaceOpen && <EmsView onStateChange={setState} onClose={() => setEmsWorkspaceOpen(false)} />}
+      </>}
       {screen === 'property' && <RealEstateView onStateChange={setState} />}
       {screen === 'vehicles' && <VehiclesView state={state} mode={vehicleMode} onModeChange={setVehicleMode} onStateChange={setState} onWorld={() => { setVehicleMapFocusId(null); setScreen('world'); }} onLocateVehicle={locateVehicle} />}
       {screen === 'police' && <PoliceView />}
