@@ -1,1 +1,1 @@
-export { StableCharacterViewer as MakeHumanViewer } from './StableCharacterViewer';
+export { ResilientCharacterViewer as MakeHumanViewer } from './ResilientCharacterViewer';
