@@ -103,6 +103,9 @@ export function normalizeVisualRecipe(input: unknown): CharacterVisualRecipeV2 {
     };
   }
 
+  const canonicalPreviewUrl = optionalString(grooming.canonicalPreviewUrl);
+  const portraitPreviewUrl = optionalString(grooming.portraitPreviewUrl);
+
   return {
     version: 2,
     body: source.body === 'female' ? 'female' : 'male',
@@ -135,8 +138,8 @@ export function normalizeVisualRecipe(input: unknown): CharacterVisualRecipeV2 {
       accessory: stringValue(grooming.accessory, 'none'),
       vibe: stringValue(grooming.vibe, 'street-modern'),
       accentColor: stringValue(grooming.accentColor, '#f0bd4f'),
-      canonicalPreviewUrl: optionalString(grooming.canonicalPreviewUrl),
-      portraitPreviewUrl: optionalString(grooming.portraitPreviewUrl)
+      ...(canonicalPreviewUrl ? { canonicalPreviewUrl } : {}),
+      ...(portraitPreviewUrl ? { portraitPreviewUrl } : {})
     },
     morphs: numberMap(source.morphs),
     faceMorphs: numberMap(source.faceMorphs)
