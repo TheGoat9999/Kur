@@ -3,6 +3,20 @@ import { z } from 'zod';
 export const VehicleClassSchema = z.enum(['compact', 'sedan', 'suv', 'pickup', 'sports', 'utility']);
 export const VehicleParkingKindSchema = z.enum(['dealership', 'street', 'home', 'parking']);
 
+export const VehicleWorldPositionSchema = z.object({
+  x: z.number().finite().min(0).max(100),
+  y: z.number().finite().min(0).max(100)
+});
+
+export const VehicleWorldLocationSchema = z.object({
+  region: z.string().min(1),
+  settlement: z.string().min(1),
+  zone: z.string().min(1),
+  district: z.string().min(1),
+  street: z.string().min(1),
+  segment: z.string().min(1)
+});
+
 export const VehicleModelSchema = z.object({
   id: z.string().min(1),
   brand: z.string().min(1),
@@ -29,7 +43,10 @@ export const PlayerVehicleSchema = z.object({
   mileageKm: z.number().int().nonnegative(),
   parkedSegmentId: z.string().min(1),
   parkedDisplayName: z.string().min(1),
+  parkedLocation: VehicleWorldLocationSchema,
+  parkedPosition: VehicleWorldPositionSchema,
   atPlayerLocation: z.boolean(),
+  withinInteractionRange: z.boolean(),
   locked: z.boolean(),
   occupied: z.boolean(),
   parkingKind: VehicleParkingKindSchema
@@ -50,12 +67,14 @@ export const VehicleDealershipSchema = z.object({
   name: z.string().min(1),
   segmentId: z.string().min(1),
   segmentDisplayName: z.string().min(1),
+  location: VehicleWorldLocationSchema,
   accessible: z.boolean(),
   stock: z.array(DealershipVehicleSchema)
 });
 
 export const VehicleStateSchema = z.object({
   activeVehicleId: z.uuid().nullable(),
+  playerLocation: VehicleWorldLocationSchema.nullable(),
   ownedVehicles: z.array(PlayerVehicleSchema),
   dealership: VehicleDealershipSchema
 });
@@ -81,6 +100,8 @@ export const VehicleTravelResultSchema = z.object({
 
 export type VehicleClass = z.infer<typeof VehicleClassSchema>;
 export type VehicleParkingKind = z.infer<typeof VehicleParkingKindSchema>;
+export type VehicleWorldPosition = z.infer<typeof VehicleWorldPositionSchema>;
+export type VehicleWorldLocation = z.infer<typeof VehicleWorldLocationSchema>;
 export type VehicleModel = z.infer<typeof VehicleModelSchema>;
 export type PlayerVehicle = z.infer<typeof PlayerVehicleSchema>;
 export type DealershipVehicle = z.infer<typeof DealershipVehicleSchema>;
