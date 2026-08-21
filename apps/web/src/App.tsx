@@ -4,6 +4,7 @@ import { Shell, type Screen } from './components/Shell';
 import { CharacterView } from './features/character/CharacterView';
 import { IntegrationView } from './features/integration/IntegrationView';
 import { WorldView } from './features/world/WorldView';
+import { HoodWalkOverlay } from './features/world/HoodWalkOverlay';
 import { InventoryModalV05 } from './features/inventory/InventoryModalV05';
 import { PhoneLauncher, PhoneOverlay } from './features/phone/PhoneOverlay';
 import { FinanceView } from './features/finance/FinanceView';
@@ -130,6 +131,7 @@ export function App() {
       {screen === 'world' && (
         <div className="world-inventory-stage h-full min-h-0">
           <WorldView state={state} onStateChange={setState} focusVehicleId={vehicleMapFocusId} onVehicleFocusHandled={() => setVehicleMapFocusId(null)} />
+          {!inventoryOpen && !phoneOpen && <HoodWalkOverlay state={state} onStateChange={setState} />}
           {!inventoryOpen && !phoneOpen && <PhoneLauncher onOpen={() => setPhoneOpen(true)} />}
           {inventoryOpen && <InventoryModalV05 onStateChange={setState} onClose={() => setInventoryOpen(false)} />}
           {phoneOpen && <PhoneOverlay state={state} onClose={() => setPhoneOpen(false)} onOpenFeature={openPhoneFeature} />}
