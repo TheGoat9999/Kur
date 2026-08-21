@@ -25,7 +25,7 @@ export function App() {
   const { push } = useNotifications();
   const [state, setState] = useState<BootstrapState | null>(null);
   const [screen, setScreen] = useState<Screen>('world');
-  const [vehicleMode, setVehicleMode] = useState<VehicleViewMode>('my');
+  const [vehicleMode, setVehicleMode] = useState<VehicleViewMode>('dealer');
   const [vehicleMapFocusId, setVehicleMapFocusId] = useState<string | null>(null);
   const [inventoryOpen, setInventoryOpen] = useState(false);
   const [phoneOpen, setPhoneOpen] = useState(false);
@@ -124,7 +124,6 @@ export function App() {
       setMenuOpen(false);
       return;
     }
-    if (next === 'vehicles') setVehicleMode('my');
     setVehicleMapFocusId(null);
     setInventoryOpen(false);
     setPhoneOpen(false);
@@ -154,7 +153,7 @@ export function App() {
           {!inventoryOpen && !phoneOpen && !emergencyOpen && <PhoneLauncher onOpen={() => setPhoneOpen(true)} />}
           {!inventoryOpen && !phoneOpen && !emergencyOpen && <button onClick={() => setEmergencyOpen(true)} className="absolute bottom-4 left-4 z-30 min-h-11 rounded-xl border border-red-300/25 bg-[#0b171d]/95 px-4 text-xs font-black tracking-wide text-red-100 shadow-xl backdrop-blur hover:border-red-300/45">112 · {locale === 'bg' ? 'Медицински сигнал' : 'Medical emergency'}</button>}
           {inventoryOpen && <InventoryModalV05 onStateChange={setState} onClose={() => setInventoryOpen(false)} />}
-          {phoneOpen && <PhoneOverlay state={state} onClose={() => setPhoneOpen(false)} onOpenFeature={openPhoneFeature} />}
+          {phoneOpen && <PhoneOverlay state={state} onClose={() => setPhoneOpen(false)} onOpenFeature={openPhoneFeature} onLocateVehicle={locateVehicle} />}
           {emergencyOpen && <Ems112Overlay onClose={() => setEmergencyOpen(false)} />}
         </div>
       )}
