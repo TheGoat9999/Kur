@@ -7,8 +7,8 @@ const rainmadGallery = 'https://items.rainmad.com/';
  * weapon manufacturing parts or procedures; recipes consume these as economy
  * resources while keeping the system game-focused.
  *
- * The local artwork reuses already-vendored Rainmad item icons whose provenance
- * is tracked in apps/web/public/assets/items/_source-map.json.
+ * The local artwork aliases already-vendored Rainmad item icons. The alias
+ * provenance is tracked in apps/web/public/assets/items/_weapon-crafting-source-map.json.
  */
 export const CRAFTING_ITEMS: ItemDefinition[] = [
   {
@@ -26,7 +26,7 @@ export const CRAFTING_ITEMS: ItemDefinition[] = [
     image: {
       provider: 'rainmad',
       galleryUrl: rainmadGallery,
-      localPath: '/assets/items/weapon_cleaning_kit.png',
+      localPath: '/assets/items/weapon_parts_kit.png',
       searchTerms: ['weapon parts', 'weapon cleaning kit'],
       preferredSourceFile: 'weapon_cleaning_kit.png'
     }
@@ -46,7 +46,7 @@ export const CRAFTING_ITEMS: ItemDefinition[] = [
     image: {
       provider: 'rainmad',
       galleryUrl: rainmadGallery,
-      localPath: '/assets/items/rifle_ammo.png',
+      localPath: '/assets/items/ammo_components_box.png',
       searchTerms: ['ammunition components', 'rifle ammo'],
       preferredSourceFile: 'rifle_ammo.png'
     }
@@ -66,7 +66,7 @@ export const CRAFTING_ITEMS: ItemDefinition[] = [
     image: {
       provider: 'rainmad',
       galleryUrl: rainmadGallery,
-      localPath: '/assets/items/screws_box.png',
+      localPath: '/assets/items/precision_hardware_pack.png',
       searchTerms: ['hardware', 'screws'],
       preferredSourceFile: 'screws_box.png'
     }
