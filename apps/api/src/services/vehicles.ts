@@ -3,15 +3,23 @@ import {
   VehicleStateSchema,
   VehicleTravelResultSchema,
   type VehicleState,
-  type VehicleTravelResult
+  type VehicleTravelResult,
+  type VehicleWorldLocation,
+  type VehicleWorldPosition
 } from '@sol-dorado/contracts/vehicles';
 import { resolveWorldConnectionRoute, type WorldStreetConnection } from '@sol-dorado/contracts/world-map';
-import { getStreetSpawnPosition } from '@sol-dorado/contracts/world-position';
 import type { Database } from '../db.js';
 
 const DEALERSHIP_KEY = 'dorado_motors';
 const DEALERSHIP_NAME = 'Dorado Motors';
 const DEALERSHIP_SEGMENT_ID = 'cypress_corner';
+const VEHICLE_INTERACTION_RADIUS = 14;
+
+const PARKING_SPOTS: Record<string, VehicleWorldPosition[]> = {
+  market_block_3: [{ x: 25, y: 57 }, { x: 67, y: 57 }, { x: 82, y: 57 }],
+  cypress_corner: [{ x: 24, y: 58 }, { x: 66, y: 58 }, { x: 82, y: 58 }],
+  mira_alley: [{ x: 29, y: 61 }, { x: 66, y: 61 }, { x: 82, y: 61 }]
+};
 
 type Queryable = Database | PoolClient;
 
@@ -38,26 +46,86 @@ function modelFromRow(row: Record<string, unknown>) {
   };
 }
 
+function locationFromRow(row: Record<string, unknown>, prefix: 'current' | 'parked' | 'dealer'): VehicleWorldLocation {
+  return {
+    region: String(row[`${prefix}_region_name`]),
+    settlement: String(row[`${prefix}_settlement_name`]),
+    zone: String(row[`${prefix}_zone_name`]),
+    district: String(row[`${prefix}_district_name`]),
+    street: String(row[`${prefix}_street_name`]),
+    segment: String(row[`${prefix}_segment_name`])
+  };
+}
+
+function parkingPosition(segmentId: string, ordinal = 0): VehicleWorldPosition {
+  const spots = PARKING_SPOTS[segmentId];
+  if (!spots?.length) return { x: 50, y: 58 };
+  return spots[Math.abs(ordinal) % spots.length] ?? spots[0]!;
+}
+
+function distanceBetween(a: VehicleWorldPosition, b: VehicleWorldPosition) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
 export async function getVehicleState(db: Queryable, playerId: string): Promise<VehicleState> {
   const [currentResult, ownedResult, dealershipSegmentResult] = await Promise.all([
-    db.query('SELECT current_segment_id FROM player_street_state WHERE player_id = $1', [playerId]),
+    db.query({
+      text: `
+        SELECT pss.current_segment_id,pss.position_x,pss.position_y,
+               r.name AS current_region_name,s.name AS current_settlement_name,z.name AS current_zone_name,
+               d.name AS current_district_name,st.name AS current_street_name,seg.display_name AS current_segment_name
+        FROM player_street_state pss
+        JOIN world_street_segments seg ON seg.id = pss.current_segment_id
+        JOIN world_streets st ON st.id = seg.street_id
+        JOIN world_districts d ON d.id = st.district_id
+        JOIN world_zones z ON z.id = d.zone_id
+        JOIN world_settlements s ON s.id = z.settlement_id
+        JOIN world_regions r ON r.id = s.region_id
+        WHERE pss.player_id = $1
+      `,
+      values: [playerId]
+    }),
     db.query({
       text: `
         SELECT pv.*, vm.brand,vm.model,vm.display_name,vm.year,vm.vehicle_class,vm.reliability,
                vm.performance,vm.comfort,vm.economy,vm.cargo_kg,vm.tank_liters,
+               r.name AS parked_region_name,s.name AS parked_settlement_name,z.name AS parked_zone_name,
+               d.name AS parked_district_name,st.name AS parked_street_name,seg.display_name AS parked_segment_name,
                seg.display_name AS parked_display_name
         FROM player_vehicles pv
         JOIN vehicle_models vm ON vm.id = pv.model_id
         JOIN world_street_segments seg ON seg.id = pv.parked_segment_id
+        JOIN world_streets st ON st.id = seg.street_id
+        JOIN world_districts d ON d.id = st.district_id
+        JOIN world_zones z ON z.id = d.zone_id
+        JOIN world_settlements s ON s.id = z.settlement_id
+        JOIN world_regions r ON r.id = s.region_id
         WHERE pv.player_id = $1
         ORDER BY pv.active DESC, pv.created_at DESC
       `,
       values: [playerId]
     }),
-    db.query('SELECT display_name FROM world_street_segments WHERE id = $1', [DEALERSHIP_SEGMENT_ID])
+    db.query({
+      text: `
+        SELECT r.name AS dealer_region_name,s.name AS dealer_settlement_name,z.name AS dealer_zone_name,
+               d.name AS dealer_district_name,st.name AS dealer_street_name,seg.display_name AS dealer_segment_name,
+               seg.display_name
+        FROM world_street_segments seg
+        JOIN world_streets st ON st.id = seg.street_id
+        JOIN world_districts d ON d.id = st.district_id
+        JOIN world_zones z ON z.id = d.zone_id
+        JOIN world_settlements s ON s.id = z.settlement_id
+        JOIN world_regions r ON r.id = s.region_id
+        WHERE seg.id = $1
+      `,
+      values: [DEALERSHIP_SEGMENT_ID]
+    })
   ]);
 
-  const currentSegmentId = currentResult.rows[0]?.current_segment_id ? String(currentResult.rows[0].current_segment_id) : '';
+  const current = currentResult.rows[0] as Record<string, unknown> | undefined;
+  const currentSegmentId = current?.current_segment_id ? String(current.current_segment_id) : '';
+  const currentPosition = current ? { x: Number(current.position_x), y: Number(current.position_y) } : null;
+  const playerLocation = current ? locationFromRow(current, 'current') : null;
   const dealershipAccessible = currentSegmentId === DEALERSHIP_SEGMENT_ID;
   const stockResult = dealershipAccessible
     ? await db.query({
@@ -74,31 +142,44 @@ export async function getVehicleState(db: Queryable, playerId: string): Promise<
       })
     : { rows: [] as Record<string, unknown>[] };
 
-  const ownedVehicles = ownedResult.rows.map(row => ({
-    id: row.id,
-    model: modelFromRow(row),
-    active: Boolean(row.active),
-    fuelPercent: Number(row.fuel_percent),
-    engineCondition: Number(row.engine_condition),
-    bodyCondition: Number(row.body_condition),
-    tireCondition: Number(row.tire_condition),
-    mileageKm: Number(row.mileage_km),
-    parkedSegmentId: String(row.parked_segment_id),
-    parkedDisplayName: String(row.parked_display_name),
-    atPlayerLocation: String(row.parked_segment_id) === currentSegmentId,
-    locked: Boolean(row.locked),
-    occupied: Boolean(row.occupied),
-    parkingKind: String(row.parking_kind)
-  }));
+  const ownedVehicles = ownedResult.rows.map(row => {
+    const parkedPosition = { x: Number(row.parked_position_x), y: Number(row.parked_position_y) };
+    const atPlayerLocation = String(row.parked_segment_id) === currentSegmentId;
+    const withinInteractionRange = Boolean(row.occupied) || Boolean(atPlayerLocation && currentPosition && distanceBetween(parkedPosition, currentPosition) <= VEHICLE_INTERACTION_RADIUS);
+    return {
+      id: row.id,
+      model: modelFromRow(row),
+      active: Boolean(row.active),
+      fuelPercent: Number(row.fuel_percent),
+      engineCondition: Number(row.engine_condition),
+      bodyCondition: Number(row.body_condition),
+      tireCondition: Number(row.tire_condition),
+      mileageKm: Number(row.mileage_km),
+      parkedSegmentId: String(row.parked_segment_id),
+      parkedDisplayName: String(row.parked_display_name),
+      parkedLocation: locationFromRow(row, 'parked'),
+      parkedPosition,
+      atPlayerLocation,
+      withinInteractionRange,
+      locked: Boolean(row.locked),
+      occupied: Boolean(row.occupied),
+      parkingKind: String(row.parking_kind)
+    };
+  });
+
+  const dealerRow = dealershipSegmentResult.rows[0] as Record<string, unknown> | undefined;
+  if (!dealerRow) throw new VehicleCommandError('vehicle_dealership_location_missing', 500);
 
   return VehicleStateSchema.parse({
     activeVehicleId: ownedVehicles.find(vehicle => vehicle.active)?.id ?? null,
+    playerLocation,
     ownedVehicles,
     dealership: {
       key: DEALERSHIP_KEY,
       name: DEALERSHIP_NAME,
       segmentId: DEALERSHIP_SEGMENT_ID,
-      segmentDisplayName: String(dealershipSegmentResult.rows[0]?.display_name ?? 'Cypress Avenue / Market Corner'),
+      segmentDisplayName: String(dealerRow.display_name ?? 'Cypress Avenue / Market Corner'),
+      location: locationFromRow(dealerRow, 'dealer'),
       accessible: dealershipAccessible,
       stock: stockResult.rows.map(row => ({
         stockKey: String(row.stock_key),
@@ -144,8 +225,12 @@ export async function purchaseVehicle(db: Database, playerId: string, stockKey: 
     if (!player) throw new VehicleCommandError('player_not_found', 404);
     if (Number(player.cash_cents) < Number(stock.price_cents)) throw new VehicleCommandError('vehicle_not_enough_cash', 409);
 
-    const ownedCountResult = await client.query('SELECT COUNT(*)::int AS count FROM player_vehicles WHERE player_id = $1', [playerId]);
+    const [ownedCountResult, parkedCountResult] = await Promise.all([
+      client.query('SELECT COUNT(*)::int AS count FROM player_vehicles WHERE player_id = $1', [playerId]),
+      client.query('SELECT COUNT(*)::int AS count FROM player_vehicles WHERE player_id = $1 AND parked_segment_id = $2', [playerId, DEALERSHIP_SEGMENT_ID])
+    ]);
     const firstVehicle = Number(ownedCountResult.rows[0]?.count ?? 0) === 0;
+    const spot = parkingPosition(DEALERSHIP_SEGMENT_ID, Number(parkedCountResult.rows[0]?.count ?? 0));
 
     await client.query({
       text: `
@@ -160,8 +245,8 @@ export async function purchaseVehicle(db: Database, playerId: string, stockKey: 
       text: `
         INSERT INTO player_vehicles
           (player_id,model_id,active,fuel_percent,engine_condition,body_condition,tire_condition,mileage_km,
-           parked_segment_id,locked,occupied,parking_kind,purchased_from)
-        VALUES ($1,$2,$3,72,$4,$5,$6,$7,$8,false,false,'dealership',$9)
+           parked_segment_id,parked_position_x,parked_position_y,locked,occupied,parking_kind,purchased_from)
+        VALUES ($1,$2,$3,72,$4,$5,$6,$7,$8,$9,$10,false,false,'dealership',$11)
       `,
       values: [
         playerId,
@@ -172,6 +257,8 @@ export async function purchaseVehicle(db: Database, playerId: string, stockKey: 
         stock.tire_condition,
         stock.mileage_km,
         DEALERSHIP_SEGMENT_ID,
+        spot.x,
+        spot.y,
         DEALERSHIP_KEY
       ]
     });
@@ -205,14 +292,23 @@ export async function vehicleAction(
   try {
     await client.query('BEGIN');
     const [locationResult, vehicleResult] = await Promise.all([
-      client.query('SELECT current_segment_id FROM player_street_state WHERE player_id = $1 FOR UPDATE', [playerId]),
+      client.query('SELECT current_segment_id,position_x,position_y FROM player_street_state WHERE player_id = $1 FOR UPDATE', [playerId]),
       client.query('SELECT * FROM player_vehicles WHERE id = $1 AND player_id = $2 FOR UPDATE', [vehicleId, playerId])
     ]);
     const vehicle = vehicleResult.rows[0];
     if (!vehicle) throw new VehicleCommandError('vehicle_not_found', 404);
-    const currentSegmentId = String(locationResult.rows[0]?.current_segment_id ?? '');
-    const besideVehicle = currentSegmentId === String(vehicle.parked_segment_id);
-    if (!besideVehicle) throw new VehicleCommandError('vehicle_not_at_player_location', 409);
+    const current = locationResult.rows[0];
+    if (!current) throw new VehicleCommandError('vehicle_player_location_missing', 404);
+
+    if (action !== 'exit') {
+      const sameSegment = String(current.current_segment_id) === String(vehicle.parked_segment_id);
+      if (!sameSegment) throw new VehicleCommandError('vehicle_not_at_player_location', 409);
+      const distance = distanceBetween(
+        { x: Number(current.position_x), y: Number(current.position_y) },
+        { x: Number(vehicle.parked_position_x), y: Number(vehicle.parked_position_y) }
+      );
+      if (distance > VEHICLE_INTERACTION_RADIUS) throw new VehicleCommandError('vehicle_too_far', 409);
+    }
 
     if (action === 'select') {
       await client.query('UPDATE player_vehicles SET active = false, occupied = false, updated_at = now() WHERE player_id = $1', [playerId]);
@@ -224,6 +320,10 @@ export async function vehicleAction(
     } else if (action === 'exit') {
       if (!vehicle.occupied) throw new VehicleCommandError('vehicle_not_occupied', 409);
       await client.query('UPDATE player_vehicles SET occupied = false, updated_at = now() WHERE id = $1', [vehicleId]);
+      await client.query(
+        'UPDATE player_street_state SET position_x = $2, position_y = $3, updated_at = now() WHERE player_id = $1',
+        [playerId, Number(vehicle.parked_position_x), Number(vehicle.parked_position_y)]
+      );
     } else if (action === 'lock') {
       if (vehicle.occupied) throw new VehicleCommandError('vehicle_exit_before_locking', 409);
       await client.query('UPDATE player_vehicles SET locked = true, updated_at = now() WHERE id = $1', [vehicleId]);
@@ -317,20 +417,27 @@ export async function travelWithVehicle(
     const mileageAddedKm = Math.round((distanceMeters / 1000) * 100) / 100;
     const storedMileageAdded = Math.max(1, Math.round(mileageAddedKm));
     const wear = Math.max(.05, distanceMeters / 6000);
+    const parkedCountResult = await client.query(
+      'SELECT COUNT(*)::int AS count FROM player_vehicles WHERE player_id = $1 AND parked_segment_id = $2 AND id <> $3',
+      [playerId, destinationSegmentId, vehicleId]
+    );
+    const spot = parkingPosition(destinationSegmentId, Number(parkedCountResult.rows[0]?.count ?? 0));
 
     await client.query({
       text: `
         UPDATE player_vehicles
         SET parked_segment_id = $2,
+            parked_position_x = $3,
+            parked_position_y = $4,
             parking_kind = 'street',
-            fuel_percent = GREATEST(0, fuel_percent - $3),
-            mileage_km = mileage_km + $4,
-            engine_condition = GREATEST(0, engine_condition - $5),
-            tire_condition = GREATEST(0, tire_condition - $6),
+            fuel_percent = GREATEST(0, fuel_percent - $5),
+            mileage_km = mileage_km + $6,
+            engine_condition = GREATEST(0, engine_condition - $7),
+            tire_condition = GREATEST(0, tire_condition - $8),
             updated_at = now()
         WHERE id = $1
       `,
-      values: [vehicleId, destinationSegmentId, fuelCostPercent, storedMileageAdded, wear * .45, wear]
+      values: [vehicleId, destinationSegmentId, spot.x, spot.y, fuelCostPercent, storedMileageAdded, wear * .45, wear]
     });
 
     await client.query({
@@ -347,7 +454,6 @@ export async function travelWithVehicle(
       values: [playerId, destination.settlement_name, destination.zone_name, destination.district_name, destination.display_name]
     });
 
-    const spawn = getStreetSpawnPosition(destinationSegmentId as 'market_block_3' | 'cypress_corner' | 'mira_alley');
     const visited = Array.isArray(progress.visited_segment_ids) ? progress.visited_segment_ids.map(String) : [];
     if (!visited.includes(destinationSegmentId)) visited.push(destinationSegmentId);
     await client.query({
@@ -360,7 +466,7 @@ export async function travelWithVehicle(
             updated_at = now()
         WHERE player_id = $1
       `,
-      values: [playerId, destinationSegmentId, visited, spawn.x, spawn.y]
+      values: [playerId, destinationSegmentId, visited, spot.x, spot.y]
     });
 
     await client.query('COMMIT');
