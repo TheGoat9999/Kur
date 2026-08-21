@@ -15,7 +15,8 @@
     "./inventory": { "types": "./dist/inventory.d.ts", "import": "./dist/inventory.js" },
     "./phone": { "types": "./dist/phone.d.ts", "import": "./dist/phone.js" },
     "./vehicles": { "types": "./dist/vehicles.d.ts", "import": "./dist/vehicles.js" },
-    "./jobs": { "types": "./dist/jobs.d.ts", "import": "./dist/jobs.js" }
+    "./jobs": { "types": "./dist/jobs.d.ts", "import": "./dist/jobs.js" },
+    "./real-estate": { "types": "./dist/real-estate.d.ts", "import": "./dist/real-estate.js" }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
