@@ -5,6 +5,7 @@ import { CharacterView } from './features/character/CharacterView';
 import { IntegrationView } from './features/integration/IntegrationView';
 import { WorldView } from './features/world/WorldView';
 import { InventoryModalV05 } from './features/inventory/InventoryModalV05';
+import { PhoneLauncher, PhoneOverlay } from './features/phone/PhoneOverlay';
 import { FinanceView } from './features/finance/FinanceView';
 import { VehiclesView, type VehicleViewMode } from './features/vehicles/VehiclesView';
 import { useNotifications } from './components/Notifications';
@@ -19,6 +20,7 @@ export function App() {
   const [vehicleMode, setVehicleMode] = useState<VehicleViewMode>('my');
   const [vehicleMapFocusId, setVehicleMapFocusId] = useState<string | null>(null);
   const [inventoryOpen, setInventoryOpen] = useState(false);
+  const [phoneOpen, setPhoneOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,14 +28,21 @@ export function App() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key.toLowerCase() !== 'i' || event.ctrlKey || event.metaKey || event.altKey) return;
+      const key = event.key.toLowerCase();
+      if ((key !== 'i' && key !== 'p') || event.ctrlKey || event.metaKey || event.altKey) return;
       const target = event.target as HTMLElement | null;
       if (target?.matches('input, textarea, select, [contenteditable="true"]')) return;
       event.preventDefault();
       setVehicleMapFocusId(null);
       setScreen('world');
-      setInventoryOpen(value => !value);
       setMenuOpen(false);
+      if (key === 'i') {
+        setPhoneOpen(false);
+        setInventoryOpen(value => !value);
+      } else {
+        setInventoryOpen(false);
+        setPhoneOpen(value => !value);
+      }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
@@ -42,6 +51,7 @@ export function App() {
   useEffect(() => {
     function openDealer() {
       setInventoryOpen(false);
+      setPhoneOpen(false);
       setMenuOpen(false);
       setVehicleMapFocusId(null);
       setVehicleMode('dealer');
@@ -76,6 +86,7 @@ export function App() {
 
   function locateVehicle(vehicleId: string) {
     setInventoryOpen(false);
+    setPhoneOpen(false);
     setMenuOpen(false);
     setVehicleMapFocusId(vehicleId);
     setScreen('world');
@@ -84,6 +95,7 @@ export function App() {
   function changeScreen(next: Screen) {
     if (next === 'inventory') {
       setVehicleMapFocusId(null);
+      setPhoneOpen(false);
       if (screen !== 'world') {
         setScreen('world');
         setInventoryOpen(true);
@@ -96,7 +108,16 @@ export function App() {
     if (next === 'vehicles') setVehicleMode('my');
     setVehicleMapFocusId(null);
     setInventoryOpen(false);
+    setPhoneOpen(false);
     setScreen(next);
+  }
+
+  function openPhoneFeature(feature: 'finance' | 'jobs') {
+    setVehicleMapFocusId(null);
+    setPhoneOpen(false);
+    setInventoryOpen(false);
+    setMenuOpen(false);
+    setScreen(feature);
   }
 
   if (error && !state) return <StartupError message={error} />;
@@ -107,13 +128,10 @@ export function App() {
       {error && <div className="mb-4 rounded-xl border border-red-400/20 bg-red-400/8 p-3 text-sm text-red-100">{error}</div>}
       {screen === 'world' && (
         <div className="world-inventory-stage h-full min-h-0">
-          <WorldView
-            state={state}
-            onStateChange={setState}
-            focusVehicleId={vehicleMapFocusId}
-            onVehicleFocusHandled={() => setVehicleMapFocusId(null)}
-          />
+          <WorldView state={state} onStateChange={setState} focusVehicleId={vehicleMapFocusId} onVehicleFocusHandled={() => setVehicleMapFocusId(null)} />
+          {!inventoryOpen && !phoneOpen && <PhoneLauncher onOpen={() => setPhoneOpen(true)} />}
           {inventoryOpen && <InventoryModalV05 onStateChange={setState} onClose={() => setInventoryOpen(false)} />}
+          {phoneOpen && <PhoneOverlay state={state} onClose={() => setPhoneOpen(false)} onOpenFeature={openPhoneFeature} />}
         </div>
       )}
       {screen === 'character' && <CharacterView state={state} onStateChange={setState} />}

@@ -13,6 +13,7 @@
     "./navigation": { "types": "./dist/navigation.d.ts", "import": "./dist/navigation.js" },
     "./items": { "types": "./dist/items.d.ts", "import": "./dist/items.js" },
     "./inventory": { "types": "./dist/inventory.d.ts", "import": "./dist/inventory.js" },
+    "./phone": { "types": "./dist/phone.d.ts", "import": "./dist/phone.js" },
     "./vehicles": { "types": "./dist/vehicles.d.ts", "import": "./dist/vehicles.js" }
   },
   "scripts": {
