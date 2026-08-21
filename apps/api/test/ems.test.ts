@@ -12,7 +12,8 @@ describe('EMS domain rules', () => {
     expect(emsCallPayout('p3', 100)).toBe(9000);
   });
 
-  it('clamps reputation at 100', () => {
+  it('clamps reputation at both progression boundaries', () => {
     expect(nextEmsReputation(99, 'p1', true, 2)).toBe(100);
+    expect(nextEmsReputation(0, 'p4', false, 0)).toBe(0);
   });
 });
