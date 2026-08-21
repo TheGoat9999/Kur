@@ -98,7 +98,7 @@ function PickupBed() {
   </g>;
 }
 
-function VanRoof({ label }: { label?: string }) {
+function VanRoof({ label }: { label: string | undefined }) {
   return <g>
     <rect x="70" y="16" width="51" height="34" rx="5" fill="#d9e2df" opacity=".07" />
     <path d="M76 20h39M76 46h39" stroke="#dbe6e3" strokeOpacity=".13" />
@@ -106,7 +106,7 @@ function VanRoof({ label }: { label?: string }) {
   </g>;
 }
 
-function TruckBox({ label }: { label?: string }) {
+function TruckBox({ label }: { label: string | undefined }) {
   return <g>
     <rect x="67" y="10" width="60" height="46" rx="4" fill="#12242a" stroke="#71858a" strokeOpacity=".22" />
     <path d="M73 17h48M73 24h48M73 31h48M73 38h48M73 45h48" stroke="#90a2a6" strokeOpacity=".12" />
