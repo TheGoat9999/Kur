@@ -72,5 +72,10 @@ try {
     VALUES ($1, 'DRC', 0), ($1, 'VTA', 0), ($1, 'MSA', 0)
     ON CONFLICT (player_id, symbol) DO NOTHING
   `, [playerId]);
+  await db.query(`
+    INSERT INTO player_admin_roles (player_id, role_key)
+    VALUES ($1, 'owner')
+    ON CONFLICT (player_id, role_key) DO NOTHING
+  `, [playerId]);
   console.log(`Seeded development player ${playerId}`);
 } finally { await db.end(); }
