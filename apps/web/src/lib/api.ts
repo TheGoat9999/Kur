@@ -21,6 +21,7 @@ import {
 } from '@sol-dorado/contracts';
 import { ItemCatalogResponseSchema, type ItemCatalogResponse } from '@sol-dorado/contracts/items';
 import { PhoneStateSchema, type PhoneSettings, type PhoneState } from '@sol-dorado/contracts/phone';
+import { PoliceStateSchema, type PoliceState } from '@sol-dorado/contracts/police';
 import { VehicleStateSchema, VehicleTravelResultSchema, type VehicleState, type VehicleTravelResult } from '@sol-dorado/contracts/vehicles';
 import { StreetPositionResultSchema, type StreetPosition, type StreetPositionResult } from '@sol-dorado/contracts/world-position';
 import { WorldMapStateSchema, WorldMapTravelResultSchema, type WorldMapState, type WorldMapTravelResult } from '@sol-dorado/contracts/world-map';
@@ -194,6 +195,30 @@ export async function driveVehicle(vehicleId: string, segmentId: string): Promis
   const response = await authenticatedFetch('/v1/vehicles/travel', { method: 'POST', body: JSON.stringify({ vehicleId, segmentId }) });
   if (!response.ok) throw new Error(await apiError(response, 'Vehicle travel failed'));
   return VehicleTravelResultSchema.parse(await response.json());
+}
+
+export async function getPolice(): Promise<PoliceState> { return policeCommand('/v1/police', undefined, 'GET'); }
+export function policeCareer(action: 'apply' | 'academy_step') { return policeCommand('/v1/police/career', { action }); }
+export function policeDuty(onDuty: boolean, callsign?: string) { return policeCommand('/v1/police/duty', { onDuty, callsign }); }
+export function createPoliceDispatch(input: { callCode: string; title: string; description: string; priority: 1 | 2 | 3; district: string; streetSegment: string; sourceKind?: 'system' | 'alarm' | 'caller' | 'officer' | 'camera'; knowledge?: Record<string, unknown> }) { return policeCommand('/v1/police/dispatch', input); }
+export function policeDispatchAction(callId: string, action: 'accept' | 'arrive' | 'clear') { return policeCommand('/v1/police/dispatch/action', { callId, action }); }
+export function createPoliceIntel(input: { callId?: string | null; sourceType: 'alarm' | 'caller' | 'witness' | 'camera' | 'officer' | 'evidence' | 'records'; label: string; summary: string; reliability: number; fields?: Record<string, unknown> }) { return policeCommand('/v1/police/intel', input); }
+export function startPoliceEncounter(input: { encounterType: 'traffic' | 'pedestrian' | 'scene'; subjectName?: string; vehicleId?: string; legalGround?: 'none' | 'reasonable_suspicion' | 'traffic_violation' | 'probable_cause' | 'warrant' }) { return policeCommand('/v1/police/encounters', input); }
+export function policeEncounterAction(encounterId: string, action: 'identify' | 'question' | 'detain' | 'search' | 'citation' | 'arrest' | 'release' | 'set_probable_cause') { return policeCommand('/v1/police/encounters/action', { encounterId, action }); }
+export function createPoliceReport(input: { title: string; reportType?: string; narrative?: string; involvedPeople?: unknown[]; charges?: unknown[]; linkedCallId?: string | null; finalize?: boolean }) { return policeCommand('/v1/police/reports', input); }
+export function createPoliceWarrant(input: { subjectName: string; reason: string; priority?: 'low' | 'medium' | 'high' | 'critical'; reportId?: string | null; expiresInDays?: number }) { return policeCommand('/v1/police/warrants', input); }
+export function policeWarrantAction(warrantId: string, action: 'serve' | 'cancel') { return policeCommand('/v1/police/warrants/action', { warrantId, action }); }
+export function createPoliceBolo(input: { targetType: 'person' | 'vehicle'; targetLabel: string; description: string; priority?: 'low' | 'medium' | 'high' | 'critical'; expiresInHours?: number }) { return policeCommand('/v1/police/bolos', input); }
+export function policeBoloAction(boloId: string, action: 'resolve' | 'cancel') { return policeCommand('/v1/police/bolos/action', { boloId, action }); }
+export function createPoliceEvidence(input: { evidenceType: string; label: string; description?: string; location?: string; reportId?: string | null; metadata?: Record<string, unknown> }) { return policeCommand('/v1/police/evidence', input); }
+export function policeEvidenceAction(evidenceId: string, action: 'store' | 'check_out' | 'release', note = '') { return policeCommand('/v1/police/evidence/action', { evidenceId, action, note }); }
+export function startPolicePursuit(input: { callId?: string | null; district: string; streetSegment: string; direction?: string }) { return policeCommand('/v1/police/pursuits', input); }
+export function policePursuitAction(pursuitId: string, action: 'aggressive' | 'maintain_visual' | 'predict_route' | 'request_backup' | 'containment' | 'back_off' | 'lose_visual' | 'refresh_search' | 'contain' | 'end') { return policeCommand('/v1/police/pursuits/action', { pursuitId, action }); }
+
+async function policeCommand(path: string, body?: unknown, method = 'POST'): Promise<PoliceState> {
+  const response = await authenticatedFetch(path, { method, body: body === undefined ? undefined : JSON.stringify(body) });
+  if (!response.ok) throw new ApiCommandError(await responseErrorCode(response, `police_action_failed_${response.status}`));
+  return PoliceStateSchema.parse(await response.json());
 }
 
 async function financeCommand(path: string, body?: unknown): Promise<FinanceMutationResult> {
