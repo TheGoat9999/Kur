@@ -131,7 +131,14 @@ export function StreetScene({ street, position, moving, activeRoute, characterRe
     <div className="street-scene-shell">
       <div className={`street-scene street-scene-${scene.theme} ${moving ? 'street-scene-moving' : ''} ${preview?.blocked ? 'street-scene-route-blocked' : ''}`} aria-label={t('world.sceneLabel', { street: t(scene.nameKey) })} onClick={moveFromScene} onPointerMove={updateMovementPreview} onPointerLeave={clearPreview}>
         <StreetBackdrop theme={scene.theme} alerted={street.flags.cornerStoreAlerted} />
-        <StreetPopulation segmentId={street.currentSegmentId} visibleObjectIds={street.visibleObjectIds} />
+        <StreetPopulation
+          segmentId={street.currentSegmentId}
+          visibleObjectIds={street.visibleObjectIds}
+          playerPosition={position}
+          onApproach={onMove}
+          suppressed={Boolean(selected || selectedVehicle)}
+          onNpcSelected={() => { setSelectedVehicleId(null); onCloseSelection(); }}
+        />
 
         <div className="street-scene-meta" title={t(scene.atmosphereKey)}><span>SOL DORADO / {t('world.title')}</span><h1>{t(scene.nameKey)}</h1></div>
         <div className={`street-danger-chip ${street.flags.cornerStoreAlerted ? 'street-danger-alert' : ''}`}><span />{street.flags.cornerStoreAlerted ? t('world.heightenedAwareness') : t('world.calm')}</div>
