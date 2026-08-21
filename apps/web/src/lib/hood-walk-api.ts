@@ -5,6 +5,12 @@ import { ApiCommandError } from './api';
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 const TOKEN_KEY = 'sd_session_token_v1';
 
+type HoodWalkCommandInput = HoodWalkCommand extends infer Command
+  ? Command extends { requestId: string }
+    ? Omit<Command, 'requestId'>
+    : never
+  : never;
+
 async function sessionToken() {
   const existing = localStorage.getItem(TOKEN_KEY);
   if (existing) return existing;
@@ -32,7 +38,7 @@ export async function getHoodWalk(): Promise<HoodWalkState> {
   return HoodWalkStateSchema.parse(await response.json());
 }
 
-export async function commandHoodWalk(command: Omit<HoodWalkCommand,'requestId'>): Promise<HoodWalkMutationResult> {
+export async function commandHoodWalk(command: HoodWalkCommandInput): Promise<HoodWalkMutationResult> {
   const response = await request('/v1/world/hood-walk', { method:'POST', body:JSON.stringify({ ...command, requestId:crypto.randomUUID() }) });
   if (!response.ok) throw new ApiCommandError(await errorCode(response));
   return HoodWalkMutationResultSchema.parse(await response.json());
