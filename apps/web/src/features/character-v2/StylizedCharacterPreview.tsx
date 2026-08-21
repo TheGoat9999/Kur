@@ -2,12 +2,7 @@ import { catalogItem } from './characterCatalog';
 import type { CharacterVisualRecipeV2 } from './characterVisualRecipe';
 
 const SKIN: Record<string, string> = {
-  porcelain: '#f2c8b6',
-  'light-warm': '#d9a186',
-  'warm-medium': '#b9785f',
-  olive: '#9e7356',
-  'deep-warm': '#734a37',
-  'deep-neutral': '#4d3028'
+  porcelain: '#f2c8b6', 'light-warm': '#d9a186', 'warm-medium': '#b9785f', olive: '#9e7356', 'deep-warm': '#734a37', 'deep-neutral': '#4d3028'
 };
 const EYE: Record<string, string> = {
   brown: '#4c3528', hazel: '#79633e', green: '#4b6f55', blue: '#4d7591', gray: '#78858d', amber: '#9a6a2e'
@@ -15,6 +10,16 @@ const EYE: Record<string, string> = {
 const HAIR: Record<string, string> = {
   black: '#171515', 'dark-brown': '#30221e', brown: '#604438', auburn: '#7a4638', blonde: '#c6a877', platinum: '#ded8c8', gray: '#777b80'
 };
+const VIBE_BG: Record<string, string> = {
+  'street-modern': 'модерен градски стил',
+  'coastal-clean': 'чист крайбрежен стил',
+  'nightlife-luxe': 'луксозен нощен стил',
+  'utility-industrial': 'функционален индустриален стил',
+  'sport-performance': 'спортен стил',
+  'old-money-modern': 'сдържан модерен лукс'
+};
+const BUILD_BG: Record<string, string> = { slim: 'слабо', average: 'средно', athletic: 'атлетично', heavy: 'едро' };
+const AGE_BG: Record<string, string> = { young: 'млад', adult: 'зрял', mature: 'по-зрял' };
 
 export function StylizedCharacterPreview({ recipe, name }: { recipe: CharacterVisualRecipeV2; name: string }) {
   const a = recipe.appearance;
@@ -48,25 +53,21 @@ export function StylizedCharacterPreview({ recipe, name }: { recipe: CharacterVi
         <defs>
           <linearGradient id="sd-top" x1="0" x2="1" y1="0" y2="1"><stop stopColor={outer && outer.id !== 'none' ? outer.primary : top?.primary ?? '#1a1d20'} /><stop offset="1" stopColor={outer && outer.id !== 'none' ? outer.secondary : top?.secondary ?? '#363a40'} /></linearGradient>
           <linearGradient id="sd-bottom" x1="0" x2="1"><stop stopColor={bottoms?.primary ?? '#30353b'} /><stop offset="1" stopColor={bottoms?.secondary ?? '#171b1f'} /></linearGradient>
-          <linearGradient id="sd-accent" x1="0" x2="1"><stop stopColor={g.accentColor} /><stop offset="1" stopColor="#ff5c8a" /></linearGradient>
           <filter id="sd-shadow"><feDropShadow dx="0" dy="18" stdDeviation="16" floodOpacity=".34" /></filter>
         </defs>
 
         <g transform={`translate(260 690) scale(${heightScale}) translate(-260 -690)`} filter="url(#sd-shadow)">
           <ellipse cx="260" cy="694" rx="118" ry="22" fill="rgba(0,0,0,.42)" />
-
           <g id="legs">
             <path d={`M${260-hip/2} 470 C${250-hip/2} 535 ${250-hip/2} 620 ${232-hip/2} 680 L${264-hip/2} 680 C${276-hip/2} 610 ${282-hip/2} 535 260 470Z`} fill="url(#sd-bottom)" />
             <path d={`M${260+hip/2} 470 C${270+hip/2} 535 ${270+hip/2} 620 ${288+hip/2} 680 L${256+hip/2} 680 C${244+hip/2} 610 ${238+hip/2} 535 260 470Z`} fill="url(#sd-bottom)" />
             <path d="M176 676 Q211 662 236 678 L231 700 Q195 705 171 695Z" fill={shoes?.primary ?? '#e7e7e5'} />
             <path d="M344 676 Q309 662 284 678 L289 700 Q325 705 349 695Z" fill={shoes?.primary ?? '#e7e7e5'} />
           </g>
-
           <g id="arms">
             <path d={`M${260-shoulder/2+8} 292 Q170 330 145 440 Q142 456 156 462 Q171 464 178 448 Q200 365 ${260-shoulder/2+28} 340Z`} fill={skin} />
             <path d={`M${260+shoulder/2-8} 292 Q350 330 375 440 Q378 456 364 462 Q349 464 342 448 Q320 365 ${260+shoulder/2-28} 340Z`} fill={skin} />
           </g>
-
           <g id="torso">
             <path d={`M${260-shoulder/2} 285 Q260 250 ${260+shoulder/2} 285 L${260+hip/2+18} 486 Q260 506 ${260-hip/2-18} 486Z`} fill="url(#sd-top)" />
             {outer && outer.id !== 'none' && <path d={`M${260-shoulder/2+10} 294 Q260 268 ${260+shoulder/2-10} 294 L${260+hip/2+8} 472 Q260 488 ${260-hip/2-8} 472Z`} fill="none" stroke={outer.secondary} strokeWidth="7" opacity=".8" />}
@@ -74,9 +75,7 @@ export function StylizedCharacterPreview({ recipe, name }: { recipe: CharacterVi
             {outer?.renderKind === 'varsity' && <path d="M252 280 L252 482 M268 280 L268 482" stroke={g.accentColor} strokeWidth="5" opacity=".85" />}
             {outer?.renderKind === 'blazer' && <><path d="M215 294 L255 372 L242 456" fill="none" stroke={outer.secondary} strokeWidth="11" /><path d="M305 294 L265 372 L278 456" fill="none" stroke={outer.secondary} strokeWidth="11" /></>}
           </g>
-
           <g id="neck"><rect x="239" y="230" width="42" height="68" rx="20" fill={skin} /></g>
-
           <g id="head">
             <ellipse cx="260" cy="190" rx={headRx} ry={headRy} fill={skin} />
             <path d={`M${260-headRx+5} 190 Q260 ${190+headRy+13} ${260+headRx-5} 190`} fill="none" stroke="rgba(70,35,25,.18)" strokeWidth="3" />
@@ -93,15 +92,14 @@ export function StylizedCharacterPreview({ recipe, name }: { recipe: CharacterVi
             {glasses && glasses.id !== 'none' && <><rect x="225" y="177" width="29" height="20" rx="7" fill="none" stroke={glasses.primary} strokeWidth="4" /><rect x="266" y="177" width="29" height="20" rx="7" fill="none" stroke={glasses.primary} strokeWidth="4" /><path d="M254 185 L266 185" stroke={glasses.primary} strokeWidth="4" /></>}
             {hat && hat.id !== 'none' && <Hat kind={hat.renderKind} primary={hat.primary} secondary={hat.secondary} />}
           </g>
-
           {jewelry && jewelry.id !== 'none' && <path d="M226 286 Q260 323 294 286" fill="none" stroke={jewelry.primary} strokeWidth="5" />}
           {accessory?.renderKind === 'bag' && <path d="M188 302 Q260 390 326 455" fill="none" stroke={accessory.primary} strokeWidth="12" opacity=".9" />}
         </g>
       </svg>
 
-      <div className="absolute left-5 top-5 rounded-full border border-white/10 bg-black/25 px-3 py-1 text-[10px] font-black uppercase tracking-[.16em] text-white/80 backdrop-blur">SOL DORADO · ART V2</div>
+      <div className="absolute left-5 top-5 rounded-full border border-white/10 bg-black/25 px-3 py-1 text-[10px] font-black uppercase tracking-[.16em] text-white/80 backdrop-blur">SOL DORADO · ИЛЮСТРАЦИЯ V2</div>
       <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4">
-        <div><div className="text-[10px] font-bold uppercase tracking-[.2em] text-amber-200/80">КАНОНИЧЕН ОБЛИК</div><div className="mt-1 text-2xl font-black tracking-tight text-white">{name || 'Моят герой'}</div><div className="mt-1 text-xs text-white/50">{g.vibe.replaceAll('-', ' ')} · {a.bodyBuild} · {a.ageBand}</div></div>
+        <div><div className="text-[10px] font-bold uppercase tracking-[.2em] text-amber-200/80">ТЕКУЩ ОБЛИК</div><div className="mt-1 text-2xl font-black tracking-tight text-white">{name || 'Моят герой'}</div><div className="mt-1 text-xs text-white/50">{VIBE_BG[g.vibe] ?? 'градски стил'} · {BUILD_BG[a.bodyBuild] ?? 'средно'} телосложение · {AGE_BG[a.ageBand] ?? 'зрял'}</div></div>
         <div className="h-14 w-2 rounded-full" style={{ background: `linear-gradient(${g.accentColor},#ff5c8a)` }} />
       </div>
     </div>
