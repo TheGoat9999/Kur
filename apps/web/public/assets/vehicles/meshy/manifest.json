@@ -1,0 +1,49 @@
+{
+  "assetId": "meshy-fast-74",
+  "purpose": "SOL DORADO realtime 3D vehicle feasibility spike",
+  "source": {
+    "uploadedName": "ergoninane-fast-74.glb",
+    "sha256": "89df0d8a799c0cfe6305c2861ffd37a6b2bf56820cdc61e95f301ff7e83cc327",
+    "bytes": 448596,
+    "format": "glTF 2.0 GLB",
+    "meshes": 5,
+    "nodes": 5,
+    "vertices": 10400,
+    "triangles": 10532,
+    "materials": 1,
+    "embeddedTextures": [
+      {
+        "mimeType": "image/png",
+        "width": 1024,
+        "height": 1024
+      }
+    ],
+    "skins": 0,
+    "animations": 0,
+    "notes": "Four wheel nodes plus one body node. Runtime spike does not require skeletal animation."
+  },
+  "runtime": {
+    "path": "/assets/vehicles/meshy/fast-74-world-lod.glb",
+    "sha256": "7c735243487f2808424d0f00c8ae7fa73223de2331d48cb2903297aa01224693",
+    "bytes": 7672,
+    "vertices": 221,
+    "triangles": 499,
+    "textures": 0,
+    "material": "baked vertex color / unlit",
+    "derivation": "Flattened node transforms, sampled the source 1K atlas into vertex colors, then applied an aggressive street-scale spatial clustering LOD. This tiny derivative is for visibility/performance testing, not final showroom quality."
+  },
+  "integration": {
+    "vehicleModelId": "veloce_sprint",
+    "surfaces": [
+      "Dorado Motors dealership artwork",
+      "owned vehicle artwork",
+      "parked street vehicle"
+    ],
+    "fallback": "existing Veloce Sprint 2D artwork when WebGL, Three.js CDN, or GLB loading fails"
+  },
+  "provenance": {
+    "provider": "Meshy user-uploaded export",
+    "productionCleared": false,
+    "note": "Investigation asset. Confirm the Meshy account plan and any reference-input rights before treating this model as production-cleared."
+  }
+}

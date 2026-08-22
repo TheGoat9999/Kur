@@ -1,0 +1,69 @@
+.vehicle-artwork.vehicle-artwork-3d {
+  position: relative;
+  display: block;
+  width: min(96%, 520px);
+  height: 190px;
+  min-height: 160px;
+  margin: 0;
+  overflow: visible;
+}
+.vehicle-artwork.vehicle-artwork-compact.vehicle-artwork-3d {
+  width: 150px;
+  height: 80px;
+  min-height: 0;
+}
+.world-vehicle-3d,
+.world-vehicle-3d-canvas,
+.world-vehicle-3d-fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.world-vehicle-3d {
+  display: block;
+  pointer-events: none;
+}
+.world-vehicle-3d-canvas {
+  display: block;
+  opacity: 0;
+  transition: opacity .18s ease;
+  filter: drop-shadow(0 10px 8px rgb(0 0 0 / .36));
+}
+.world-vehicle-3d-fallback {
+  display: grid;
+  place-items: center;
+  opacity: 1;
+  transition: opacity .18s ease;
+}
+.world-vehicle-3d-fallback > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.world-vehicle-3d-ready .world-vehicle-3d-canvas { opacity: 1; }
+.world-vehicle-3d-ready .world-vehicle-3d-fallback { opacity: 0; }
+.world-vehicle-3d-failed .world-vehicle-3d-canvas { display: none; }
+
+.street-world-vehicle .vehicle-artwork.vehicle-artwork-3d {
+  display: block !important;
+  position: absolute;
+  z-index: 2;
+  inset: -20px -24px;
+  width: auto !important;
+  height: auto;
+  min-height: 0;
+}
+.street-world-vehicle:has(.vehicle-artwork-3d)::before {
+  display: none !important;
+}
+.street-world-vehicle .vehicle-artwork-3d .world-vehicle-3d-canvas {
+  filter: drop-shadow(0 8px 5px rgb(0 0 0 / .48));
+}
+
+@media (max-width: 760px) {
+  .vehicle-artwork.vehicle-artwork-3d { height: 160px; min-height: 145px; }
+  .vehicle-artwork.vehicle-artwork-compact.vehicle-artwork-3d { width: 136px; height: 74px; min-height: 0; }
+  .street-world-vehicle .vehicle-artwork.vehicle-artwork-3d { inset: -18px -22px; }
+}

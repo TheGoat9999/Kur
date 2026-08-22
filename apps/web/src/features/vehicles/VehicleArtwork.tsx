@@ -1,4 +1,5 @@
 import type { VehicleModel } from '@sol-dorado/contracts/vehicles';
+import { WorldVehicle3D } from '../../components/WorldVehicle3D';
 
 const vehicleAssets: Record<string, { src: string; position: string }> = {
   bravura_compact_s: {
@@ -21,16 +22,33 @@ const vehicleAssets: Record<string, { src: string; position: string }> = {
 
 export function VehicleArtwork({ model, className = '', compact = false }: { model: VehicleModel; className?: string; compact?: boolean }) {
   const asset = vehicleAssets[model.id] ?? vehicleAssets.bravura_compact_s!;
+  const fallback = (
+    <img
+      src={asset.src}
+      alt={model.displayName}
+      loading="lazy"
+      decoding="async"
+      referrerPolicy="no-referrer"
+      style={{ objectPosition: asset.position }}
+    />
+  );
+
+  if (model.id === 'veloce_sprint') {
+    return (
+      <figure
+        className={`vehicle-artwork vehicle-artwork-3d ${compact ? 'vehicle-artwork-compact' : ''} ${className}`.trim()}
+        aria-label={`${model.displayName} 3D model`}
+        data-vehicle-render="meshy-glb-spike"
+      >
+        <WorldVehicle3D compact={compact} fallback={fallback} />
+        <span className="vehicle-artwork-vignette" aria-hidden="true" />
+      </figure>
+    );
+  }
+
   return (
     <figure className={`vehicle-artwork ${compact ? 'vehicle-artwork-compact' : ''} ${className}`} aria-label={model.displayName}>
-      <img
-        src={asset.src}
-        alt={model.displayName}
-        loading="lazy"
-        decoding="async"
-        referrerPolicy="no-referrer"
-        style={{ objectPosition: asset.position }}
-      />
+      {fallback}
       <span className="vehicle-artwork-vignette" aria-hidden="true" />
     </figure>
   );
