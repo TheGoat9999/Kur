@@ -109,6 +109,11 @@ export const EmsHandoffRequestSchema = z.object({
   notes: z.string().trim().max(800).default('')
 });
 
+export const EmsReportResultSchema = z.object({
+  noticeBg: z.string(),
+  noticeEn: z.string()
+});
+
 export const EmsMutationResultSchema = z.object({
   ems: EmsStateSchema,
   noticeBg: z.string(),
@@ -120,6 +125,7 @@ export type EmsCallStatus = z.infer<typeof EmsCallStatusSchema>;
 export type EmsTreatment = z.infer<typeof EmsTreatmentSchema>;
 export type EmsOutcome = z.infer<typeof EmsOutcomeSchema>;
 export type EmsAccess = z.infer<typeof EmsAccessSchema>;
+export type EmsReportResult = z.infer<typeof EmsReportResultSchema>;
 export type EmsCall = z.infer<typeof EmsCallSchema>;
 export type EmsState = z.infer<typeof EmsStateSchema>;
 export type EmsMutationResult = z.infer<typeof EmsMutationResultSchema>;
