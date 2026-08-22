@@ -1,45 +1,96 @@
-.world-map-canvas.world-map-level-region::before {
+.world-map-heading > small { display: none !important; }
+.world-map-toolbar { padding-top: 10px; padding-bottom: 9px; }
+
+.world-map-canvas.world-map-level-region::before,
+.world-map-canvas.world-map-level-settlement:has(.world-map-kind-airport)::before,
+.world-map-canvas.world-map-level-zone:has(.world-map-kind-mixed_use):has(.world-map-kind-residential)::before,
+.world-map-canvas.world-map-level-district::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-image: url('/assets/world/sol-dorado-island-master.svg');
   background-repeat: no-repeat;
   background-position: center;
+  background-size: cover;
+}
+
+.world-map-canvas.world-map-level-region::before {
+  background-image: url('/assets/world/sol-dorado-island-master.svg');
   background-size: contain;
   filter: saturate(1.08) contrast(1.035) brightness(.98);
+}
+
+.world-map-canvas.world-map-level-settlement:has(.world-map-kind-airport)::before {
+  background-image: url('/assets/world/sol-dorado-city-master.svg');
+  filter: saturate(1.08) contrast(1.04) brightness(.91);
+}
+
+.world-map-canvas.world-map-level-zone:has(.world-map-kind-mixed_use):has(.world-map-kind-residential)::before {
+  background-image: url('/assets/world/las-palmas-master.svg');
+  filter: saturate(1.06) contrast(1.05) brightness(.9);
+}
+
+.world-map-canvas.world-map-level-district::before {
+  background-image: url('/assets/world/district-master.svg');
+  filter: saturate(.95) contrast(1.04) brightness(.78);
 }
 
 .world-map-canvas.world-map-level-region svg > rect:first-of-type,
 .world-map-canvas.world-map-level-region svg > .atlas-wave-lines,
 .world-map-canvas.world-map-level-region svg > .atlas-main-land,
 .world-map-canvas.world-map-level-region svg > g[clip-path],
-.world-map-canvas.world-map-level-region svg > .atlas-coastline {
+.world-map-canvas.world-map-level-region svg > .atlas-coastline,
+.world-map-canvas.world-map-level-settlement:has(.world-map-kind-airport) svg > .atlas-local-land,
+.world-map-canvas.world-map-level-settlement:has(.world-map-kind-airport) svg > .atlas-city-ocean,
+.world-map-canvas.world-map-level-settlement:has(.world-map-kind-airport) svg > .atlas-harbor-water,
+.world-map-canvas.world-map-level-settlement:has(.world-map-kind-airport) svg > .atlas-hills,
+.world-map-canvas.world-map-level-settlement:has(.world-map-kind-airport) svg > .atlas-city-park,
+.world-map-canvas.world-map-level-settlement:has(.world-map-kind-airport) svg > .atlas-city-arterials,
+.world-map-canvas.world-map-level-zone:has(.world-map-kind-mixed_use):has(.world-map-kind-residential) svg > .atlas-zone-base,
+.world-map-canvas.world-map-level-zone:has(.world-map-kind-mixed_use):has(.world-map-kind-residential) svg > .atlas-zone-roads,
+.world-map-canvas.world-map-level-district svg > .atlas-district-base,
+.world-map-canvas.world-map-level-district svg > .atlas-building-blocks,
+.world-map-canvas.world-map-level-district svg > .atlas-district-park,
+.world-map-canvas.world-map-level-district svg > .atlas-service-ground,
+.world-map-canvas.world-map-level-district svg > .atlas-minor-roads {
   opacity: 0 !important;
 }
 
-.world-map-canvas.world-map-level-region .world-map-area-settlement polygon {
-  fill: rgb(255 255 255 / .018) !important;
-  stroke: rgb(238 228 188 / .76) !important;
+.world-map-canvas.world-map-level-region .world-map-area-settlement polygon,
+.world-map-canvas.world-map-level-settlement:has(.world-map-kind-airport) .world-map-area-zone polygon,
+.world-map-canvas.world-map-level-zone:has(.world-map-kind-mixed_use):has(.world-map-kind-residential) .world-map-area-district polygon {
+  fill: rgb(255 255 255 / .012) !important;
+  stroke: rgb(238 228 188 / .72) !important;
   stroke-width: .5 !important;
+}
+
+.world-map-canvas.world-map-level-region .world-map-area-settlement polygon {
   stroke-dasharray: 1.15 .72 !important;
 }
 
-.world-map-canvas.world-map-level-region .world-map-area-settlement circle {
-  opacity: .62;
+.world-map-canvas.world-map-level-region .world-map-area-settlement circle,
+.world-map-canvas.world-map-level-settlement:has(.world-map-kind-airport) .world-map-area-zone circle,
+.world-map-canvas.world-map-level-zone:has(.world-map-kind-mixed_use):has(.world-map-kind-residential) .world-map-area-district circle {
+  opacity: .52;
 }
 
 .world-map-canvas.world-map-level-region .world-map-area-settlement:hover polygon,
-.world-map-canvas.world-map-level-region .world-map-area-settlement:focus polygon {
-  fill: rgb(238 194 91 / .13) !important;
+.world-map-canvas.world-map-level-region .world-map-area-settlement:focus polygon,
+.world-map-canvas.world-map-level-settlement:has(.world-map-kind-airport) .world-map-area-zone:hover polygon,
+.world-map-canvas.world-map-level-settlement:has(.world-map-kind-airport) .world-map-area-zone:focus polygon,
+.world-map-canvas.world-map-level-zone:has(.world-map-kind-mixed_use):has(.world-map-kind-residential) .world-map-area-district:hover polygon,
+.world-map-canvas.world-map-level-zone:has(.world-map-kind-mixed_use):has(.world-map-kind-residential) .world-map-area-district:focus polygon {
+  fill: rgb(238 194 91 / .105) !important;
   stroke: #f4d37e !important;
   stroke-width: .9 !important;
   filter: drop-shadow(0 0 1.8px rgb(243 205 116 / .78));
 }
 
-.world-map-canvas.world-map-level-region .world-map-area-settlement.world-map-current polygon {
-  fill: rgb(235 183 70 / .095) !important;
+.world-map-canvas.world-map-level-region .world-map-area-settlement.world-map-current polygon,
+.world-map-canvas.world-map-level-settlement:has(.world-map-kind-airport) .world-map-area-zone.world-map-current polygon,
+.world-map-canvas.world-map-level-zone:has(.world-map-kind-mixed_use):has(.world-map-kind-residential) .world-map-area-district.world-map-current polygon {
+  fill: rgb(235 183 70 / .078) !important;
   stroke: #ffd46e !important;
   stroke-width: .92 !important;
   filter: drop-shadow(0 0 1.7px rgb(236 190 87 / .7));
@@ -47,7 +98,36 @@
 
 .world-map-canvas.world-map-level-region .world-map-area-settlement:hover circle,
 .world-map-canvas.world-map-level-region .world-map-area-settlement:focus circle,
-.world-map-canvas.world-map-level-region .world-map-area-settlement.world-map-current circle {
+.world-map-canvas.world-map-level-region .world-map-area-settlement.world-map-current circle,
+.world-map-canvas.world-map-level-settlement:has(.world-map-kind-airport) .world-map-area-zone:hover circle,
+.world-map-canvas.world-map-level-settlement:has(.world-map-kind-airport) .world-map-area-zone:focus circle,
+.world-map-canvas.world-map-level-settlement:has(.world-map-kind-airport) .world-map-area-zone.world-map-current circle,
+.world-map-canvas.world-map-level-zone:has(.world-map-kind-mixed_use):has(.world-map-kind-residential) .world-map-area-district:hover circle,
+.world-map-canvas.world-map-level-zone:has(.world-map-kind-mixed_use):has(.world-map-kind-residential) .world-map-area-district:focus circle,
+.world-map-canvas.world-map-level-zone:has(.world-map-kind-mixed_use):has(.world-map-kind-residential) .world-map-area-district.world-map-current circle {
+  opacity: 1;
+}
+
+.world-map-canvas.world-map-level-district .world-map-street text {
+  opacity: .28;
+  transition: opacity .14s ease, fill .14s ease;
+}
+.world-map-canvas.world-map-level-district .world-map-street:hover text,
+.world-map-canvas.world-map-level-district .world-map-street-current text {
+  opacity: 1;
+}
+.world-map-canvas.world-map-level-district .world-map-street-casing {
+  stroke: rgb(9 15 16 / .86);
+}
+.world-map-canvas.world-map-level-district .world-map-street-surface {
+  stroke: #a5a79f;
+  opacity: .86;
+}
+.world-map-canvas.world-map-level-district .world-map-segment-planned .world-map-segment-focus {
+  opacity: .26;
+}
+.world-map-canvas.world-map-level-district .world-map-segment-planned:hover .world-map-segment-focus,
+.world-map-canvas.world-map-level-district .world-map-segment.world-map-selected .world-map-segment-focus {
   opacity: 1;
 }
 
@@ -55,7 +135,15 @@
   .world-map-canvas.world-map-level-region::before {
     filter: saturate(1.06) contrast(1.04) brightness(.95);
   }
-  .world-map-canvas.world-map-level-region .world-map-area-settlement polygon {
+  .world-map-canvas.world-map-level-settlement:has(.world-map-kind-airport)::before,
+  .world-map-canvas.world-map-level-zone:has(.world-map-kind-mixed_use):has(.world-map-kind-residential)::before,
+  .world-map-canvas.world-map-level-district::before {
+    background-size: cover;
+  }
+  .world-map-canvas.world-map-level-region .world-map-area-settlement polygon,
+  .world-map-canvas.world-map-level-settlement:has(.world-map-kind-airport) .world-map-area-zone polygon,
+  .world-map-canvas.world-map-level-zone:has(.world-map-kind-mixed_use):has(.world-map-kind-residential) .world-map-area-district polygon {
     stroke-width: .64 !important;
   }
+  .world-map-heading > span { font-size: 6.5px; }
 }
