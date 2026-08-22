@@ -2,7 +2,8 @@ import { useEffect, useState, type CSSProperties, type MouseEvent, type PointerE
 import type { NpcInteractionAction, NpcInteractionResult, NpcPublicState } from '@sol-dorado/contracts/npcs';
 import type { StreetObjectId, StreetSegmentId } from '@sol-dorado/contracts';
 import { streetDistance, type StreetPosition } from '@sol-dorado/contracts/world-position';
-import { WorldCharacter, visualFromSeed, type WorldCharacterDirection } from '../../components/WorldCharacter';
+import { visualFromSeed, type WorldCharacterDirection } from '../../components/WorldCharacter';
+import { WorldPedestrian } from '../../components/WorldPedestrian';
 import { WorldVehicle } from '../../components/WorldVehicle';
 import { useI18n } from '../../i18n';
 import { getNearbyNpcs, interactWithNpc, NpcApiError } from '../../lib/npc-api';
@@ -95,15 +96,17 @@ export function StreetPopulation({ segmentId, visibleObjectIds, playerPosition, 
           .filter(npc => !npc.namedObjectId && (!npc.namedObjectId || visibleObjectIds.includes(npc.namedObjectId)))
           .map(npc => {
             const moving = npc.toX !== undefined || npc.toY !== undefined;
+            const seed = `${segmentId}:${npc.id}`;
             const style = { '--npc-x': `${npc.x}%`, '--npc-y': `${npc.y}%`, '--npc-to-x': `${npc.toX ?? npc.x}%`, '--npc-to-y': `${npc.toY ?? npc.y}%`, '--npc-duration': `${npc.durationSeconds ?? 0}s`, '--npc-delay': `${npc.delaySeconds ?? 0}s` } as CSSProperties;
-            return <span key={npc.id} className={`street-npc-actor ${moving ? 'street-npc-actor-moving' : ''}`} style={style} data-actor-kind="npc"><WorldCharacter visual={npc.visual ?? visualFromSeed(`${segmentId}:${npc.id}`)} direction={npcDirection(npc)} moving={moving} /></span>;
+            return <span key={npc.id} className={`street-npc-actor ${moving ? 'street-npc-actor-moving' : ''}`} style={style} data-actor-kind="npc"><WorldPedestrian visual={npc.visual ?? visualFromSeed(seed)} seed={seed} direction={npcDirection(npc)} moving={moving} /></span>;
           })}
       </div>
 
       {npcs.map(npc => {
         const near = streetDistance(playerPosition, npc.presence.position) <= NPC_REACH;
+        const seed = `canonical:${npc.id}`;
         return <button key={npc.id} type="button" className={`street-npc-canonical street-collision-actor ${near ? 'near' : ''}`} style={{ left: `${npc.presence.position.x}%`, top: `${npc.presence.position.y}%` }} onClick={event => selectNpc(event, npc)} aria-label={`${npc.name} · ${local(npc.role)}`}>
-          <WorldCharacter visual={visualFromSeed(`canonical:${npc.id}`)} direction="south" moving={npc.presence.intent === 'commute'} />
+          <WorldPedestrian visual={visualFromSeed(seed)} seed={seed} direction="south" moving={npc.presence.intent === 'commute'} />
           <span className="street-npc-name">{npc.nickname ?? npc.name.split(' ')[0]}</span>
         </button>;
       })}
