@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type MouseEvent, type PointerEvent } from 'react';
+import { useEffect, useState, type CSSProperties, type MouseEvent } from 'react';
 import type { NpcInteractionAction, NpcInteractionResult, NpcPublicState } from '@sol-dorado/contracts/npcs';
 import type { StreetObjectId, StreetSegmentId } from '@sol-dorado/contracts';
 import { streetDistance, type StreetPosition } from '@sol-dorado/contracts/world-position';
@@ -50,10 +50,6 @@ export function StreetPopulation({ segmentId, visibleObjectIds, playerPosition, 
     if (suppressed) { setSelectedId(null); setResult(null); setError(null); }
   }, [suppressed]);
 
-  function stopVehicleEvent(event: MouseEvent<HTMLElement> | PointerEvent<HTMLElement>) {
-    event.stopPropagation();
-  }
-
   function selectNpc(event: MouseEvent<HTMLButtonElement>, npc: NpcPublicState) {
     event.stopPropagation();
     onNpcSelected?.();
@@ -89,7 +85,7 @@ export function StreetPopulation({ segmentId, visibleObjectIds, playerPosition, 
             '--vehicle-duration': `${vehicle.durationSeconds ?? 0}s`, '--vehicle-delay': `${vehicle.delaySeconds ?? 0}s`, '--vehicle-width': `${vehicle.widthPercent ?? 9.6}%`
           } as CSSProperties;
           const serviceProps = { ...(vehicle.service ? { service: vehicle.service } : {}), ...(vehicle.serviceLabel ? { serviceLabel: vehicle.serviceLabel } : {}) };
-          return <span key={vehicle.id} className={`street-vehicle-actor street-collision-actor ${moving ? 'street-vehicle-actor-moving' : ''} ${vehicle.parked ? 'street-vehicle-actor-parked' : ''}`} style={style} data-actor-kind="vehicle" data-lane={moving ? vehicle.heading : 'parking'} onPointerDown={stopVehicleEvent} onClick={stopVehicleEvent}><WorldVehicle type={vehicle.type} color={vehicle.color} heading={vehicle.heading} assetSeed={vehicle.id} {...serviceProps} /></span>;
+          return <span key={vehicle.id} className={`street-vehicle-actor ${moving ? 'street-vehicle-actor-moving' : ''} ${vehicle.parked ? 'street-vehicle-actor-parked' : ''}`} style={style} data-actor-kind="vehicle" data-lane={moving ? vehicle.heading : 'parking'}><WorldVehicle type={vehicle.type} color={vehicle.color} heading={vehicle.heading} assetSeed={vehicle.id} {...serviceProps} /></span>;
         })}
 
         {definition.npcs
@@ -98,16 +94,34 @@ export function StreetPopulation({ segmentId, visibleObjectIds, playerPosition, 
             const moving = npc.toX !== undefined || npc.toY !== undefined;
             const seed = `${segmentId}:${npc.id}`;
             const style = { '--npc-x': `${npc.x}%`, '--npc-y': `${npc.y}%`, '--npc-to-x': `${npc.toX ?? npc.x}%`, '--npc-to-y': `${npc.toY ?? npc.y}%`, '--npc-duration': `${npc.durationSeconds ?? 0}s`, '--npc-delay': `${npc.delaySeconds ?? 0}s` } as CSSProperties;
-            return <span key={npc.id} className={`street-npc-actor ${moving ? 'street-npc-actor-moving' : ''}`} style={style} data-actor-kind="npc"><WorldPedestrian visual={npc.visual ?? visualFromSeed(seed)} seed={seed} direction={npcDirection(npc)} moving={moving} /></span>;
+            const motionClass = moving ? (npc.patrol ? 'street-npc-actor-patrol' : 'street-npc-actor-pass') : '';
+            return <span key={npc.id} className={`street-npc-actor ${moving ? 'street-npc-actor-moving' : ''} ${motionClass}`} style={style} data-actor-kind="npc"><WorldPedestrian visual={npc.visual ?? visualFromSeed(seed)} seed={seed} direction={npcDirection(npc)} moving={moving} /></span>;
           })}
       </div>
 
       {npcs.map(npc => {
         const near = streetDistance(playerPosition, npc.presence.position) <= NPC_REACH;
         const seed = `canonical:${npc.id}`;
-        return <button key={npc.id} type="button" className={`street-npc-canonical street-collision-actor ${near ? 'near' : ''}`} style={{ left: `${npc.presence.position.x}%`, top: `${npc.presence.position.y}%` }} onClick={event => selectNpc(event, npc)} aria-label={`${npc.name} · ${local(npc.role)}`}>
-          <WorldPedestrian visual={visualFromSeed(seed)} seed={seed} direction="south" moving={npc.presence.intent === 'commute'} />
+        const motion = canonicalNpcMotion(npc);
+        const style = {
+          '--canonical-npc-x': `${npc.presence.position.x}%`,
+          '--canonical-npc-y': `${npc.presence.position.y}%`,
+          '--canonical-npc-to-x': `${motion.x}%`,
+          '--canonical-npc-to-y': `${motion.y}%`,
+          '--canonical-npc-duration': `${motion.durationSeconds}s`,
+          '--canonical-npc-delay': `${motion.delaySeconds}s`
+        } as CSSProperties;
+        return <button
+          key={npc.id}
+          type="button"
+          className={`street-npc-canonical ${motion.active ? 'street-npc-canonical-active' : 'street-npc-canonical-idle'} ${near ? 'near' : ''}`}
+          style={style}
+          onClick={event => selectNpc(event, npc)}
+          aria-label={`${npc.name} · ${local(npc.role)} · ${copy.openInteraction}`}
+        >
+          <WorldPedestrian visual={visualFromSeed(seed)} seed={seed} direction={motion.direction} moving={motion.active} />
           <span className="street-npc-name">{npc.nickname ?? npc.name.split(' ')[0]}</span>
+          <span className="street-npc-interact-hint">{near ? copy.talk : copy.inspect}</span>
         </button>;
       })}
 
@@ -133,6 +147,44 @@ function npcDirection(npc: StreetNpcSlot): WorldCharacterDirection {
   return 'south';
 }
 
+function canonicalNpcMotion(npc: NpcPublicState) {
+  const amplitude = {
+    work: 2.6,
+    commute: 5.2,
+    break: 1.4,
+    socialize: 3.4,
+    errand: 4.4,
+    off_duty: 0
+  }[npc.presence.intent];
+  const hash = stableHash(npc.id);
+  const horizontal = hash % 3 !== 0;
+  const sign = hash % 2 === 0 ? 1 : -1;
+  const dx = horizontal ? amplitude * sign : amplitude * 0.35 * sign;
+  const dy = horizontal ? amplitude * 0.22 * (sign * -1) : amplitude * sign;
+  const x = clamp(npc.presence.position.x + dx, 4, 96);
+  const y = clamp(npc.presence.position.y + dy, 4, 96);
+  const direction: WorldCharacterDirection = Math.abs(dx) >= Math.abs(dy) ? (dx >= 0 ? 'east' : 'west') : (dy >= 0 ? 'south' : 'north');
+  return {
+    x,
+    y,
+    direction,
+    active: amplitude > 0,
+    durationSeconds: 5.5 + (hash % 5),
+    delaySeconds: -(hash % 7)
+  };
+}
+
+function stableHash(value: string) {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function clamp(value: number, min: number, max: number) { return Math.max(min, Math.min(max, value)); }
+
 function relationWord(value: number, locale: 'bg' | 'en') {
   if (locale === 'bg') return value >= 50 ? 'познат човек' : value >= 25 ? 'разпознава те' : value >= 10 ? 'помни те' : 'почти непознат';
   return value >= 50 ? 'familiar' : value >= 25 ? 'recognizes you' : value >= 10 ? 'remembers you' : 'near stranger';
@@ -142,5 +194,5 @@ function moodWord(mood: NpcPublicState['presence']['mood'], locale: 'bg' | 'en')
   return locale === 'bg' ? bg[mood] : mood;
 }
 
-const enCopy = { livingCitizen: 'LIVING CITIZEN', close: 'Close', met: 'Encounters', familiarity: 'Relation', mood: 'Mood', approach: 'Approach', talk: 'Talk', work: 'Ask about work', rumor: 'Ask what is happening', tooFar: 'Move closer before speaking.', movedAway: 'They are no longer here.', failed: 'The conversation could not start.' };
-const bgCopy: typeof enCopy = { livingCitizen: 'ЖИВ ЖИТЕЛ', close: 'Затвори', met: 'Срещи', familiarity: 'Отношение', mood: 'Настроение', approach: 'Приближи се', talk: 'Говори', work: 'Попитай за работа', rumor: 'Попитай какво става', tooFar: 'Приближи се, преди да говориш.', movedAway: 'Вече не е тук.', failed: 'Разговорът не можа да започне.' };
+const enCopy = { livingCitizen: 'LIVING CITIZEN', close: 'Close', met: 'Encounters', familiarity: 'Relation', mood: 'Mood', approach: 'Approach', talk: 'Talk', work: 'Ask about work', rumor: 'Ask what is happening', inspect: 'Interact', openInteraction: 'Open interaction', tooFar: 'Move closer before speaking.', movedAway: 'They are no longer here.', failed: 'The conversation could not start.' };
+const bgCopy: typeof enCopy = { livingCitizen: 'ЖИВ ЖИТЕЛ', close: 'Затвори', met: 'Срещи', familiarity: 'Отношение', mood: 'Настроение', approach: 'Приближи се', talk: 'Говори', work: 'Попитай за работа', rumor: 'Попитай какво става', inspect: 'Взаимодействай', openInteraction: 'Отвори взаимодействие', tooFar: 'Приближи се, преди да говориш.', movedAway: 'Вече не е тук.', failed: 'Разговорът не можа да започне.' };
