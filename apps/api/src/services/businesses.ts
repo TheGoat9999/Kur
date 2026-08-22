@@ -23,7 +23,7 @@ async function managerRole(db: Db, businessId: string, playerId: string) {
 }
 
 export async function getBusinessesState(db: Db, playerId: string): Promise<BusinessesState> {
-  const businesses = await db.query({ text:`SELECT b.*,p.name property_name,
+  const businesses = await db.query({ text:`SELECT b.*,COALESCE(p.name_bg,p.name_en) property_name,
     COALESCE((SELECT SUM(amount_cents) FROM business_tax_obligations t WHERE t.business_id=b.id AND t.status='due'),0) due_taxes_cents,
     (SELECT role FROM business_members m WHERE m.business_id=b.id AND m.player_id=$1 AND m.active=true LIMIT 1) member_role
     FROM businesses b LEFT JOIN real_estate_properties p ON p.id=b.property_id ORDER BY b.name`, values:[playerId] });
