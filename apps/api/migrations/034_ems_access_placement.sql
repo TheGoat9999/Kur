@@ -1,0 +1,27 @@
+ALTER TABLE ems_profiles
+  ADD COLUMN IF NOT EXISTS employed boolean NOT NULL DEFAULT false;
+
+-- Existing EMS profiles predate explicit employment. Preserve their staff access during migration;
+-- new profiles must be granted employment deliberately.
+UPDATE ems_profiles SET employed = true WHERE employed = false;
+
+ALTER TABLE phone_notifications DROP CONSTRAINT IF EXISTS phone_notifications_app_id_check;
+ALTER TABLE phone_notifications
+  ADD CONSTRAINT phone_notifications_app_id_check
+  CHECK (app_id IN ('phone','messages','contacts','maps','vehicles','ems','bank','tasks','jobs','mail','notes','camera','gallery','settings'));
+
+ALTER TABLE phone_devices
+  ALTER COLUMN settings SET DEFAULT '{"theme":"dark","wallpaper":"dorado","accent":"#f2bf62","uiScale":1,"soundEnabled":true,"vibrationEnabled":true,"doNotDisturb":false,"airplaneMode":false,"showNotificationPreviews":true,"homeLayout":["messages","contacts","maps","vehicles","ems","bank","tasks","jobs","mail","notes","camera","gallery","settings","phone"]}'::jsonb;
+
+UPDATE phone_devices
+SET settings = jsonb_set(
+  settings,
+  '{homeLayout}',
+  CASE
+    WHEN COALESCE(settings->'homeLayout', '[]'::jsonb) ? 'ems'
+      THEN COALESCE(settings->'homeLayout', '[]'::jsonb)
+    ELSE COALESCE(settings->'homeLayout', '[]'::jsonb) || '"ems"'::jsonb
+  END,
+  true
+),
+updated_at = now();

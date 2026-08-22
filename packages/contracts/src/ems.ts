@@ -9,6 +9,8 @@ export const EmsBleedingSchema = z.enum(['none', 'minor', 'major']);
 export const EmsTreatmentSchema = z.enum(['bandage', 'trauma_dressing', 'tourniquet', 'splint', 'oxygen', 'saline', 'cpr']);
 export const EmsOutcomeSchema = z.enum(['treated_scene', 'transported', 'refused', 'deceased']);
 
+export const EmsAccessSchema = z.object({ staffAccess: z.boolean() });
+
 export const EmsLocationSchema = z.object({
   streetSegmentId: z.string().min(1),
   streetLabel: z.string().min(1),
@@ -51,6 +53,7 @@ export const EmsCallSchema = z.object({
 });
 
 export const EmsProfileSchema = z.object({
+  employed: z.boolean(),
   rank: EmsRankSchema,
   onDuty: z.boolean(),
   callsCompleted: z.number().int().nonnegative(),
@@ -106,6 +109,11 @@ export const EmsHandoffRequestSchema = z.object({
   notes: z.string().trim().max(800).default('')
 });
 
+export const EmsReportResultSchema = z.object({
+  noticeBg: z.string(),
+  noticeEn: z.string()
+});
+
 export const EmsMutationResultSchema = z.object({
   ems: EmsStateSchema,
   noticeBg: z.string(),
@@ -116,6 +124,8 @@ export type EmsPriority = z.infer<typeof EmsPrioritySchema>;
 export type EmsCallStatus = z.infer<typeof EmsCallStatusSchema>;
 export type EmsTreatment = z.infer<typeof EmsTreatmentSchema>;
 export type EmsOutcome = z.infer<typeof EmsOutcomeSchema>;
+export type EmsAccess = z.infer<typeof EmsAccessSchema>;
+export type EmsReportResult = z.infer<typeof EmsReportResultSchema>;
 export type EmsCall = z.infer<typeof EmsCallSchema>;
 export type EmsState = z.infer<typeof EmsStateSchema>;
 export type EmsMutationResult = z.infer<typeof EmsMutationResultSchema>;

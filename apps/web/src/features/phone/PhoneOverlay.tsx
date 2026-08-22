@@ -12,6 +12,7 @@ import {
   setPhoneTask
 } from '../../lib/api';
 import { useI18n } from '../../i18n';
+import { PhoneEmergencyApp } from './PhoneEmergencyApp';
 import { PhoneVehiclesApp } from './PhoneVehiclesApp';
 import './phone.css';
 
@@ -23,25 +24,25 @@ interface PhoneOverlayProps {
 }
 
 const APP_ORDER: PhoneAppId[] = [
-  'messages', 'contacts', 'maps', 'vehicles', 'bank', 'tasks', 'jobs',
+  'messages', 'contacts', 'maps', 'vehicles', 'ems', 'bank', 'tasks', 'jobs',
   'mail', 'notes', 'camera', 'gallery', 'settings', 'phone'
 ];
 const DOCK_APPS: PhoneAppId[] = ['phone', 'messages', 'maps', 'bank'];
 const GALLERY_STORAGE = 'sd_phone_gallery_v1';
 
 const APP_COLORS: Record<PhoneAppId, string> = {
-  phone: '#3bc76b', messages: '#2e9bf4', contacts: '#8e7cf0', maps: '#56b68b', vehicles: '#4f8f9a',
+  phone: '#3bc76b', messages: '#2e9bf4', contacts: '#8e7cf0', maps: '#56b68b', vehicles: '#4f8f9a', ems: '#e85f5f',
   bank: '#d4a84d', tasks: '#ef775f', jobs: '#cf8d43', mail: '#4f8be8',
   notes: '#f0bf49', camera: '#79848d', gallery: '#bc6dd6', settings: '#6d7780'
 };
 
 const APP_LABELS: Record<'bg' | 'en', Record<PhoneAppId, string>> = {
   bg: {
-    phone: 'Телефон', messages: 'Съобщения', contacts: 'Контакти', maps: 'Карти', vehicles: 'Моите коли', bank: 'Банка', tasks: 'Задачи',
+    phone: 'Телефон', messages: 'Съобщения', contacts: 'Контакти', maps: 'Карти', vehicles: 'Моите коли', ems: '112', bank: 'Банка', tasks: 'Задачи',
     jobs: 'Работа', mail: 'Поща', notes: 'Бележки', camera: 'Камера', gallery: 'Галерия', settings: 'Настройки'
   },
   en: {
-    phone: 'Phone', messages: 'Messages', contacts: 'Contacts', maps: 'Maps', vehicles: 'My Cars', bank: 'Bank', tasks: 'Tasks',
+    phone: 'Phone', messages: 'Messages', contacts: 'Contacts', maps: 'Maps', vehicles: 'My Cars', ems: '112', bank: 'Bank', tasks: 'Tasks',
     jobs: 'Work', mail: 'Mail', notes: 'Notes', camera: 'Camera', gallery: 'Gallery', settings: 'Settings'
   }
 };
@@ -351,6 +352,7 @@ function PhoneAppView({
         {appId === 'contacts' && <ContactsApp phone={phone} locale={locale} onCall={onCall} onThread={thread => { onThread(thread); onOpenApp('messages'); }} />}
         {appId === 'maps' && <MapsApp state={state} locale={locale} />}
         {appId === 'vehicles' && <PhoneVehiclesApp locale={locale} onLocateVehicle={onLocateVehicle} />}
+        {appId === 'ems' && <PhoneEmergencyApp locale={locale} />}
         {appId === 'bank' && <BankApp locale={locale} onOpenFull={() => onOpenFeature('finance')} />}
         {appId === 'tasks' && <TasksApp phone={phone} locale={locale} onState={onState} />}
         {appId === 'jobs' && <JobsApp locale={locale} onOpenFull={() => onOpenFeature('jobs')} />}
@@ -431,7 +433,7 @@ function ContactsApp({ phone, locale, onCall, onThread }: { phone: PhoneState; l
       <label className="phone-search"><PhoneGlyph name="search" /><input value={query} onChange={event => setQuery(event.target.value)} placeholder={L(locale, 'Търси', 'Search')} /></label>
       {contacts.map(contact => {
         const thread = phone.threads.find(item => item.contactId === contact.id);
-        return <div className="phone-contact-row" key={contact.id}><Avatar name={contact.name} color={contact.color} /><span><b>{contact.name}</b><small>{contact.phoneNumber}</small></span><button onClick={() => onCall(contact.name)}><PhoneGlyph name="phone" /></button><button disabled={!thread} onClick={() => thread && onThread(thread.id)}><PhoneGlyph name="messages" /></button></div>;
+        return <div className="phone-contact-row" key={contact.id}><Avatar name={contact.name} color="#567f94" /><span><b>{contact.name}</b><small>{contact.phoneNumber}</small></span><button onClick={() => onCall(contact.name)}><PhoneGlyph name="phone" /></button><button disabled={!thread} onClick={() => thread && onThread(thread.id)}><PhoneGlyph name="messages" /></button></div>;
       })}
     </section>
   );
@@ -651,6 +653,7 @@ function PhoneGlyph({ name }: { name: GlyphName }) {
     case 'contacts': body = <><circle cx="12" cy="8" r="3" /><path d="M6 19c1-4 3-6 6-6s5 2 6 6M4 4h16v16H4Z" /></>; break;
     case 'maps': body = <><path d="m4 5 5-2 6 2 5-2v16l-5 2-6-2-5 2V5Z" /><path d="M9 3v16M15 5v16" /></>; break;
     case 'vehicles': body = <><path d="M5 16h14l-1.4-5.2A2 2 0 0 0 15.7 9H8.3a2 2 0 0 0-1.9 1.8L5 16Z" /><path d="M4 16v3m16-3v3M7 19h10M7.5 13h.01M16.5 13h.01" /></>; break;
+    case 'ems': body = <path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6V3Z" />; break;
     case 'bank': body = <><path d="m3 9 9-5 9 5H3ZM5 10h14M6 10v7M10 10v7M14 10v7M18 10v7M4 18h16M3 21h18" /></>; break;
     case 'tasks': body = <><path d="M9 5h11M9 12h11M9 19h11" /><path d="m3 5 1 1 2-2m-3 8 1 1 2-2m-3 8 1 1 2-2" /></>; break;
     case 'jobs': body = <><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M8 7V5h8v2M3 12h18M10 12v2h4v-2" /></>; break;
