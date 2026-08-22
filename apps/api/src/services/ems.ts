@@ -1,6 +1,8 @@
 import type { PoolClient } from 'pg';
 import {
+  EmsAccessSchema,
   EmsMutationResultSchema,
+  EmsReportResultSchema,
   EmsStateSchema,
   type EmsCall,
   type EmsOutcome,
@@ -17,8 +19,14 @@ export class EmsCommandError extends Error {
   constructor(public readonly code: string, public readonly status: number) { super(code); }
 }
 
-async function ensureProfile(db: Queryable, playerId: string) {
-  await db.query(`INSERT INTO ems_profiles (player_id) VALUES ($1) ON CONFLICT (player_id) DO NOTHING`, [playerId]);
+export async function getEmsAccess(db: Queryable, playerId: string) {
+  const result = await db.query(`SELECT employed FROM ems_profiles WHERE player_id = $1`, [playerId]);
+  return EmsAccessSchema.parse({ staffAccess: Boolean(result.rows[0]?.employed) });
+}
+
+async function requireEmsEmployment(db: Queryable, playerId: string) {
+  const access = await getEmsAccess(db, playerId);
+  if (!access.staffAccess) throw new EmsCommandError('ems_employment_required', 403);
 }
 
 function callFromRow(row: any, playerId: string): EmsCall {
@@ -81,9 +89,9 @@ async function loadCalls(db: Queryable, playerId: string) {
 }
 
 export async function getEmsState(db: Queryable, playerId: string): Promise<EmsState> {
-  await ensureProfile(db, playerId);
+  await requireEmsEmployment(db, playerId);
   const [profileResult, calls, recordsResult] = await Promise.all([
-    db.query(`SELECT rank, on_duty, calls_completed, reputation, shift_earnings_cents, active_call_id FROM ems_profiles WHERE player_id = $1`, [playerId]),
+    db.query(`SELECT employed, rank, on_duty, calls_completed, reputation, shift_earnings_cents, active_call_id FROM ems_profiles WHERE player_id = $1`, [playerId]),
     loadCalls(db, playerId),
     db.query(`
       SELECT r.id, r.call_id, c.call_number, COALESCE(pc.display_name, 'Гражданин') AS patient_name,
@@ -100,6 +108,7 @@ export async function getEmsState(db: Queryable, playerId: string): Promise<EmsS
   const activeCall = profileRow.active_call_id ? calls.find(call => call.id === profileRow.active_call_id) ?? null : null;
   return EmsStateSchema.parse({
     profile: {
+      employed: Boolean(profileRow.employed),
       rank: profileRow.rank,
       onDuty: profileRow.on_duty,
       callsCompleted: Number(profileRow.calls_completed),
@@ -130,7 +139,7 @@ async function result(db: Queryable, playerId: string, noticeBg: string, noticeE
 }
 
 export async function setEmsDuty(db: Database, playerId: string, onDuty: boolean) {
-  await ensureProfile(db, playerId);
+  await requireEmsEmployment(db, playerId);
   if (!onDuty) {
     const current = await db.query(`SELECT active_call_id FROM ems_profiles WHERE player_id = $1`, [playerId]);
     if (current.rows[0]?.active_call_id) throw new EmsCommandError('ems_active_call_blocks_off_duty', 409);
@@ -147,14 +156,14 @@ export async function reportEmsCall(db: Database, playerId: string, priority: Em
   const row = location.rows[0];
   if (!row) throw new EmsCommandError('ems_location_unavailable', 409);
   await db.query(`INSERT INTO ems_calls (reporter_player_id, patient_player_id, priority, incident_type, summary, street_segment_id, position_x, position_y) VALUES ($1,$1,$2,$3,$4,$5,$6,$7)`, [playerId, priority, incidentType, summary, row.current_segment_id, row.position_x, row.position_y]);
-  return result(db, playerId, 'Сигналът е изпратен към 112.', 'The emergency call was sent to dispatch.');
+  return EmsReportResultSchema.parse({ noticeBg: 'Сигналът е изпратен към 112.', noticeEn: 'The emergency call was sent to dispatch.' });
 }
 
 export async function acceptEmsCall(db: Database, playerId: string, callId: string) {
   const client = await db.connect();
   try {
     await client.query('BEGIN');
-    await ensureProfile(client, playerId);
+    await requireEmsEmployment(client, playerId);
     const profile = await client.query(`SELECT on_duty, active_call_id FROM ems_profiles WHERE player_id = $1 FOR UPDATE`, [playerId]);
     if (!profile.rows[0]?.on_duty) throw new EmsCommandError('ems_not_on_duty', 409);
     if (profile.rows[0].active_call_id) throw new EmsCommandError('ems_responder_already_assigned', 409);
@@ -169,6 +178,7 @@ export async function acceptEmsCall(db: Database, playerId: string, callId: stri
 }
 
 export async function updateEmsCallStatus(db: Database, playerId: string, callId: string, status: 'en_route'|'on_scene'|'transporting') {
+  await requireEmsEmployment(db, playerId);
   const call = await db.query(`SELECT status, assigned_ems_player_id FROM ems_calls WHERE id = $1`, [callId]);
   const row = call.rows[0];
   if (!row) throw new EmsCommandError('ems_call_not_found', 404);
@@ -181,6 +191,7 @@ export async function updateEmsCallStatus(db: Database, playerId: string, callId
 }
 
 async function requireClinicalAccess(db: Queryable, playerId: string, callId: string) {
+  await requireEmsEmployment(db, playerId);
   const call = await db.query(`SELECT assigned_ems_player_id, status, patient_player_id FROM ems_calls WHERE id = $1`, [callId]);
   const row = call.rows[0];
   if (!row) throw new EmsCommandError('ems_call_not_found', 404);
@@ -218,6 +229,7 @@ export async function handoffEmsCall(db: Database, playerId: string, callId: str
   const client = await db.connect();
   try {
     await client.query('BEGIN');
+    await requireEmsEmployment(client, playerId);
     const callResult = await client.query(`SELECT * FROM ems_calls WHERE id = $1 FOR UPDATE`, [callId]);
     const call = callResult.rows[0];
     if (!call) throw new EmsCommandError('ems_call_not_found', 404);

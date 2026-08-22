@@ -1,9 +1,13 @@
 import {
+  EmsAccessSchema,
   EmsMutationResultSchema,
+  EmsReportResultSchema,
   EmsStateSchema,
+  type EmsAccess,
   type EmsMutationResult,
   type EmsOutcome,
   type EmsPriority,
+  type EmsReportResult,
   type EmsState,
   type EmsTreatment
 } from '@sol-dorado/contracts/ems';
@@ -25,14 +29,23 @@ async function request(path: string, init?: RequestInit) {
   return response;
 }
 
+export async function getEmsAccess(): Promise<EmsAccess> {
+  return EmsAccessSchema.parse(await (await request('/v1/ems/access')).json());
+}
+
 export async function getEms(): Promise<EmsState> {
   return EmsStateSchema.parse(await (await request('/v1/ems')).json());
 }
+
 async function command(path: string, body: unknown): Promise<EmsMutationResult> {
   return EmsMutationResultSchema.parse(await (await request(path, { method: 'POST', body: JSON.stringify(body) })).json());
 }
+
+export async function reportEmsCall(priority: EmsPriority, incidentType: string, summary: string): Promise<EmsReportResult> {
+  return EmsReportResultSchema.parse(await (await request('/v1/ems/calls', { method: 'POST', body: JSON.stringify({ priority, incidentType, summary }) })).json());
+}
+
 export const setEmsDuty = (onDuty: boolean) => command('/v1/ems/duty', { onDuty });
-export const reportEmsCall = (priority: EmsPriority, incidentType: string, summary: string) => command('/v1/ems/calls', { priority, incidentType, summary });
 export const acceptEmsCall = (callId: string) => command('/v1/ems/calls/accept', { callId });
 export const updateEmsStatus = (callId: string, status: 'en_route'|'on_scene'|'transporting') => command('/v1/ems/calls/status', { callId, status });
 export const saveEmsAssessment = (input: { callId: string; consciousness: 'alert'|'confused'|'unresponsive'; breathing: 'normal'|'labored'|'absent'; bleeding: 'none'|'minor'|'major'; pain: number; notes: string }) => command('/v1/ems/assessment', input);

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="ocean" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#072733"/><stop offset="1" stop-color="#03151b"/></linearGradient>
+    <linearGradient id="land" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#415645"/><stop offset=".55" stop-color="#2f453d"/><stop offset="1" stop-color="#263936"/></linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#a88b5e"/><stop offset="1" stop-color="#806b4d"/></linearGradient>
+    <linearGradient id="hills" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#4c5a3d"/><stop offset="1" stop-color="#6f6048"/></linearGradient>
+    <pattern id="urban" width="58" height="58" patternUnits="userSpaceOnUse" patternTransform="rotate(-7)"><rect width="58" height="58" fill="#4a4f4b"/><path d="M4 6h21v16H4zM31 5h21v22H31zM5 31h18v21H5zM29 33h24v18H29z" fill="#313a3a"/><path d="M0 29h58M27 0v58" stroke="#8e948d" stroke-width="3" opacity=".33"/></pattern>
+    <pattern id="suburb" width="72" height="72" patternUnits="userSpaceOnUse" patternTransform="rotate(9)"><rect width="72" height="72" fill="#405143"/><path d="M6 8h19v16H6zM34 7h28v18H34zM8 37h25v22H8zM43 37h19v23H43z" fill="#38413d"/><circle cx="28" cy="31" r="3" fill="#547253"/><circle cx="67" cy="33" r="3" fill="#547253"/></pattern>
+    <pattern id="industrial" width="86" height="66" patternUnits="userSpaceOnUse"><rect width="86" height="66" fill="#55483e"/><rect x="7" y="8" width="31" height="20" fill="#403d39"/><rect x="45" y="7" width="34" height="26" fill="#3b3b39"/><rect x="8" y="38" width="51" height="20" fill="#46423c"/><path d="M0 33h86" stroke="#8e7d6c" stroke-width="4" opacity=".3"/></pattern>
+    <filter id="soft"><feGaussianBlur stdDeviation="10"/></filter>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#ocean)"/>
+  <path d="M105 70C225 20 450 25 630 42c205 20 426-14 652 41 150 36 239 112 260 238 22 134-5 290-41 396-42 121-135 194-280 216-211 33-363 12-507 38-159 28-326 30-456-19C119 899 72 792 65 645c-8-169-16-272 7-395C83 190 91 123 105 70Z" fill="url(#land)" stroke="#9bb496" stroke-width="7"/>
+  <path d="M66 231c44-82 84-114 158-157 44-25 118-46 177-47L351 213 211 329 91 333Z" fill="url(#hills)" opacity=".95"/>
+  <path d="M432 41c132 4 249 23 368 11 137-14 245-17 359 18l-31 180-154 66-217-53-191 34-119-84Z" fill="url(#hills)" opacity=".9"/>
+  <path d="M69 269c49-31 112-44 188-38l86 164-116 135-164-21Z" fill="url(#sand)" opacity=".9"/>
+  <path d="M246 361c132-59 294-72 430-29 113 36 243 43 339 1 80-35 168-33 269-7l56 183-118 183-221 76-294-12-274 38-235-106-51-164Z" fill="url(#urban)" opacity=".92"/>
+  <path d="M177 462c91-54 176-68 268-51l78 290-149 118-211-102Z" fill="url(#suburb)" opacity=".9"/>
+  <path d="M1009 325c108-39 213-36 329 4l85 120-44 207-163 79-173-61-73-188Z" fill="url(#industrial)" opacity=".95"/>
+  <path d="M602 103c85 21 181 10 265 0 48-6 109-11 160 2l-29 127-151 61-185-35-75-73Z" fill="#35543d" opacity=".95"/>
+  <path d="M705 616c66-39 139-59 214-57 77 2 148 26 218 47l-34 173-172 73-198-35-74-89Z" fill="#375047" opacity=".72"/>
+  <path d="M105 710c97 45 184 69 276 69l-13 125-158 40-114-77Z" fill="#496648" opacity=".8"/>
+  <path d="M1159 700c108-22 204-4 307 48l-32 126-137 75-141-64Z" fill="#4f5d4f" opacity=".55"/>
+  <path d="M1260 718c92-21 177 8 252 55l11 112-164 76-132-83Z" fill="#7b6549" opacity=".72"/>
+  <path d="M1184 652c142-16 246 8 337 88l16 173-121 40-119-74-83-119Z" fill="#0b3542" stroke="#4e8d8f" stroke-width="4"/>
+  <path d="M1246 720h262v38h-262zM1291 787h218v34h-218zM1361 852h141v28h-141z" fill="#1e2e32" opacity=".9"/>
+  <path d="M1205 669l41 34m7 61 38 23m31 51 39 17" stroke="#9ba49c" stroke-width="5" opacity=".48"/>
+  <g fill="none" stroke-linecap="round">
+    <path d="M140 487C361 460 522 449 740 464s425 6 722-72" stroke="#d5c89f" stroke-width="13" opacity=".62"/>
+    <path d="M244 724C447 640 662 625 895 656c201 27 365 11 548-65" stroke="#d5c89f" stroke-width="12" opacity=".58"/>
+    <path d="M783 75c-21 142-7 278 29 409 31 112 60 236 38 432" stroke="#d5c89f" stroke-width="11" opacity=".6"/>
+    <path d="M348 196c92 74 186 132 308 175 153 54 316 58 487 45" stroke="#c6b98f" stroke-width="8" opacity=".5"/>
+    <path d="M1008 160c-67 98-99 204-87 319 12 118 62 219 145 314" stroke="#c6b98f" stroke-width="8" opacity=".5"/>
+  </g>
+  <path d="M905 82c-22 115-8 206 29 274 25 46 26 99-2 154-34 66-21 141 41 226" fill="none" stroke="#4b9bb0" stroke-width="10" opacity=".8"/>
+  <path d="M135 598c74 41 143 40 212 7 55-27 108-24 163 8 76 45 148 42 221-8" fill="none" stroke="#4b9bb0" stroke-width="8" opacity=".62"/>
+  <g fill="#66745f" opacity=".8">
+    <circle cx="263" cy="151" r="19"/><circle cx="312" cy="126" r="15"/><circle cx="369" cy="164" r="17"/><circle cx="468" cy="111" r="16"/><circle cx="526" cy="139" r="21"/><circle cx="1110" cy="161" r="18"/><circle cx="1163" cy="133" r="16"/>
+  </g>
+  <g fill="#244d38" opacity=".85">
+    <circle cx="642" cy="178" r="17"/><circle cx="691" cy="149" r="19"/><circle cx="742" cy="185" r="15"/><circle cx="1027" cy="198" r="17"/><circle cx="1075" cy="217" r="14"/><circle cx="297" cy="840" r="16"/>
+  </g>
+  <ellipse cx="650" cy="524" rx="370" ry="210" fill="#d8c56b" opacity=".06" filter="url(#soft)"/>
+</svg>
