@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="road" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#38474a"/><stop offset="1" stop-color="#242f32"/></linearGradient>
+    <linearGradient id="walk" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#b9b2a2"/><stop offset="1" stop-color="#918c80"/></linearGradient>
+    <linearGradient id="roof1"><stop stop-color="#5a6160"/><stop offset="1" stop-color="#3d4748"/></linearGradient>
+    <linearGradient id="roof2"><stop stop-color="#755d4f"/><stop offset="1" stop-color="#4d403a"/></linearGradient>
+    <pattern id="asphalt" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="5" cy="8" r="1" fill="#fff" opacity=".025"/><circle cx="20" cy="20" r="1" fill="#000" opacity=".09"/></pattern>
+  </defs>
+  <rect width="1200" height="700" fill="#1b3035"/>
+  <rect x="0" y="220" width="1200" height="90" fill="url(#walk)"/>
+  <rect x="0" y="310" width="1200" height="138" fill="url(#road)"/>
+  <rect x="0" y="448" width="1200" height="80" fill="url(#walk)"/>
+  <rect x="0" y="310" width="1200" height="138" fill="url(#asphalt)"/>
+  <path d="M0 310h1200M0 448h1200" stroke="#ded7c8" stroke-width="5" opacity=".7"/>
+  <path d="M0 379h1200" stroke="#d4b85f" stroke-width="4" stroke-dasharray="34 30" opacity=".75"/>
+  <path d="M0 335h1200M0 423h1200" stroke="#ebe6dc" stroke-width="2" stroke-dasharray="18 28" opacity=".16"/>
+  <g opacity=".2" stroke="#655f55" stroke-width="1.4">
+    <path d="M0 260h1200M0 488h1200"/>
+    <path d="M76 220v90M152 220v90M228 220v90M304 220v90M380 220v90M456 220v90M532 220v90M608 220v90M684 220v90M760 220v90M836 220v90M912 220v90M988 220v90M1064 220v90M1140 220v90"/>
+    <path d="M76 448v80M152 448v80M228 448v80M304 448v80M380 448v80M456 448v80M532 448v80M608 448v80M684 448v80M760 448v80M836 448v80M912 448v80M988 448v80M1064 448v80M1140 448v80"/>
+  </g>
+  <g>
+    <rect x="34" y="28" width="276" height="192" rx="10" fill="url(#roof1)"/><rect x="54" y="48" width="236" height="152" rx="8" fill="#263a3e"/>
+    <rect x="340" y="18" width="350" height="202" rx="10" fill="url(#roof1)"/><rect x="360" y="38" width="310" height="162" rx="8" fill="#2b3f43"/>
+    <rect x="800" y="30" width="350" height="190" rx="10" fill="url(#roof2)"/><rect x="820" y="50" width="310" height="150" rx="8" fill="#3d3532"/>
+    <rect x="20" y="528" width="250" height="148" rx="10" fill="url(#roof2)"/><rect x="292" y="528" width="260" height="148" rx="10" fill="url(#roof1)"/>
+    <rect x="812" y="528" width="360" height="148" rx="10" fill="url(#roof1)"/>
+  </g>
+  <g fill="#6ea2a6" opacity=".65">
+    <rect x="72" y="77" width="44" height="44" rx="5"/><rect x="132" y="77" width="44" height="44" rx="5"/><rect x="192" y="77" width="44" height="44" rx="5"/>
+    <rect x="388" y="70" width="47" height="48" rx="5"/><rect x="454" y="70" width="47" height="48" rx="5"/><rect x="520" y="70" width="47" height="48" rx="5"/><rect x="586" y="70" width="47" height="48" rx="5"/>
+    <rect x="850" y="83" width="46" height="42" rx="5"/><rect x="918" y="83" width="46" height="42" rx="5"/><rect x="986" y="83" width="46" height="42" rx="5"/>
+  </g>
+  <rect x="576" y="535" width="212" height="126" rx="8" fill="#4a5150" stroke="#737c78" stroke-width="3"/>
+  <g stroke="#ddd8ca" stroke-width="4" opacity=".55"><path d="M600 554v88M648 554v88M696 554v88M744 554v88"/></g>
+  <g fill="#4f7d54">
+    <circle cx="329" cy="247" r="22"/><circle cx="716" cy="247" r="22"/><circle cx="1116" cy="247" r="22"/><circle cx="286" cy="503" r="20"/><circle cx="803" cy="503" r="20"/>
+  </g>
+  <g fill="#6e5436"><rect x="324" y="244" width="9" height="44"/><rect x="711" y="244" width="9" height="44"/><rect x="1111" y="244" width="9" height="44"/><rect x="281" y="500" width="9" height="42"/><rect x="798" y="500" width="9" height="42"/></g>
+  <g fill="#e6e1d5" opacity=".82">
+    <rect x="552" y="319" width="12" height="120"/><rect x="575" y="319" width="12" height="120"/><rect x="598" y="319" width="12" height="120"/><rect x="621" y="319" width="12" height="120"/><rect x="644" y="319" width="12" height="120"/>
+  </g>
+  <path d="M598 220v90M598 448v80" stroke="#d8cfae" stroke-width="18" opacity=".38"/>
+  <g fill="#d6b75d" opacity=".55"><circle cx="140" cy="278" r="5"/><circle cx="378" cy="278" r="5"/><circle cx="758" cy="278" r="5"/><circle cx="1080" cy="278" r="5"/></g>
+</svg>
