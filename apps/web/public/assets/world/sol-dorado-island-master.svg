@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="ocean" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#061e29"/>
+      <stop offset="0.45" stop-color="#0a3440"/>
+      <stop offset="1" stop-color="#03141c"/>
+    </linearGradient>
+    <linearGradient id="land" x1="0.08" y1="0.08" x2="0.9" y2="0.92">
+      <stop offset="0" stop-color="#42634c"/>
+      <stop offset="0.5" stop-color="#52644b"/>
+      <stop offset="1" stop-color="#665c43"/>
+    </linearGradient>
+    <linearGradient id="desert" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a78055"/>
+      <stop offset="0.58" stop-color="#7e6044"/>
+      <stop offset="1" stop-color="#5e4939"/>
+    </linearGradient>
+    <linearGradient id="forest" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#234f39"/>
+      <stop offset="1" stop-color="#173e32"/>
+    </linearGradient>
+    <linearGradient id="urban" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4c5553"/>
+      <stop offset="1" stop-color="#303a3b"/>
+    </linearGradient>
+    <linearGradient id="shallows" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b6a70" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#0b3945" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="fields" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(16)">
+      <rect width="5" height="5" fill="#728150"/>
+      <path d="M0 1.2H5M0 3.8H5" stroke="#b19d68" stroke-width="0.5" opacity="0.35"/>
+    </pattern>
+    <pattern id="cityGrid" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="4" fill="#343f40"/>
+      <path d="M0 1.15H4M0 3.1H4M1.1 0V4M3.05 0V4" stroke="#78817c" stroke-width="0.28" opacity="0.54"/>
+      <rect x="1.35" y="1.4" width="1.25" height="1.15" rx="0.15" fill="#525d5b"/>
+    </pattern>
+    <pattern id="suburb" width="5.5" height="5.5" patternUnits="userSpaceOnUse" patternTransform="rotate(-8)">
+      <rect width="5.5" height="5.5" fill="#445348"/>
+      <path d="M0 1.5H5.5M0 4.2H5.5M1.45 0V5.5M4.2 0V5.5" stroke="#75806f" stroke-width="0.22" opacity="0.42"/>
+    </pattern>
+    <pattern id="industrial" width="6" height="6" patternUnits="userSpaceOnUse">
+      <rect width="6" height="6" fill="#4f4b43"/>
+      <rect x="0.7" y="0.7" width="2" height="1.8" fill="#686258"/>
+      <rect x="3.5" y="3.2" width="1.7" height="2" fill="#6c6355"/>
+      <path d="M0 3H6M3 0V6" stroke="#857c68" stroke-width="0.25" opacity="0.38"/>
+    </pattern>
+    <filter id="coastGlow" x="-15%" y="-15%" width="130%" height="130%">
+      <feGaussianBlur stdDeviation="1.3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softShadow" x="-15%" y="-15%" width="130%" height="140%">
+      <feDropShadow dx="0" dy="1.2" stdDeviation="1.4" flood-color="#00070a" flood-opacity="0.58"/>
+    </filter>
+    <clipPath id="islandClip">
+      <path d="M6.5 13C15.5 8.5 23 7 31.5 8.8C39.2 2.8 50 3.3 58 7.6C66.5 3.7 77.8 4.8 84.4 11.5C92 16.6 94.8 25.5 92.2 34.2C98 41.8 97.6 52.2 93 59.4C96.2 69.2 91.6 78.5 84 83.5C78 92.2 65.2 94.7 56.4 91.3C47 97 34.4 96.8 26.2 92.2C16.8 94 8.4 88.6 6.2 80.2C0.7 72.7 1.9 61.7 5.8 55.3C1.4 47.1 2.8 37.8 7.4 31.7C3.4 24.8 3.7 18.2 6.5 13Z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="100" height="100" fill="url(#ocean)"/>
+  <path d="M3 15C18 9 31 10 44 8S73 4 95 16M2 87C17 81 34 91 49 86S78 82 98 88M1 44C18 39 30 46 43 42S70 36 99 43" fill="none" stroke="#2a6f78" stroke-width="0.42" opacity="0.18"/>
+  <path d="M6.5 13C15.5 8.5 23 7 31.5 8.8C39.2 2.8 50 3.3 58 7.6C66.5 3.7 77.8 4.8 84.4 11.5C92 16.6 94.8 25.5 92.2 34.2C98 41.8 97.6 52.2 93 59.4C96.2 69.2 91.6 78.5 84 83.5C78 92.2 65.2 94.7 56.4 91.3C47 97 34.4 96.8 26.2 92.2C16.8 94 8.4 88.6 6.2 80.2C0.7 72.7 1.9 61.7 5.8 55.3C1.4 47.1 2.8 37.8 7.4 31.7C3.4 24.8 3.7 18.2 6.5 13Z" fill="#11606b" opacity="0.28" filter="url(#coastGlow)"/>
+  <path d="M6.5 13C15.5 8.5 23 7 31.5 8.8C39.2 2.8 50 3.3 58 7.6C66.5 3.7 77.8 4.8 84.4 11.5C92 16.6 94.8 25.5 92.2 34.2C98 41.8 97.6 52.2 93 59.4C96.2 69.2 91.6 78.5 84 83.5C78 92.2 65.2 94.7 56.4 91.3C47 97 34.4 96.8 26.2 92.2C16.8 94 8.4 88.6 6.2 80.2C0.7 72.7 1.9 61.7 5.8 55.3C1.4 47.1 2.8 37.8 7.4 31.7C3.4 24.8 3.7 18.2 6.5 13Z" fill="url(#land)" filter="url(#softShadow)"/>
+
+  <g clip-path="url(#islandClip)">
+    <path d="M2 0H63L67 18L56 34L40 31L30 38L11 33L0 22Z" fill="url(#forest)"/>
+    <path d="M51 0H92L97 17L84 34L68 29L57 18Z" fill="#365740" opacity="0.92"/>
+    <path d="M62 36C74 31 92 34 100 46V91L71 95L61 76L67 58Z" fill="url(#desert)"/>
+    <path d="M14 28L43 24L53 38L45 50L20 49L10 38Z" fill="url(#fields)" opacity="0.96"/>
+    <path d="M8 42L29 36L39 48L30 61L7 59Z" fill="#536d48" opacity="0.88"/>
+    <path d="M14 48C27 43 49 42 61 52L64 76L53 87L26 87L12 73Z" fill="url(#cityGrid)" opacity="0.96"/>
+    <path d="M51 47L68 45L77 57L71 70L60 73L55 60Z" fill="url(#industrial)" opacity="0.82"/>
+    <path d="M57 12L84 9L90 24L82 37L63 35L54 24Z" fill="url(#suburb)" opacity="0.82"/>
+    <path d="M15 8L32 7L37 19L29 29L13 27L8 18Z" fill="url(#fields)" opacity="0.76"/>
+
+    <path d="M40 3C43 12 41 20 46 26S55 36 51 48S43 65 46 84" fill="none" stroke="#4b9fb0" stroke-width="0.9" opacity="0.7"/>
+    <path d="M43 4C46 13 44 20 49 26S58 37 54 48S46 65 49 84" fill="none" stroke="#8ec0c4" stroke-width="0.24" opacity="0.35"/>
+    <path d="M72 43C78 48 86 52 92 60M70 48C78 55 83 62 87 72" fill="none" stroke="#a18760" stroke-width="0.55" stroke-dasharray="1.5 1.2" opacity="0.54"/>
+
+    <g fill="#615a50" stroke="#282d2c" stroke-width="0.22">
+      <path d="M31 18L36 8L41 18Z"/><path d="M38 20L44 6L50 20Z"/><path d="M46 18L51 7L56 18Z"/><path d="M54 21L60 9L66 21Z"/><path d="M61 18L66 8L71 18Z"/><path d="M68 23L73 12L78 23Z"/>
+    </g>
+    <g fill="#d7d5c4" opacity="0.6">
+      <path d="M34 12L36 8L38 12L36.7 11L36 12L35.3 11Z"/><path d="M42 11L44 6L46 11L44.7 10L44 11L43.4 10Z"/><path d="M49 11L51 7L53 11L51.6 10L51 11L50.3 10Z"/>
+    </g>
+    <g fill="none" stroke="#c7b98b" stroke-width="0.24" opacity="0.32">
+      <path d="M27 14C36 9 47 11 57 17"/><path d="M25 18C37 12 51 15 62 22"/><path d="M25 23C39 16 54 20 66 28"/>
+      <path d="M72 50C80 46 88 48 96 54"/><path d="M69 55C80 50 90 52 99 59"/><path d="M69 61C81 56 91 59 99 66"/>
+    </g>
+
+    <g fill="none" stroke="#d8cfb5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 25C32 35 39 44 54 54S73 67 86 75" stroke-width="0.65" opacity="0.78"/>
+      <path d="M29 74C42 63 55 52 67 35S74 22 83 18" stroke-width="0.62" opacity="0.76"/>
+      <path d="M16 54C31 57 45 60 59 68S72 78 83 84" stroke-width="0.58" opacity="0.72"/>
+      <path d="M15 37C29 39 42 42 55 39S73 34 88 36" stroke-width="0.48" opacity="0.6"/>
+      <path d="M26 84C35 74 39 64 40 51S43 28 46 18" stroke-width="0.46" opacity="0.56"/>
+    </g>
+    <g fill="none" stroke="#f0c974" stroke-width="0.19" opacity="0.34">
+      <path d="M21 25C32 35 39 44 54 54S73 67 86 75"/>
+      <path d="M29 74C42 63 55 52 67 35S74 22 83 18"/>
+    </g>
+
+    <path d="M23 47C31 43 45 43 54 48M19 53C31 48 47 49 58 55M17 60C30 55 47 56 61 63M18 67C33 62 48 63 61 70M24 74C35 69 48 70 57 77" fill="none" stroke="#a9b1aa" stroke-width="0.34" opacity="0.55"/>
+    <path d="M27 44V82M34 42V84M42 43V86M50 46V84M57 50V80" fill="none" stroke="#9aa4a0" stroke-width="0.3" opacity="0.48"/>
+
+    <path d="M51 75C56 72 63 71 69 73L76 80L73 91H50C54 85 55 80 51 75Z" fill="#0a3946" stroke="#5c989a" stroke-width="0.45"/>
+    <path d="M54 78L61 77V89H55ZM63 77L68 78V91H63ZM70 80L73 82V90H70Z" fill="#59605c" opacity="0.8"/>
+    <path d="M78 75L93 76L94 82L80 82Z" fill="#4d4f4a" opacity="0.8"/>
+    <path d="M80 77L92 80" stroke="#d9d0b4" stroke-width="0.75" opacity="0.7"/>
+    <path d="M80 79L91 76" stroke="#d9d0b4" stroke-width="0.26" opacity="0.42"/>
+
+    <path d="M66 18C71 14 79 13 84 16L87 24L83 30L72 31L65 26Z" fill="url(#cityGrid)" opacity="0.66"/>
+    <path d="M72 57C78 54 85 56 88 61L86 69L78 72L72 68Z" fill="#5f5041" opacity="0.65"/>
+    <path d="M18 13C22 10 28 11 31 15L29 21L22 23L17 19Z" fill="#637451" opacity="0.7"/>
+  </g>
+
+  <path d="M6.5 13C15.5 8.5 23 7 31.5 8.8C39.2 2.8 50 3.3 58 7.6C66.5 3.7 77.8 4.8 84.4 11.5C92 16.6 94.8 25.5 92.2 34.2C98 41.8 97.6 52.2 93 59.4C96.2 69.2 91.6 78.5 84 83.5C78 92.2 65.2 94.7 56.4 91.3C47 97 34.4 96.8 26.2 92.2C16.8 94 8.4 88.6 6.2 80.2C0.7 72.7 1.9 61.7 5.8 55.3C1.4 47.1 2.8 37.8 7.4 31.7C3.4 24.8 3.7 18.2 6.5 13Z" fill="none" stroke="#d6d0ab" stroke-width="0.6" opacity="0.86"/>
+  <path d="M5.2 14.4C14.9 9.5 22.8 8.4 31 10.2M84.2 13C90.1 18 92.2 25 90.5 31M91.2 61C94.5 70 89.3 77 83.4 81.7M56 89.2C46.8 94.5 35.5 94.1 27 90.2" fill="none" stroke="#79bdc0" stroke-width="0.3" opacity="0.45"/>
+</svg>
