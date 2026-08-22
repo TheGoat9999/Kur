@@ -24,6 +24,7 @@ import { businessRoutes } from './routes/businesses.js';
 import { adminRoutes } from './routes/admin.js';
 import { needsRoutes } from './routes/needs.js';
 import { crimeRoutes } from './routes/crime.js';
+import { governmentRoutes } from './routes/government.js';
 
 export function createApp(services: AppServices) {
   const app = express();
@@ -52,6 +53,7 @@ export function createApp(services: AppServices) {
   app.use(realEstateRoutes(services));
   app.use(businessRoutes(services));
   app.use(needsRoutes(services));
+  app.use(governmentRoutes(services));
   app.use(adminRoutes(services));
   app.use((error: unknown, _request: Request, response: Response, _next: NextFunction) => {
     console.error(error);
