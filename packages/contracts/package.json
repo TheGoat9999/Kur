@@ -26,7 +26,8 @@
     "./admin": { "types": "./dist/admin.d.ts", "import": "./dist/admin.js" },
     "./needs": { "types": "./dist/needs.d.ts", "import": "./dist/needs.js" },
     "./crime": { "types": "./dist/crime.d.ts", "import": "./dist/crime.js" },
-    "./government": { "types": "./dist/government.d.ts", "import": "./dist/government.js" }
+    "./government": { "types": "./dist/government.d.ts", "import": "./dist/government.js" },
+    "./hospitality": { "types": "./dist/hospitality.d.ts", "import": "./dist/hospitality.js" }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
