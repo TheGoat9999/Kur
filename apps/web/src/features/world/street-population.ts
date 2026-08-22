@@ -12,6 +12,7 @@ export interface StreetNpcSlot {
   durationSeconds?: number;
   delaySeconds?: number;
   direction?: WorldCharacterDirection;
+  patrol?: boolean;
   namedObjectId?: StreetObjectId;
   visual?: WorldCharacterVisual;
 }
@@ -37,7 +38,7 @@ export interface StreetPopulationDefinition {
   vehicles: StreetVehicleSlot[];
 }
 
-type StreetNpcMotion = Partial<Pick<StreetNpcSlot, 'toX' | 'toY' | 'durationSeconds' | 'delaySeconds' | 'direction'>>;
+type StreetNpcMotion = Partial<Pick<StreetNpcSlot, 'toX' | 'toY' | 'durationSeconds' | 'delaySeconds' | 'direction' | 'patrol'>>;
 type StreetVehiclePresentation = Partial<Pick<StreetVehicleSlot, 'widthPercent' | 'service' | 'serviceLabel' | 'parked'>>;
 
 const MAYA_VISUAL: WorldCharacterVisual = {
@@ -54,11 +55,11 @@ const MAYA_VISUAL: WorldCharacterVisual = {
 export const STREET_POPULATION: Record<StreetSegmentId, StreetPopulationDefinition> = {
   market_block_3: {
     npcs: [
-      npc('market-west-north', 14.2, 37.3, 'market-west-north'),
-      npc('market-east-north', 86.7, 37.1, 'market-east-north'),
-      npc('market-office-south', 35.8, 71.4, 'market-office-south'),
-      npc('market-cafe-north', 51.5, 37.2, 'market-cafe-north'),
-      npc('market-bodega-south', 77.2, 71.7, 'market-bodega-south'),
+      npc('market-west-north', 14.2, 37.3, 'market-west-north', patrol(27.5, 37.3, 13, -2, 'east')),
+      npc('market-east-north', 86.7, 37.1, 'market-east-north', patrol(74.5, 37.1, 15, -7, 'west')),
+      npc('market-office-south', 35.8, 71.4, 'market-office-south', patrol(48.5, 71.4, 14, -5, 'east')),
+      npc('market-cafe-north', 51.5, 37.2, 'market-cafe-north', patrol(60.5, 37.2, 12, -8, 'east')),
+      npc('market-bodega-south', 77.2, 71.7, 'market-bodega-south', patrol(65.5, 71.7, 16, -11, 'west')),
       npc('market-walker-a', -5, 72, 'market-walker-a', { toX: 105, toY: 72, durationSeconds: 34, delaySeconds: -3, direction: 'east' }),
       npc('market-walker-b', 105, 38, 'market-walker-b', { toX: -5, toY: 38, durationSeconds: 37, delaySeconds: -11, direction: 'west' }),
       npc('market-walker-c', -12, 72, 'market-walker-c', { toX: 112, toY: 72, durationSeconds: 43, delaySeconds: -24, direction: 'east' }),
@@ -77,10 +78,10 @@ export const STREET_POPULATION: Record<StreetSegmentId, StreetPopulationDefiniti
   cypress_corner: {
     npcs: [
       { ...npc('maya-rojas-visual', 62, 72, 'maya-rojas'), namedObjectId: 'maya_rojas', visual: MAYA_VISUAL, direction: 'south' },
-      npc('cypress-park', 37.5, 36.9, 'cypress-park'),
-      npc('cypress-shops', 91.7, 36.9, 'cypress-shops'),
+      npc('cypress-park', 37.5, 36.9, 'cypress-park', patrol(45.5, 36.9, 15, -4, 'east')),
+      npc('cypress-shops', 91.7, 36.9, 'cypress-shops', patrol(83.0, 36.9, 14, -9, 'west')),
       npc('cypress-bench', 49.5, 37.1, 'cypress-bench'),
-      npc('cypress-office-south', 82.2, 71.6, 'cypress-office-south'),
+      npc('cypress-office-south', 82.2, 71.6, 'cypress-office-south', patrol(70.5, 71.6, 17, -12, 'west')),
       npc('cypress-walker-a', -6, 72, 'cypress-walker-a', { toX: 106, toY: 72, durationSeconds: 38, delaySeconds: -5, direction: 'east' }),
       npc('cypress-walker-b', 106, 38, 'cypress-walker-b', { toX: -6, toY: 38, durationSeconds: 42, delaySeconds: -19, direction: 'west' }),
       npc('cypress-walker-c', -13, 72, 'cypress-walker-c', { toX: 113, toY: 72, durationSeconds: 49, delaySeconds: -32, direction: 'east' })
@@ -97,9 +98,9 @@ export const STREET_POPULATION: Record<StreetSegmentId, StreetPopulationDefiniti
   },
   mira_alley: {
     npcs: [
-      npc('alley-service', 32.1, 37.1, 'alley-service'),
-      npc('alley-yard', 58.3, 72.1, 'alley-yard'),
-      npc('alley-loader', 42.5, 71.7, 'alley-loader'),
+      npc('alley-service', 32.1, 37.1, 'alley-service', patrol(39.5, 37.1, 14, -3, 'east')),
+      npc('alley-yard', 58.3, 72.1, 'alley-yard', patrol(68.0, 72.1, 15, -8, 'east')),
+      npc('alley-loader', 42.5, 71.7, 'alley-loader', patrol(50.5, 71.7, 12, -6, 'east')),
       npc('alley-walker-a', 106, 72, 'alley-walker-a', { toX: -6, toY: 72, durationSeconds: 39, delaySeconds: -2, direction: 'west' }),
       npc('alley-walker-b', -7, 38, 'alley-walker-b', { toX: 107, toY: 38, durationSeconds: 44, delaySeconds: -17, direction: 'east' }),
       npc('alley-walker-c', -14, 72, 'alley-walker-c', { toX: 114, toY: 72, durationSeconds: 52, delaySeconds: -35, direction: 'east' })
@@ -117,6 +118,10 @@ export const STREET_POPULATION: Record<StreetSegmentId, StreetPopulationDefiniti
 
 function npc(id: string, x: number, y: number, seed: string, overrides: StreetNpcMotion = {}): StreetNpcSlot {
   return { id, x, y, visual: visualFromSeed(seed), ...overrides };
+}
+
+function patrol(toX: number, toY: number, durationSeconds: number, delaySeconds: number, direction: WorldCharacterDirection): StreetNpcMotion {
+  return { toX, toY, durationSeconds, delaySeconds, direction, patrol: true };
 }
 
 function vehicle(id: string, x: number, y: number, type: WorldVehicleType, heading: WorldVehicleHeading, color: string, presentation: StreetVehiclePresentation = {}): StreetVehicleSlot {
