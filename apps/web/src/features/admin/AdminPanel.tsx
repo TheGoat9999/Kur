@@ -123,7 +123,7 @@ export function AdminPanel({ open, onClose, onGameplayStateChanged }: Props) {
     }
   }
 
-  async function run(input: AdminMutation, gameplay = true, key = input.action) {
+  async function run(input: AdminMutation, gameplay = true, key: string = input.action) {
     if (busy) return;
     setPending(key);
     setError(null);
@@ -143,7 +143,7 @@ export function AdminPanel({ open, onClose, onGameplayStateChanged }: Props) {
     }
   }
 
-  function confirmRun(config: Omit<ConfirmState, 'execute'>, input: AdminMutation, gameplay = true, key = input.action) {
+  function confirmRun(config: Omit<ConfirmState, 'execute'>, input: AdminMutation, gameplay = true, key: string = input.action) {
     setConfirm({ ...config, execute: () => { setConfirm(null); void run(input, gameplay, key); } });
   }
 
@@ -191,7 +191,7 @@ export function AdminPanel({ open, onClose, onGameplayStateChanged }: Props) {
         </>}
       </div>
     </section>
-    {confirm && <div className="absolute inset-0 z-[135] grid place-items-center bg-black/60 p-4 backdrop-blur-sm" role="alertdialog" aria-modal="true"><div className="w-full max-w-md rounded-2xl border border-red-300/20 bg-[#0d181d] p-5 shadow-2xl"><div className="text-[10px] font-black uppercase tracking-[.18em] text-red-300">ADMIN CONFIRMATION</div><h3 className="mt-2 text-lg font-black text-slate-50">{confirm.title}</h3><p className="mt-3 text-sm leading-6 text-slate-400">{confirm.message}</p><div className="mt-5 flex justify-end gap-2"><button disabled={busy} onClick={() => setConfirm(null)} className="min-h-11 rounded-xl border border-white/10 px-4 text-sm font-bold text-slate-300">{copy.cancel}</button><button disabled={busy} onClick={confirm.execute} className="min-h-11 rounded-xl border border-red-300/25 bg-red-400/10 px-4 text-sm font-black text-red-100">{copy.confirm}</button></div></div></div>}
+    {confirm && <div className="absolute inset-0 z-[135] grid place-items-center bg-black/60 p-4 backdrop-blur-sm" role="alertdialog" aria-modal="true"><div className="w-full max-w-md rounded-2xl border border-red-300/20 bg-[#0d181d] p-5 shadow-2xl"><div className="text-[10px] font-black uppercase tracking-[.18em] text-red-300">ADMIN CONFIRMATION</div><h3 className="mt-2 text-lg font-black text-slate-50">{confirm.title}</h3><p className="mt-3 text-sm leading-6 text-slate-400">{confirm.message}</p><div className="mt-5 flex justify-end gap-2"><button disabled={busy} onClick={() => setConfirm(null)} className="min-h-11 rounded-xl border border-white/10 px-4 text-sm font-bold text-slate-300">{copy.cancel}</button><button disabled={busy} onClick={confirm.execute} className="min-h-11 rounded-xl border border-red-300/25 bg-red-400/10 px-4 text-sm font-black text-red-100">{confirm.confirmLabel}</button></div></div></div>}
   </div>;
 }
 
