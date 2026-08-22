@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "assetKey": "meshy-boho-western-muse",
+  "purpose": "Realtime 3D player-character investigation spike",
+  "source": {
+    "kind": "user-supplied-meshy-output",
+    "filename": "Meshy_AI_Boho_Western_Muse_0821234954_texture.glb",
+    "sha256": "1be6e7c53bd3165b39d868d2b39695be07bc8c0338ef3fff38e3aa8dda325c5d",
+    "bytes": 19328944,
+    "format": "glTF 2.0 GLB",
+    "generator": "pygltflib@v1.16.5",
+    "geometry": {
+      "meshes": 1,
+      "vertices": 215429,
+      "triangles": 370289,
+      "skins": 0,
+      "animations": 0
+    },
+    "textures": [
+      { "role": "baseColor", "width": 2048, "height": 2048 },
+      { "role": "metallicRoughness", "width": 2048, "height": 2048 },
+      { "role": "normal", "width": 2048, "height": 2048 },
+      { "role": "emissive", "width": 2048, "height": 2048 }
+    ]
+  },
+  "runtimeDerivative": {
+    "filename": "boho-western-muse-world-lod.glb",
+    "sha256": "45b69ecfa53c3c6ef6004abd3c9aaabecd52aa34d7e873b2e81b4f23d6d10a01",
+    "bytes": 11056,
+    "vertices": 337,
+    "triangles": 751,
+    "geometryChanges": "Tiny in-world investigation LOD generated with 0.09-unit vertex clustering; degenerate and duplicate collapsed triangles removed.",
+    "appearanceChanges": "The source base-color texture is sampled into normalized RGBA vertex colors; PBR/normal/metallic/emissive textures are omitted and the runtime material is unlit.",
+    "productionStatus": "spike-only",
+    "productionBlockers": [
+      "Character has no skeleton or animation clips; movement currently uses only whole-model bob/sway.",
+      "LOD is an automated investigation derivative, not artist-reviewed retopology; silhouette and texture fidelity require visual acceptance.",
+      "Commercial provenance of any source/reference input used to generate this exact Meshy output must be confirmed before shipping."
+    ]
+  },
+  "licensing": {
+    "provider": "Meshy",
+    "termsChecked": "2026-08-22",
+    "termsUrl": "https://www.meshy.ai/terms-of-use",
+    "freePlanBasis": "CC BY 4.0 with attribution according to Meshy Terms of Service last updated 2026-03-07.",
+    "paidPlanBasis": "Paid-plan output ownership is governed by Meshy terms and the customer's plan; input/reference rights remain the customer's responsibility.",
+    "attributionFallback": "Model created with Meshy - CC BY 4.0 License",
+    "clearance": "conditional-pending-source-input-confirmation"
+  }
+}
