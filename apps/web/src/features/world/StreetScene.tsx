@@ -65,7 +65,7 @@ export function StreetScene({ street, position, moving, activeRoute, characterRe
   }
 
   function isUiTarget(target: EventTarget | null) {
-    return (target as HTMLElement | null)?.closest('button, .street-interaction-panel, .street-vehicle-panel, .street-scene-meta, .street-danger-chip, .street-route, .street-collision-actor');
+    return (target as HTMLElement | null)?.closest('button, .street-interaction-panel, .street-vehicle-panel, .street-scene-meta, .street-danger-chip, .street-route');
   }
 
   function updateMovementPreview(event: PointerEvent<HTMLDivElement>) {
@@ -154,7 +154,7 @@ export function StreetScene({ street, position, moving, activeRoute, characterRe
           return <button
             key={vehicle.id}
             type="button"
-            className={`street-world-vehicle street-collision-actor ${vehicle.active ? 'active' : ''} ${vehicle.locked ? 'locked' : ''} ${localRange ? 'near' : ''} ${selectedVehicleId === vehicle.id ? 'selected' : ''}`}
+            className={`street-world-vehicle ${vehicle.active ? 'active' : ''} ${vehicle.locked ? 'locked' : ''} ${localRange ? 'near' : ''} ${selectedVehicleId === vehicle.id ? 'selected' : ''}`}
             style={{ left: `${vehicle.parkedPosition.x}%`, top: `${vehicle.parkedPosition.y}%` }}
             onClick={() => selectVehicle(vehicle)}
             aria-label={`${vehicle.model.displayName} · ${vehicle.locked ? copy.locked : copy.unlocked}`}

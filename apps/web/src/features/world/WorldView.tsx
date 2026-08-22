@@ -190,18 +190,10 @@ export function WorldView({ state, onStateChange, focusVehicleId = null, onVehic
     setMoving(true);
     setActiveRoute(planned.route);
     try {
-      const animation = await animateStreetRoute(position, planned.route, next => setPosition(next));
-      if (animation.collided) {
-        if (streetDistance(previous, animation.position) > 0.35) {
-          const saved = await moveStreetPlayer(animation.position);
-          setPosition(saved.position);
-        } else {
-          setPosition(previous);
-        }
-        push({ tone: 'info', title: t('common.actionBlocked'), message: locale === 'bg' ? 'Пътят ти е блокиран от човек или автомобил.' : 'Your path is blocked by a pedestrian or vehicle.' });
-        return;
-      }
-
+      // Dynamic NPCs and vehicles are soft occupancy until the router supports
+      // dynamic obstacle avoidance. The authored navigation graph is the hard
+      // walking boundary; DOM hitboxes must never deadlock a valid route.
+      await animateStreetRoute(position, planned.route, next => setPosition(next));
       const result = await moveStreetPlayer(target);
       setPosition(result.position);
     } catch (reason) {
@@ -268,39 +260,17 @@ export function WorldView({ state, onStateChange, focusVehicleId = null, onVehic
 
 async function animateStreetRoute(start: StreetPosition, route: StreetPosition[], apply: (position: StreetPosition) => void) {
   let from = start;
-  let lastSafe = start;
   for (const destination of route) {
     const distance = streetDistance(from, destination);
     if (distance < 0.25) { from = destination; continue; }
     const steps = Math.max(1, Math.ceil(distance / 1.65));
     for (let step = 1; step <= steps; step += 1) {
       const progress = step / steps;
-      const next = { x: from.x + (destination.x - from.x) * progress, y: from.y + (destination.y - from.y) * progress };
-      if (hasStreetActorCollision(next)) return { position: lastSafe, collided: true };
-      apply(next);
-      lastSafe = next;
+      apply({ x: from.x + (destination.x - from.x) * progress, y: from.y + (destination.y - from.y) * progress });
       await delay(22);
     }
     from = destination;
   }
-  return { position: lastSafe, collided: false };
-}
-
-function hasStreetActorCollision(position: StreetPosition) {
-  const scene = document.querySelector<HTMLElement>('.street-scene');
-  if (!scene) return false;
-  const sceneRect = scene.getBoundingClientRect();
-  const px = sceneRect.left + (position.x / 100) * sceneRect.width;
-  const py = sceneRect.top + (position.y / 100) * sceneRect.height;
-  const playerRadius = 9;
-  for (const actor of scene.querySelectorAll<HTMLElement>('.street-collision-actor')) {
-    const rect = actor.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) continue;
-    const nearestX = Math.max(rect.left, Math.min(px, rect.right));
-    const nearestY = Math.max(rect.top, Math.min(py, rect.bottom));
-    if (Math.hypot(px - nearestX, py - nearestY) <= playerRadius) return true;
-  }
-  return false;
 }
 
 function vehicleActionMessage(action: VehicleAction, name: string, locale: 'bg' | 'en') {
