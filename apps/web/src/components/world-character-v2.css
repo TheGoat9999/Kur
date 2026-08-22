@@ -1,0 +1,96 @@
+.world-character {
+  position: relative;
+  display: block;
+  width: 44px;
+  height: 74px;
+  overflow: visible;
+  pointer-events: none;
+  transform-origin: 50% 100%;
+}
+
+.world-character-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 5px 5px rgb(0 0 0 / .42));
+}
+
+.world-character-v2-leg-left,
+.world-character-v2-leg-right,
+.world-character-v2-arm-left,
+.world-character-v2-arm-right,
+.world-character-v2-body,
+.world-character-v2-head {
+  transform-box: fill-box;
+}
+
+.world-character-v2-leg-left,
+.world-character-v2-leg-right { transform-origin: 50% 4%; }
+.world-character-v2-arm-left,
+.world-character-v2-arm-right { transform-origin: 50% 9%; }
+.world-character-v2-body { transform-origin: 50% 100%; }
+.world-character-v2-head { transform-origin: 50% 100%; }
+
+.world-character-moving .world-character-v2-leg-left { animation: sd-vector-leg-left .42s ease-in-out infinite alternate; }
+.world-character-moving .world-character-v2-leg-right { animation: sd-vector-leg-right .42s ease-in-out infinite alternate; }
+.world-character-moving .world-character-v2-arm-left { animation: sd-vector-arm-left .42s ease-in-out infinite alternate; }
+.world-character-moving .world-character-v2-arm-right { animation: sd-vector-arm-right .42s ease-in-out infinite alternate; }
+.world-character-moving .world-character-v2-body { animation: sd-vector-body-step .21s ease-in-out infinite alternate; }
+.world-character-moving .world-character-v2-head { animation: sd-vector-head-step .42s ease-in-out infinite alternate; }
+
+@keyframes sd-vector-leg-left { to { transform: rotate(5deg) translateY(-.5px); } }
+@keyframes sd-vector-leg-right { to { transform: rotate(-5deg) translateY(.5px); } }
+@keyframes sd-vector-arm-left { to { transform: rotate(-4deg); } }
+@keyframes sd-vector-arm-right { to { transform: rotate(4deg); } }
+@keyframes sd-vector-body-step { to { transform: translateY(-1.1px); } }
+@keyframes sd-vector-head-step { to { transform: translateY(-.7px) rotate(.45deg); } }
+
+/* Street renderer: player and NPCs intentionally share the same vector silhouette. */
+.world-screen .street-npc-actor .world-character,
+.world-screen .street-npc-canonical .world-character {
+  width: 46px;
+  height: 77px;
+}
+
+.world-screen .world-character.street-player-avatar {
+  width: 50px;
+  height: 84px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+}
+
+.world-screen .street-player .world-character-svg {
+  filter: drop-shadow(0 6px 6px rgb(0 0 0 / .5)) drop-shadow(0 0 5px rgb(231 190 115 / .17));
+}
+
+.world-screen .street-npc-canonical.near .world-character-svg {
+  filter: drop-shadow(0 6px 6px rgb(0 0 0 / .48)) drop-shadow(0 0 5px rgb(116 231 171 / .18));
+}
+
+@media (max-width: 700px) {
+  .world-screen .street-npc-actor .world-character,
+  .world-screen .street-npc-canonical .world-character {
+    width: 41px;
+    height: 69px;
+  }
+
+  .world-screen .world-character.street-player-avatar {
+    width: 45px;
+    height: 76px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-character-moving .world-character-v2-leg-left,
+  .world-character-moving .world-character-v2-leg-right,
+  .world-character-moving .world-character-v2-arm-left,
+  .world-character-moving .world-character-v2-arm-right,
+  .world-character-moving .world-character-v2-body,
+  .world-character-moving .world-character-v2-head {
+    animation: none;
+  }
+}
