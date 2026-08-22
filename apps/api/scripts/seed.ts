@@ -73,6 +73,11 @@ try {
     ON CONFLICT (player_id, symbol) DO NOTHING
   `, [playerId]);
   await db.query(`
+    INSERT INTO ems_profiles (player_id, employed)
+    VALUES ($1, true)
+    ON CONFLICT (player_id) DO UPDATE SET employed = true, updated_at = now()
+  `, [playerId]);
+  await db.query(`
     INSERT INTO player_admin_roles (player_id, role_key)
     VALUES ($1, 'owner')
     ON CONFLICT (player_id, role_key) DO NOTHING

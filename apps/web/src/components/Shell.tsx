@@ -4,7 +4,7 @@ import { Hud } from './Hud';
 import { GameIcon, type GameIconName } from './GameIcon';
 import { useI18n, type TranslationKey } from '../i18n';
 
-export type Screen = 'world' | 'character' | 'inventory' | 'finance' | 'businesses' | 'vehicles' | 'property' | 'jobs' | 'hospitality' | 'government' | 'police';
+export type Screen = 'world' | 'character' | 'inventory' | 'finance' | 'businesses' | 'vehicles' | 'property' | 'jobs' | 'hospitality' | 'government' | 'police' | 'ems';
 type FeatureStage = 'live' | 'foundation' | 'migration';
 type RightNavDensity = 'compact' | 'comfortable' | 'large';
 type NavItem = { id: Screen; icon: GameIconName; label: TranslationKey; stage: FeatureStage; labelBg?: string; labelEn?: string };
@@ -29,7 +29,8 @@ const groups: ReadonlyArray<{
   { label: 'nav.institutions', items: [
     { id: 'hospitality', icon: 'utensils', label: 'nav.hospitality', stage: 'migration' },
     { id: 'government', icon: 'landmark', label: 'nav.character', labelBg: 'Идентичност и държава', labelEn: 'Identity & Government', stage: 'live' },
-    { id: 'police', icon: 'shield', label: 'nav.police', stage: 'migration' }
+    { id: 'police', icon: 'shield', label: 'nav.police', stage: 'migration' },
+    { id: 'ems', icon: 'heart', label: 'nav.jobs', labelBg: 'EMS · Медицинска служба', labelEn: 'EMS · Medical Services', stage: 'live' }
   ] }
 ];
 
@@ -57,7 +58,8 @@ const DEFAULT_RIGHT_NAV: RightNavPreferences = {
     jobs: true,
     hospitality: true,
     government: true,
-    police: true
+    police: true,
+    ems: true
   },
   density: 'comfortable',
   showStages: true
@@ -68,12 +70,13 @@ interface Props {
   screen: Screen;
   inventoryOpen: boolean;
   menuOpen: boolean;
+  emsStaffAccess: boolean;
   onScreen: (screen: Screen) => void;
   onMenu: (open: boolean) => void;
   children: ReactNode;
 }
 
-export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu, children }: Props) {
+export function Shell({ state, screen, inventoryOpen, menuOpen, emsStaffAccess, onScreen, onMenu, children }: Props) {
   const { locale, setLocale, t, runtime } = useI18n();
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem('sd_sidebar_collapsed') === 'true');
   const [rightNav, setRightNav] = useState<RightNavPreferences>(readRightNavPreferences);
@@ -100,6 +103,10 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
     localStorage.setItem(RIGHT_NAV_STORAGE, JSON.stringify(rightNav));
   }, [rightNav]);
 
+  function allowed(item: NavItem) {
+    return item.id !== 'ems' || emsStaffAccess;
+  }
+
   function toggleCollapsed() {
     setCollapsed(value => {
       localStorage.setItem('sd_sidebar_collapsed', String(!value));
@@ -108,6 +115,7 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
   }
 
   function navigate(next: Screen) {
+    if (next === 'ems' && !emsStaffAccess) return;
     onScreen(next);
     onMenu(false);
   }
@@ -133,7 +141,8 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
 
   const orderedRightItems = rightNav.order
     .map(id => navItems.find(item => item.id === id))
-    .filter((item): item is NavItem => Boolean(item));
+    .filter((item): item is NavItem => Boolean(item))
+    .filter(allowed);
 
   return (
     <div className={`game-shell ${collapsed ? 'game-shell-collapsed' : ''}`}>
@@ -164,10 +173,12 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
         </div>
 
         <nav className="game-nav" aria-label={t('shell.navigation')}>
-          {groups.map(group => (
-            <div className="nav-group" key={group.label}>
+          {groups.map(group => {
+            const items = group.items.filter(allowed);
+            if (items.length === 0) return null;
+            return <div className="nav-group" key={group.label}>
               <div className="nav-group-label">{t(group.label)}</div>
-              {group.items.map(item => {
+              {items.map(item => {
                 const label = navLabel(item, locale, t);
                 return <button
                   key={item.id}
@@ -180,8 +191,8 @@ export function Shell({ state, screen, inventoryOpen, menuOpen, onScreen, onMenu
                   <span className={`stage-dot stage-dot-${item.stage}`} />
                 </button>;
               })}
-            </div>
-          ))}
+            </div>;
+          })}
         </nav>
 
         <div className="sidebar-player">
