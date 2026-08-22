@@ -1,4 +1,5 @@
 import type { CharacterRecipe } from '@sol-dorado/contracts';
+import { WorldCharacter3D } from './WorldCharacter3D';
 
 export type WorldCharacterDirection = 'north' | 'south' | 'east' | 'west';
 export type WorldHairStyle = 'bald' | 'crop' | 'short' | 'long' | 'bun';
@@ -57,6 +58,26 @@ export function visualFromSeed(seed: string): WorldCharacterVisual {
 }
 
 export function WorldCharacter({ visual, direction = 'south', moving = false, className = '' }: {
+  visual: WorldCharacterVisual;
+  direction?: WorldCharacterDirection;
+  moving?: boolean;
+  className?: string;
+}) {
+  if (className.split(/\s+/).includes('street-player-avatar')) {
+    return (
+      <WorldCharacter3D
+        direction={direction}
+        moving={moving}
+        className={className}
+        fallback={<WorldCharacterSvg visual={visual} direction={direction} moving={moving} />}
+      />
+    );
+  }
+
+  return <WorldCharacterSvg visual={visual} direction={direction} moving={moving} className={className} />;
+}
+
+function WorldCharacterSvg({ visual, direction = 'south', moving = false, className = '' }: {
   visual: WorldCharacterVisual;
   direction?: WorldCharacterDirection;
   moving?: boolean;
