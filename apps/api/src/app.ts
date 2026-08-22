@@ -21,6 +21,7 @@ import { justiceRoutes } from './routes/justice.js';
 import { realEstateRoutes } from './routes/real-estate.js';
 import { hoodWalkRoutes } from './routes/hood-walk.js';
 import { businessRoutes } from './routes/businesses.js';
+import { hospitalityRoutes } from './routes/hospitality.js';
 import { adminRoutes } from './routes/admin.js';
 import { needsRoutes } from './routes/needs.js';
 import { crimeRoutes } from './routes/crime.js';
@@ -52,6 +53,7 @@ export function createApp(services: AppServices) {
   app.use(justiceRoutes(services));
   app.use(realEstateRoutes(services));
   app.use(businessRoutes(services));
+  app.use(hospitalityRoutes(services));
   app.use(needsRoutes(services));
   app.use(governmentRoutes(services));
   app.use(adminRoutes(services));

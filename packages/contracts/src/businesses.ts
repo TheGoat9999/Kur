@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const BusinessKindSchema = z.enum(['convenience_store','restaurant','mechanic_shop','dealership','logistics','nightclub']);
+export const BusinessKindSchema = z.enum(['convenience_store','restaurant','cafe','bar','bakery','mechanic_shop','dealership','logistics','nightclub']);
 export const BusinessRoleSchema = z.enum(['owner','manager','employee']);
 export const BusinessStatusSchema = z.enum(['open','closed','suspended']);
 
