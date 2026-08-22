@@ -30,6 +30,29 @@ export const ItemImageSchema = z.object({
   preferredSourceFile: z.string().min(1).nullable()
 });
 
+export const ItemRealWorldReferenceSchema = z.object({
+  matchType: z.literal('representative'),
+  referenceName: z.string().min(1).max(120),
+  manufacturer: z.string().min(1).max(120),
+  referenceClass: z.string().min(1).max(100),
+  cartridge: z.string().min(1).max(60).nullable(),
+  action: z.string().min(1).max(80).nullable(),
+  typicalCapacity: z.number().int().positive().max(200).nullable(),
+  approximateUnloadedWeightGrams: z.number().int().positive().max(30000).nullable(),
+  referenceUrl: z.url(),
+  disclaimer: z.string().min(1).max(240)
+});
+
+export const ItemWorldAssetSourceSchema = z.object({
+  provider: z.literal('quaternius'),
+  pack: z.literal('Ultimate Guns Pack'),
+  sourceEntry: z.string().min(1),
+  uploadedArchiveSha256: z.string().regex(/^[a-f0-9]{64}$/),
+  sourceUrl: z.url(),
+  license: z.literal('CC0-1.0'),
+  runtimeStatus: z.literal('source-fbx')
+});
+
 export const ItemDefinitionSchema = z.object({
   key: z.string().regex(/^[a-z0-9_]+$/),
   displayName: z.string().min(1).max(80),
@@ -42,7 +65,9 @@ export const ItemDefinitionSchema = z.object({
   legality: ItemLegalitySchema,
   useEffects: ItemUseEffectsSchema,
   tags: z.array(z.string().min(1).max(40)),
-  image: ItemImageSchema
+  image: ItemImageSchema,
+  realWorldReference: ItemRealWorldReferenceSchema.optional(),
+  worldAssetSource: ItemWorldAssetSourceSchema.optional()
 }).superRefine((item, context) => {
   if (!item.stackable && item.maxStack !== 1) {
     context.addIssue({
@@ -64,5 +89,7 @@ export type ItemCategory = z.infer<typeof ItemCategorySchema>;
 export type ItemLegality = z.infer<typeof ItemLegalitySchema>;
 export type ItemUseEffects = z.infer<typeof ItemUseEffectsSchema>;
 export type ItemImage = z.infer<typeof ItemImageSchema>;
+export type ItemRealWorldReference = z.infer<typeof ItemRealWorldReferenceSchema>;
+export type ItemWorldAssetSource = z.infer<typeof ItemWorldAssetSourceSchema>;
 export type ItemDefinition = z.infer<typeof ItemDefinitionSchema>;
 export type ItemCatalogResponse = z.infer<typeof ItemCatalogResponseSchema>;
