@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { calculateSaleBreakdown, isCanonicalBusinessJob, supplierUnitCost } from '../src/domain/business-commerce.js';
 import { getItemDefinition } from '../src/domain/items/index.js';
+import { getBusinessesState } from '../src/services/businesses.js';
+import type { Database } from '../src/db.js';
 
 describe('business commerce domain', () => {
   it('reuses canonical item keys for business stock and pricing', () => {
@@ -25,5 +27,20 @@ describe('business commerce domain', () => {
 
   it('derives supplier cost from canonical base price and supplier terms', () => {
     expect(supplierUnitCost(250, 7800)).toBe(195);
+  });
+
+  it('reads property names from the canonical bilingual real-estate columns', async () => {
+    const queries: string[] = [];
+    const db = {
+      query: async (query: string | { text: string }) => {
+        queries.push(typeof query === 'string' ? query : query.text);
+        return { rows: [], rowCount: 0 };
+      }
+    } as unknown as Database;
+
+    await getBusinessesState(db, '00000000-0000-4000-8000-000000000001');
+
+    expect(queries[0]).toContain('COALESCE(p.name_bg,p.name_en) property_name');
+    expect(queries[0]).not.toContain('p.name property_name');
   });
 });
