@@ -4,7 +4,7 @@ import { Hud } from './Hud';
 import { GameIcon, type GameIconName } from './GameIcon';
 import { useI18n, type TranslationKey } from '../i18n';
 
-export type Screen = 'world' | 'character' | 'inventory' | 'finance' | 'businesses' | 'vehicles' | 'property' | 'jobs' | 'hospitality' | 'police';
+export type Screen = 'world' | 'character' | 'inventory' | 'finance' | 'businesses' | 'vehicles' | 'property' | 'jobs' | 'hospitality' | 'government' | 'police';
 type FeatureStage = 'live' | 'foundation' | 'migration';
 type RightNavDensity = 'compact' | 'comfortable' | 'large';
 type NavItem = { id: Screen; icon: GameIconName; label: TranslationKey; stage: FeatureStage; labelBg?: string; labelEn?: string };
@@ -28,6 +28,7 @@ const groups: ReadonlyArray<{
   ] },
   { label: 'nav.institutions', items: [
     { id: 'hospitality', icon: 'utensils', label: 'nav.hospitality', stage: 'migration' },
+    { id: 'government', icon: 'landmark', label: 'nav.character', labelBg: 'Идентичност и държава', labelEn: 'Identity & Government', stage: 'live' },
     { id: 'police', icon: 'shield', label: 'nav.police', stage: 'migration' }
   ] }
 ];
@@ -55,6 +56,7 @@ const DEFAULT_RIGHT_NAV: RightNavPreferences = {
     property: true,
     jobs: true,
     hospitality: true,
+    government: true,
     police: true
   },
   density: 'comfortable',
