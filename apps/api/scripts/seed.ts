@@ -50,7 +50,7 @@ try {
       ('00000000-0000-4000-8000-000000000304', $1, '00000000-0000-4000-8000-000000000201', 'water_bottle', 'Water Bottle', 'Drink', 'H2O', 2, 500, true, 3, '{}'),
       ('00000000-0000-4000-8000-000000000305', $1, '00000000-0000-4000-8000-000000000201', 'sandwich', 'Sandwich', 'Food', 'FOOD', 1, 350, true, 4, '{}'),
       ('00000000-0000-4000-8000-000000000306', $1, '00000000-0000-4000-8000-000000000201', 'work_gloves', 'Work Gloves', 'Personal', 'GLV', 1, 150, false, 5, '{}'),
-      ('00000000-0000-4000-8000-000000000307', $1, '00000000-0000-4000-8000-000000000203', 'toolbox', 'Toolbox', 'Tool', 'TOOL', 1, 5200, false, 0, '{"quality": 62}'),
+      ('00000000-0000-4000-8000-000000000307', $1, '00000000-0000-4000-8000-000000000203', 'toolbox', 'Toolbox', 'TOOL', 'TOOL', 1, 5200, false, 0, '{"quality": 62}'),
       ('00000000-0000-4000-8000-000000000308', $1, '00000000-0000-4000-8000-000000000204', 'crowbar', 'Crowbar', 'Tool', 'BAR', 1, 2200, false, 0, '{}')
     ON CONFLICT (id) DO NOTHING
   `, [playerId]);
@@ -71,6 +71,11 @@ try {
     INSERT INTO finance_holdings (player_id, symbol, quantity)
     VALUES ($1, 'DRC', 0), ($1, 'VTA', 0), ($1, 'MSA', 0)
     ON CONFLICT (player_id, symbol) DO NOTHING
+  `, [playerId]);
+  await db.query(`
+    INSERT INTO ems_profiles (player_id, employed)
+    VALUES ($1, true)
+    ON CONFLICT (player_id) DO UPDATE SET employed = true, updated_at = now()
   `, [playerId]);
   await db.query(`
     INSERT INTO player_admin_roles (player_id, role_key)
