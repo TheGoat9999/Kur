@@ -1,0 +1,61 @@
+.world-map-canvas.world-map-level-region::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url('/assets/world/sol-dorado-island-master.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  filter: saturate(1.08) contrast(1.035) brightness(.98);
+}
+
+.world-map-canvas.world-map-level-region svg > rect:first-of-type,
+.world-map-canvas.world-map-level-region svg > .atlas-wave-lines,
+.world-map-canvas.world-map-level-region svg > .atlas-main-land,
+.world-map-canvas.world-map-level-region svg > g[clip-path],
+.world-map-canvas.world-map-level-region svg > .atlas-coastline {
+  opacity: 0 !important;
+}
+
+.world-map-canvas.world-map-level-region .world-map-area-settlement polygon {
+  fill: rgb(255 255 255 / .018) !important;
+  stroke: rgb(238 228 188 / .76) !important;
+  stroke-width: .5 !important;
+  stroke-dasharray: 1.15 .72 !important;
+}
+
+.world-map-canvas.world-map-level-region .world-map-area-settlement circle {
+  opacity: .62;
+}
+
+.world-map-canvas.world-map-level-region .world-map-area-settlement:hover polygon,
+.world-map-canvas.world-map-level-region .world-map-area-settlement:focus polygon {
+  fill: rgb(238 194 91 / .13) !important;
+  stroke: #f4d37e !important;
+  stroke-width: .9 !important;
+  filter: drop-shadow(0 0 1.8px rgb(243 205 116 / .78));
+}
+
+.world-map-canvas.world-map-level-region .world-map-area-settlement.world-map-current polygon {
+  fill: rgb(235 183 70 / .095) !important;
+  stroke: #ffd46e !important;
+  stroke-width: .92 !important;
+  filter: drop-shadow(0 0 1.7px rgb(236 190 87 / .7));
+}
+
+.world-map-canvas.world-map-level-region .world-map-area-settlement:hover circle,
+.world-map-canvas.world-map-level-region .world-map-area-settlement:focus circle,
+.world-map-canvas.world-map-level-region .world-map-area-settlement.world-map-current circle {
+  opacity: 1;
+}
+
+@media (max-width: 760px) {
+  .world-map-canvas.world-map-level-region::before {
+    filter: saturate(1.06) contrast(1.04) brightness(.95);
+  }
+  .world-map-canvas.world-map-level-region .world-map-area-settlement polygon {
+    stroke-width: .64 !important;
+  }
+}
