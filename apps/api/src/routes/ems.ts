@@ -13,6 +13,7 @@ import {
   acceptEmsCall,
   applyEmsTreatment,
   EmsCommandError,
+  getEmsAccess,
   getEmsState,
   handoffEmsCall,
   reportEmsCall,
@@ -31,8 +32,12 @@ export function emsRoutes(services: AppServices) {
     }
   };
 
+  router.get('/v1/ems/access', async (request, response) => {
+    response.json(await getEmsAccess(services.db, request.playerId!));
+  });
+
   router.get('/v1/ems', async (request, response) => {
-    response.json(await getEmsState(services.db, request.playerId!));
+    return command(response, () => getEmsState(services.db, request.playerId!));
   });
 
   router.post('/v1/ems/duty', async (request, response) => {
