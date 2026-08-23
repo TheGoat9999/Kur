@@ -9,8 +9,6 @@ import { useI18n } from '../../i18n';
 import { getNearbyNpcs, interactWithNpc, NpcApiError } from '../../lib/npc-api';
 import { CanonicalNpcActor } from './CanonicalNpcActor';
 import { STREET_POPULATION, type StreetNpcSlot } from './street-population';
-import { getStreetSceneVNext } from './street-scene-vnext';
-import { StreetRuntimePopulation } from './StreetVNextLayer';
 import './npc-life.css';
 
 const NPC_REACH = 11;
@@ -29,7 +27,6 @@ export function StreetPopulation({ segmentId, visibleObjectIds, playerPosition, 
 }) {
   const { locale } = useI18n();
   const definition = STREET_POPULATION[segmentId];
-  const vnextScene = getStreetSceneVNext(segmentId);
   const [npcs, setNpcs] = useState<NpcPublicState[]>([]);
   const [selectedId, setSelectedId] = useState<NpcPublicState['id'] | null>(null);
   const [result, setResult] = useState<NpcInteractionResult | null>(null);
@@ -80,7 +77,7 @@ export function StreetPopulation({ segmentId, visibleObjectIds, playerPosition, 
 
   return (
     <>
-      {vnextScene ? <StreetRuntimePopulation scene={vnextScene} /> : <div className="street-population-layer" aria-hidden="true">
+      <div className="street-population-layer" aria-hidden="true">
         {definition.vehicles.map(vehicle => {
           const moving = vehicle.toX !== undefined;
           const laneY = moving ? TRAFFIC_LANE_Y[vehicle.heading] : vehicle.y;
@@ -101,7 +98,7 @@ export function StreetPopulation({ segmentId, visibleObjectIds, playerPosition, 
             const motionClass = moving ? (npc.patrol ? 'street-npc-actor-patrol' : 'street-npc-actor-pass') : '';
             return <span key={npc.id} className={`street-npc-actor ${moving ? 'street-npc-actor-moving' : ''} ${motionClass}`} style={style} data-actor-kind="npc"><WorldPedestrian visual={npc.visual ?? visualFromSeed(seed)} seed={seed} direction={npcDirection(npc)} moving={moving} /></span>;
           })}
-      </div>}
+      </div>
 
       {npcs.map(npc => {
         const near = streetDistance(playerPosition, npc.presence.position) <= NPC_REACH;
