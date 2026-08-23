@@ -1,9 +1,9 @@
 .world-screen .street-scene.street-scene-market {
   background-color: #1b3035 !important;
-  background-image: url('/assets/world/street-market-master.svg') !important;
+  background-image: var(--market-street-block-3-background, url('/assets/world/street-market-master.svg')) !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
-  background-size: cover !important;
+  background-size: 100% 100% !important;
 }
 
 .world-screen .street-scene.street-scene-corner {
@@ -41,7 +41,15 @@
 }
 
 @media (max-width: 760px) {
-  .world-screen .street-scene.street-scene-market,
+  /* Keep the existing mobile fallback until the vNext pan/zoom viewport lands.
+     Stretching the 16:9 pilot into the portrait street viewport would desync
+     player, hotspot and actor coordinates from the artwork. */
+  .world-screen .street-scene.street-scene-market {
+    background-image: url('/assets/world/street-market-master.svg') !important;
+    background-position: center !important;
+    background-size: cover !important;
+  }
+
   .world-screen .street-scene.street-scene-corner,
   .world-screen .street-scene.street-scene-alley {
     background-position: center !important;
