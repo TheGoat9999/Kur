@@ -1,6 +1,6 @@
 .world-screen .street-scene.street-scene-market {
   background-color: #1b3035 !important;
-  background-image: var(--market-street-block-3-background, url('/assets/world/street-market-master.svg')) !important;
+  background-image: url('/assets/world/streets/market-block-3/background.webp') !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
   background-size: 100% 100% !important;
@@ -41,9 +41,8 @@
 }
 
 @media (max-width: 760px) {
-  /* Keep the existing mobile fallback until the vNext pan/zoom viewport lands.
-     Stretching the 16:9 pilot into the portrait street viewport would desync
-     player, hotspot and actor coordinates from the artwork. */
+  /* Preserve coordinate alignment on the current portrait viewport until the
+     image-backed scene receives its dedicated pan/zoom framing. */
   .world-screen .street-scene.street-scene-market {
     background-image: url('/assets/world/street-market-master.svg') !important;
     background-position: center !important;
