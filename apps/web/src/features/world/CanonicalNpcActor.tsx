@@ -39,9 +39,15 @@ export function CanonicalNpcActor({ npc, near, selected, interactionLabel, talkL
     let index = 0;
     const first = route[0] ?? npc.presence.position;
 
-    setMotion({ position: first, direction: 'south', moving: false, durationMs: 0 });
+    if (selected) {
+      // Freeze where the player clicked the NPC. Do not teleport the actor back
+      // to its anchor while the interaction panel is open.
+      setMotion(current => ({ ...current, moving: false, durationMs: 0 }));
+      return () => undefined;
+    }
 
-    if (route.length < 2 || selected) return () => undefined;
+    setMotion({ position: first, direction: 'south', moving: false, durationMs: 0 });
+    if (route.length < 2) return () => undefined;
 
     const schedulePause = (initial = false) => {
       if (cancelled) return;
