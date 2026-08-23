@@ -1,0 +1,66 @@
+.market-street-image-actors {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.market-image-actor {
+  position: absolute;
+  left: var(--image-actor-from-x);
+  top: var(--image-actor-from-y);
+  display: block;
+  transform: translate(-50%, -82%);
+  will-change: left, top;
+  pointer-events: none;
+}
+
+.market-image-actor img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 5px rgb(0 0 0 / .38));
+  user-select: none;
+}
+
+.market-image-actor-pedestrian {
+  z-index: 10;
+  width: clamp(25px, 2.05vw, 36px);
+  height: clamp(46px, 4.05vw, 66px);
+}
+
+.market-image-actor-vehicle {
+  z-index: 8;
+  width: clamp(78px, 8.9vw, 132px);
+  height: auto;
+  transform: translate(-50%, -50%);
+}
+
+.market-image-actor-west img {
+  transform: scaleX(-1);
+}
+
+.market-image-actor-moving {
+  animation: market-image-actor-travel var(--image-actor-duration) linear var(--image-actor-delay) infinite;
+}
+
+.market-image-actor-parked {
+  opacity: .97;
+}
+
+@keyframes market-image-actor-travel {
+  from { left: var(--image-actor-from-x); top: var(--image-actor-from-y); }
+  to { left: var(--image-actor-to-x); top: var(--image-actor-to-y); }
+}
+
+@media (max-width: 760px) {
+  /* The image-backed Market Street background intentionally stays desktop-only
+     in this pilot, so its image actors must not leak onto the mobile fallback. */
+  .street-scene-market .market-street-image-actors { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .market-image-actor-moving { animation-play-state: paused; }
+}
