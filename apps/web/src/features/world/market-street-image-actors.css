@@ -16,7 +16,8 @@
   pointer-events: none;
 }
 
-.market-image-actor img {
+.market-image-actor > img,
+.market-pedestrian-walk-cycle img {
   display: block;
   width: 100%;
   height: 100%;
@@ -27,8 +28,38 @@
 
 .market-image-actor-pedestrian {
   z-index: 10;
-  width: clamp(25px, 2.05vw, 36px);
-  height: clamp(46px, 4.05vw, 66px);
+  width: clamp(31px, 2.5vw, 43px);
+  height: clamp(44px, 3.55vw, 61px);
+}
+
+.market-pedestrian-walk-cycle {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 88%;
+}
+
+.market-pedestrian-frame {
+  position: absolute;
+  inset: 0;
+}
+.market-pedestrian-frame-1 { opacity: 1; }
+.market-pedestrian-frame-2 { opacity: 0; }
+
+.market-image-actor-moving.market-image-actor-pedestrian .market-pedestrian-frame-1 {
+  animation: market-pedestrian-frame-a .44s steps(1, end) infinite;
+}
+.market-image-actor-moving.market-image-actor-pedestrian .market-pedestrian-frame-2 {
+  animation: market-pedestrian-frame-b .44s steps(1, end) infinite;
+}
+.market-image-actor-moving.market-image-actor-pedestrian .market-pedestrian-walk-cycle {
+  animation: market-pedestrian-footfall .44s ease-in-out infinite;
+}
+
+.market-image-actor-west .market-pedestrian-walk-cycle,
+.market-image-actor-west.market-image-actor-vehicle > img {
+  transform: scaleX(-1);
 }
 
 .market-image-actor-vehicle {
@@ -38,29 +69,38 @@
   transform: translate(-50%, -50%);
 }
 
-.market-image-actor-west img {
-  transform: scaleX(-1);
-}
-
 .market-image-actor-moving {
   animation: market-image-actor-travel var(--image-actor-duration) linear var(--image-actor-delay) infinite;
 }
 
-.market-image-actor-parked {
-  opacity: .97;
-}
+.market-image-actor-parked { opacity: .97; }
 
 @keyframes market-image-actor-travel {
   from { left: var(--image-actor-from-x); top: var(--image-actor-from-y); }
   to { left: var(--image-actor-to-x); top: var(--image-actor-to-y); }
 }
+@keyframes market-pedestrian-frame-a {
+  0%, 49.99% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes market-pedestrian-frame-b {
+  0%, 49.99% { opacity: 0; }
+  50%, 100% { opacity: 1; }
+}
+@keyframes market-pedestrian-footfall {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -1.5px; }
+}
 
 @media (max-width: 760px) {
-  /* The image-backed Market Street background intentionally stays desktop-only
-     in this pilot, so its image actors must not leak onto the mobile fallback. */
   .street-scene-market .market-street-image-actors { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .market-image-actor-moving { animation-play-state: paused; }
+  .market-image-actor-moving.market-image-actor-pedestrian .market-pedestrian-frame-1,
+  .market-image-actor-moving.market-image-actor-pedestrian .market-pedestrian-frame-2,
+  .market-image-actor-moving.market-image-actor-pedestrian .market-pedestrian-walk-cycle { animation: none; }
+  .market-image-actor-moving.market-image-actor-pedestrian .market-pedestrian-frame-1 { opacity: 1; }
+  .market-image-actor-moving.market-image-actor-pedestrian .market-pedestrian-frame-2 { opacity: 0; }
 }

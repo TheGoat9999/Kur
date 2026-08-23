@@ -1,7 +1,10 @@
 import type { CSSProperties } from 'react';
 
-const PEDESTRIAN = '/assets/world/streets/market-block-3/pedestrian-east.webp';
-const VAN = '/assets/world/streets/market-block-3/van-east.webp';
+const PEDESTRIAN_FRAMES = [
+  '/assets/world/streets/market-block-3/pedestrian-east-01.webp?v=20260824-v4',
+  '/assets/world/streets/market-block-3/pedestrian-east-02.webp?v=20260824-v4'
+] as const;
+const VAN = '/assets/world/streets/market-block-3/van-east.webp?v=20260824-v4';
 
 type ActorKind = 'pedestrian' | 'vehicle';
 type ActorDirection = 'east' | 'west';
@@ -48,7 +51,15 @@ export function MarketStreetImageActors() {
             data-actor-id={actor.id}
             data-actor-kind={actor.kind}
           >
-            <img src={actor.kind === 'pedestrian' ? PEDESTRIAN : VAN} alt="" draggable={false} decoding="async" />
+            {actor.kind === 'pedestrian' ? (
+              <span className="market-pedestrian-walk-cycle">
+                {PEDESTRIAN_FRAMES.map((frame, index) => (
+                  <img key={frame} className={`market-pedestrian-frame market-pedestrian-frame-${index + 1}`} src={frame} alt="" draggable={false} decoding="async" />
+                ))}
+              </span>
+            ) : (
+              <img src={VAN} alt="" draggable={false} decoding="async" />
+            )}
           </span>
         );
       })}

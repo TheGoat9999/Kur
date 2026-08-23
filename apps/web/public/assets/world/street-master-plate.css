@@ -1,9 +1,30 @@
 .world-screen .street-scene.street-scene-market {
+  position: relative;
   background-color: #1b3035 !important;
-  background-image: url('/assets/world/streets/market-block-3/background.webp') !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
-  background-size: 100% 100% !important;
+  background-image: none !important;
+}
+
+/* Keep the authored procedural street below the photo plate as a fail-safe.
+   If the WebP cannot load for any reason, the player must never get a blank scene. */
+.world-screen .street-scene-market > .street-backdrop-market {
+  z-index: 0 !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+}
+
+/* A dedicated visual plate is more reliable than depending on the root
+   background shorthand. The version query also breaks stale browser caches
+   from the earlier broken pilot asset. */
+.world-screen .street-scene.street-scene-market::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: url('/assets/world/streets/market-block-3/background.webp?v=20260824-v4');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  pointer-events: none;
 }
 
 .world-screen .street-scene.street-scene-corner {
@@ -22,7 +43,6 @@
   background-size: cover !important;
 }
 
-.world-screen .street-scene-market > .street-backdrop-market,
 .world-screen .street-scene-corner > .street-backdrop-corner,
 .world-screen .street-scene-alley > .street-backdrop-alley {
   opacity: 0 !important;
@@ -41,13 +61,15 @@
 }
 
 @media (max-width: 760px) {
-  /* Preserve coordinate alignment on the current portrait viewport until the
-     image-backed scene receives its dedicated pan/zoom framing. */
+  /* Preserve the established mobile geometry until the dedicated image-backed
+     pan/zoom viewport is authored. Never stretch the desktop plate into portrait. */
+  .world-screen .street-scene.street-scene-market::after { display: none; }
   .world-screen .street-scene.street-scene-market {
     background-image: url('/assets/world/street-market-master.svg') !important;
     background-position: center !important;
     background-size: cover !important;
   }
+  .world-screen .street-scene-market > .street-backdrop-market { opacity: 0 !important; }
 
   .world-screen .street-scene.street-scene-corner,
   .world-screen .street-scene.street-scene-alley {
