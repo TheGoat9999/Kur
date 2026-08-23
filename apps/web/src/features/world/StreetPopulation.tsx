@@ -8,8 +8,10 @@ import { WorldVehicle } from '../../components/WorldVehicle';
 import { useI18n } from '../../i18n';
 import { getNearbyNpcs, interactWithNpc, NpcApiError } from '../../lib/npc-api';
 import { CanonicalNpcActor } from './CanonicalNpcActor';
+import { MarketStreetImageActors } from './MarketStreetImageActors';
 import { STREET_POPULATION, type StreetNpcSlot } from './street-population';
 import './npc-life.css';
+import './market-street-image-actors.css';
 
 const NPC_REACH = 11;
 const TRAFFIC_LANE_Y = {
@@ -35,6 +37,7 @@ export function StreetPopulation({ segmentId, visibleObjectIds, playerPosition, 
   const selected = npcs.find(npc => npc.id === selectedId) ?? null;
   const local = <T extends { bg: string; en: string }>(value: T) => value[locale];
   const copy = locale === 'bg' ? bgCopy : enCopy;
+  const imageBackedMarket = segmentId === 'market_block_3';
 
   useEffect(() => {
     let cancelled = false;
@@ -77,28 +80,32 @@ export function StreetPopulation({ segmentId, visibleObjectIds, playerPosition, 
 
   return (
     <>
-      <div className="street-population-layer" aria-hidden="true">
-        {definition.vehicles.map(vehicle => {
-          const moving = vehicle.toX !== undefined;
-          const laneY = moving ? TRAFFIC_LANE_Y[vehicle.heading] : vehicle.y;
-          const style = {
-            '--vehicle-x': `${vehicle.x}%`, '--vehicle-y': `${laneY}%`, '--vehicle-to-x': `${vehicle.toX ?? vehicle.x}%`,
-            '--vehicle-duration': `${vehicle.durationSeconds ?? 0}s`, '--vehicle-delay': `${vehicle.delaySeconds ?? 0}s`, '--vehicle-width': `${vehicle.widthPercent ?? 9.6}%`
-          } as CSSProperties;
-          const serviceProps = { ...(vehicle.service ? { service: vehicle.service } : {}), ...(vehicle.serviceLabel ? { serviceLabel: vehicle.serviceLabel } : {}) };
-          return <span key={vehicle.id} className={`street-vehicle-actor ${moving ? 'street-vehicle-actor-moving' : ''} ${vehicle.parked ? 'street-vehicle-actor-parked' : ''}`} style={style} data-actor-kind="vehicle" data-lane={moving ? vehicle.heading : 'parking'}><WorldVehicle type={vehicle.type} color={vehicle.color} heading={vehicle.heading} assetSeed={vehicle.id} {...serviceProps} /></span>;
-        })}
-
-        {definition.npcs
-          .filter(npc => !npc.namedObjectId && (!npc.namedObjectId || visibleObjectIds.includes(npc.namedObjectId)))
-          .map(npc => {
-            const moving = npc.toX !== undefined || npc.toY !== undefined;
-            const seed = `${segmentId}:${npc.id}`;
-            const style = { '--npc-x': `${npc.x}%`, '--npc-y': `${npc.y}%`, '--npc-to-x': `${npc.toX ?? npc.x}%`, '--npc-to-y': `${npc.toY ?? npc.y}%`, '--npc-duration': `${npc.durationSeconds ?? 0}s`, '--npc-delay': `${npc.delaySeconds ?? 0}s` } as CSSProperties;
-            const motionClass = moving ? (npc.patrol ? 'street-npc-actor-patrol' : 'street-npc-actor-pass') : '';
-            return <span key={npc.id} className={`street-npc-actor ${moving ? 'street-npc-actor-moving' : ''} ${motionClass}`} style={style} data-actor-kind="npc"><WorldPedestrian visual={npc.visual ?? visualFromSeed(seed)} seed={seed} direction={npcDirection(npc)} moving={moving} /></span>;
+      {imageBackedMarket ? (
+        <MarketStreetImageActors />
+      ) : (
+        <div className="street-population-layer" aria-hidden="true">
+          {definition.vehicles.map(vehicle => {
+            const moving = vehicle.toX !== undefined;
+            const laneY = moving ? TRAFFIC_LANE_Y[vehicle.heading] : vehicle.y;
+            const style = {
+              '--vehicle-x': `${vehicle.x}%`, '--vehicle-y': `${laneY}%`, '--vehicle-to-x': `${vehicle.toX ?? vehicle.x}%`,
+              '--vehicle-duration': `${vehicle.durationSeconds ?? 0}s`, '--vehicle-delay': `${vehicle.delaySeconds ?? 0}s`, '--vehicle-width': `${vehicle.widthPercent ?? 9.6}%`
+            } as CSSProperties;
+            const serviceProps = { ...(vehicle.service ? { service: vehicle.service } : {}), ...(vehicle.serviceLabel ? { serviceLabel: vehicle.serviceLabel } : {}) };
+            return <span key={vehicle.id} className={`street-vehicle-actor ${moving ? 'street-vehicle-actor-moving' : ''} ${vehicle.parked ? 'street-vehicle-actor-parked' : ''}`} style={style} data-actor-kind="vehicle" data-lane={moving ? vehicle.heading : 'parking'}><WorldVehicle type={vehicle.type} color={vehicle.color} heading={vehicle.heading} assetSeed={vehicle.id} {...serviceProps} /></span>;
           })}
-      </div>
+
+          {definition.npcs
+            .filter(npc => !npc.namedObjectId && (!npc.namedObjectId || visibleObjectIds.includes(npc.namedObjectId)))
+            .map(npc => {
+              const moving = npc.toX !== undefined || npc.toY !== undefined;
+              const seed = `${segmentId}:${npc.id}`;
+              const style = { '--npc-x': `${npc.x}%`, '--npc-y': `${npc.y}%`, '--npc-to-x': `${npc.toX ?? npc.x}%`, '--npc-to-y': `${npc.toY ?? npc.y}%`, '--npc-duration': `${npc.durationSeconds ?? 0}s`, '--npc-delay': `${npc.delaySeconds ?? 0}s` } as CSSProperties;
+              const motionClass = moving ? (npc.patrol ? 'street-npc-actor-patrol' : 'street-npc-actor-pass') : '';
+              return <span key={npc.id} className={`street-npc-actor ${moving ? 'street-npc-actor-moving' : ''} ${motionClass}`} style={style} data-actor-kind="npc"><WorldPedestrian visual={npc.visual ?? visualFromSeed(seed)} seed={seed} direction={npcDirection(npc)} moving={moving} /></span>;
+            })}
+        </div>
+      )}
 
       {npcs.map(npc => {
         const near = streetDistance(playerPosition, npc.presence.position) <= NPC_REACH;

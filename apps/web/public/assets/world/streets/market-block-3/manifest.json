@@ -1,0 +1,28 @@
+{
+  "streetId": "market_block_3",
+  "renderMode": "image-backed-runtime-pilot",
+  "background": {
+    "file": "background.webp",
+    "source": "user-provided generated image",
+    "actorsBakedIn": false,
+    "vehiclesBakedIn": false
+  },
+  "actors": {
+    "pedestrian": {
+      "file": "pedestrian-east.webp",
+      "source": "crop derived from user-provided Pedestrian_male.png",
+      "runtimeMirroring": true
+    },
+    "vehicle": {
+      "file": "van-east.webp",
+      "source": "crop derived from user-provided Van.png",
+      "runtimeMirroring": true
+    }
+  },
+  "foreground": {
+    "enabled": false,
+    "reason": "The supplied foreground.png is a parts sheet rather than a scene-aligned occlusion mask."
+  },
+  "gameplayAuthority": "runtime-data",
+  "coordinateSpace": { "width": 100, "height": 100 }
+}
