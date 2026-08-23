@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import './world-vehicle-3d.css';
 
 const THREE_MODULE_URL = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-const MODEL_URL = '/assets/vehicles/meshy/fast-74-world-lod.glb?v=20260822-meshy-spike-1';
+const MODEL_URL = '/assets/vehicles/meshy/fast-74-world-lod.glb?v=20260824-meshy-visual-fix-1';
 const MAX_PIXEL_RATIO = 1.5;
 
 type VehicleHeading = 'east' | 'west';
@@ -10,18 +10,13 @@ type ThreeRuntime = Record<string, any>;
 type GlbJson = {
   accessors: Array<Record<string, any>>;
   bufferViews: Array<Record<string, any>>;
-  images?: Array<Record<string, any>>;
-  materials?: Array<Record<string, any>>;
-  textures?: Array<Record<string, any>>;
   meshes: Array<{ primitives: Array<Record<string, any>> }>;
 };
 
 type LoadedModel = {
   root: any;
   material: any;
-  texture: any;
   geometries: any[];
-  objectUrl: string | null;
 };
 
 export function WorldVehicle3D({
@@ -65,18 +60,33 @@ export function WorldVehicle3D({
           canvas,
           alpha: true,
           antialias: true,
+          premultipliedAlpha: true,
           powerPreference: 'high-performance'
         });
         renderer.setClearColor(0x000000, 0);
+        renderer.setClearAlpha(0);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO));
         if ('outputColorSpace' in renderer && THREE.SRGBColorSpace) renderer.outputColorSpace = THREE.SRGBColorSpace;
 
         const scene = new THREE.Scene();
-        const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 10);
-        camera.position.set(0, 0.15, 3);
-        camera.lookAt(0, 0, 0);
+        const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 30);
 
-        model = await buildModel(THREE, parsed.json, parsed.binary);
+        // The source car's long axis is Z. For street-size rendering the camera
+        // looks across X and down from above, which produces a readable side/top
+        // silhouette instead of the near-flat front view from the first spike.
+        if (compact) camera.position.set(4.6, 3.1, 0.0);
+        else camera.position.set(4.4, 2.8, 5.2);
+        camera.lookAt(0, 0.23, 0);
+
+        scene.add(new THREE.HemisphereLight(0xe9f4f7, 0x263238, 2.15));
+        const key = new THREE.DirectionalLight(0xffffff, 2.7);
+        key.position.set(3.5, 6.5, 4.5);
+        scene.add(key);
+        const rim = new THREE.DirectionalLight(0x9fc9d2, 1.25);
+        rim.position.set(-4, 3, -5);
+        scene.add(rim);
+
+        model = buildModel(THREE, parsed.json, parsed.binary);
         fitVehicleModel(THREE, model.root);
         scene.add(model.root);
 
@@ -85,7 +95,7 @@ export function WorldVehicle3D({
           const height = Math.max(1, canvas.clientHeight);
           renderer.setSize(width, height, false);
           const aspect = width / height;
-          const halfHeight = compact ? 0.58 : 0.43;
+          const halfHeight = compact ? 0.56 : 0.58;
           camera.left = -halfHeight * aspect;
           camera.right = halfHeight * aspect;
           camera.top = halfHeight;
@@ -98,9 +108,11 @@ export function WorldVehicle3D({
 
         const tick = () => {
           if (disposed) return;
-          model!.root.rotation.y = compact
-            ? (headingRef.current === 'east' ? Math.PI / 2 : -Math.PI / 2)
-            : Math.PI / 2 - 0.26;
+          if (compact) {
+            model!.root.rotation.y = headingRef.current === 'east' ? 0 : Math.PI;
+          } else {
+            model!.root.rotation.y = -0.16;
+          }
           renderer.render(scene, camera);
           frame = window.requestAnimationFrame(tick);
         };
@@ -119,8 +131,6 @@ export function WorldVehicle3D({
       resizeObserver?.disconnect();
       model?.geometries.forEach(geometry => geometry.dispose?.());
       model?.material?.dispose?.();
-      model?.texture?.dispose?.();
-      if (model?.objectUrl) URL.revokeObjectURL(model.objectUrl);
       renderer?.dispose?.();
     };
   }, [compact]);
@@ -129,7 +139,7 @@ export function WorldVehicle3D({
     <span
       className={`world-vehicle-3d world-vehicle-3d-${status} ${compact ? 'world-vehicle-3d-compact' : 'world-vehicle-3d-showroom'} ${className}`.trim()}
       aria-hidden="true"
-      data-renderer="meshy-glb-spike"
+      data-renderer="meshy-glb-spike-v2"
     >
       <span className="world-vehicle-3d-fallback">{fallback}</span>
       <canvas ref={canvasRef} className="world-vehicle-3d-canvas" />
@@ -164,52 +174,32 @@ function parseGlb(buffer: ArrayBuffer): { json: GlbJson; binary: ArrayBuffer } {
   return { json, binary };
 }
 
-async function buildModel(THREE: ThreeRuntime, gltf: GlbJson, binary: ArrayBuffer): Promise<LoadedModel> {
-  const textureInfo = gltf.materials?.[0]?.pbrMetallicRoughness?.baseColorTexture;
-  const textureDef = textureInfo ? gltf.textures?.[textureInfo.index] : null;
-  const imageDef = textureDef ? gltf.images?.[textureDef.source] : null;
-  let texture: any = null;
-  let objectUrl: string | null = null;
-
-  if (imageDef?.bufferView !== undefined) {
-    const view = gltf.bufferViews[imageDef.bufferView];
-    const bytes = new Uint8Array(binary, view.byteOffset ?? 0, view.byteLength);
-    objectUrl = URL.createObjectURL(new Blob([bytes], { type: imageDef.mimeType ?? 'image/png' }));
-    texture = await new THREE.TextureLoader().loadAsync(objectUrl);
-    texture.flipY = false;
-    if (THREE.SRGBColorSpace) texture.colorSpace = THREE.SRGBColorSpace;
-    texture.needsUpdate = true;
-  }
-
+function buildModel(THREE: ThreeRuntime, gltf: GlbJson, binary: ArrayBuffer): LoadedModel {
   const root = new THREE.Group();
   const geometries: any[] = [];
   const sourceMesh = gltf.meshes[0];
   if (!sourceMesh) throw new Error('GLB has no mesh');
-  const hasVertexColors = sourceMesh.primitives.some(primitive => primitive.attributes.COLOR_0 !== undefined);
-  const material = new THREE.MeshBasicMaterial({
-    map: texture,
-    vertexColors: hasVertexColors,
-    color: 0xffffff,
-    side: THREE.DoubleSide,
-    toneMapped: false
+
+  // The first spike baked the source atlas into a tiny vertex-color LOD. At this
+  // aggressive reduction the sampled colours read as a cyan blob. For the
+  // visibility test we prefer a neutral lit material so the actual car form,
+  // roof line and wheel arches remain legible at street scale.
+  const material = new THREE.MeshStandardMaterial({
+    color: 0x879399,
+    roughness: 0.42,
+    metalness: 0.48,
+    side: THREE.DoubleSide
   });
 
   for (const primitive of sourceMesh.primitives) {
     const geometry = new THREE.BufferGeometry();
     const position = typedAccessor(gltf, binary, primitive.attributes.POSITION);
     geometry.setAttribute('position', new THREE.BufferAttribute(position.array, position.itemSize, position.normalized));
-    if (primitive.attributes.TEXCOORD_0 !== undefined) {
-      const uv = typedAccessor(gltf, binary, primitive.attributes.TEXCOORD_0);
-      geometry.setAttribute('uv', new THREE.BufferAttribute(uv.array, uv.itemSize, uv.normalized));
-    }
-    if (primitive.attributes.COLOR_0 !== undefined) {
-      const color = typedAccessor(gltf, binary, primitive.attributes.COLOR_0);
-      geometry.setAttribute('color', new THREE.BufferAttribute(color.array, color.itemSize, color.normalized));
-    }
     if (primitive.indices !== undefined) {
       const indices = typedAccessor(gltf, binary, primitive.indices);
       geometry.setIndex(new THREE.BufferAttribute(indices.array, 1, false));
     }
+    geometry.computeVertexNormals();
     geometry.computeBoundingBox();
     const mesh = new THREE.Mesh(geometry, material);
     mesh.frustumCulled = false;
@@ -217,7 +207,7 @@ async function buildModel(THREE: ThreeRuntime, gltf: GlbJson, binary: ArrayBuffe
     geometries.push(geometry);
   }
 
-  return { root, material, texture, geometries, objectUrl };
+  return { root, material, geometries };
 }
 
 function typedAccessor(gltf: GlbJson, binary: ArrayBuffer, accessorIndex: number) {
@@ -253,11 +243,17 @@ function accessorSize(type: string) {
 }
 
 function fitVehicleModel(THREE: ThreeRuntime, root: any) {
-  const box = new THREE.Box3().setFromObject(root);
-  const size = box.getSize(new THREE.Vector3());
-  const center = box.getCenter(new THREE.Vector3());
-  const longest = Math.max(size.x, size.z, 0.001);
-  const scale = 1.58 / longest;
+  const sourceBox = new THREE.Box3().setFromObject(root);
+  const sourceSize = sourceBox.getSize(new THREE.Vector3());
+  const sourceCenter = sourceBox.getCenter(new THREE.Vector3());
+  const longest = Math.max(sourceSize.x, sourceSize.z, 0.001);
+  const scale = 1.72 / longest;
+
   root.scale.setScalar(scale);
-  root.position.set(-center.x * scale, -center.y * scale + 0.02, -center.z * scale);
+  // Center horizontally and put the lowest point on the virtual ground plane.
+  root.position.set(
+    -sourceCenter.x * scale,
+    -sourceBox.min.y * scale - 0.20,
+    -sourceCenter.z * scale
+  );
 }
