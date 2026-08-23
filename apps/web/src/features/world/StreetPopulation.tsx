@@ -7,6 +7,7 @@ import { WorldPedestrian } from '../../components/WorldPedestrian';
 import { WorldVehicle } from '../../components/WorldVehicle';
 import { useI18n } from '../../i18n';
 import { getNearbyNpcs, interactWithNpc, NpcApiError } from '../../lib/npc-api';
+import { CanonicalNpcActor } from './CanonicalNpcActor';
 import { STREET_POPULATION, type StreetNpcSlot } from './street-population';
 import './npc-life.css';
 
@@ -101,28 +102,15 @@ export function StreetPopulation({ segmentId, visibleObjectIds, playerPosition, 
 
       {npcs.map(npc => {
         const near = streetDistance(playerPosition, npc.presence.position) <= NPC_REACH;
-        const seed = `canonical:${npc.id}`;
-        const motion = canonicalNpcMotion(npc);
-        const style = {
-          '--canonical-npc-x': `${npc.presence.position.x}%`,
-          '--canonical-npc-y': `${npc.presence.position.y}%`,
-          '--canonical-npc-to-x': `${motion.x}%`,
-          '--canonical-npc-to-y': `${motion.y}%`,
-          '--canonical-npc-duration': `${motion.durationSeconds}s`,
-          '--canonical-npc-delay': `${motion.delaySeconds}s`
-        } as CSSProperties;
-        return <button
+        return <CanonicalNpcActor
           key={npc.id}
-          type="button"
-          className={`street-npc-canonical ${motion.active ? 'street-npc-canonical-active' : 'street-npc-canonical-idle'} ${near ? 'near' : ''}`}
-          style={style}
-          onClick={event => selectNpc(event, npc)}
-          aria-label={`${npc.name} · ${local(npc.role)} · ${copy.openInteraction}`}
-        >
-          <WorldPedestrian visual={visualFromSeed(seed)} seed={seed} direction={motion.direction} moving={motion.active} />
-          <span className="street-npc-name">{npc.nickname ?? npc.name.split(' ')[0]}</span>
-          <span className="street-npc-interact-hint">{near ? copy.talk : copy.inspect}</span>
-        </button>;
+          npc={npc}
+          near={near}
+          selected={selectedId === npc.id}
+          interactionLabel={copy.inspect}
+          talkLabel={copy.talk}
+          onSelect={event => selectNpc(event, npc)}
+        />;
       })}
 
       {selected && !suppressed && <aside className="npc-life-panel street-interaction-panel" onClick={event => event.stopPropagation()} aria-label={selected.name}>
@@ -146,44 +134,6 @@ function npcDirection(npc: StreetNpcSlot): WorldCharacterDirection {
   if (Math.abs(dy) > 0.01) return dy > 0 ? 'south' : 'north';
   return 'south';
 }
-
-function canonicalNpcMotion(npc: NpcPublicState) {
-  const amplitude = {
-    work: 2.6,
-    commute: 5.2,
-    break: 1.4,
-    socialize: 3.4,
-    errand: 4.4,
-    off_duty: 0
-  }[npc.presence.intent];
-  const hash = stableHash(npc.id);
-  const horizontal = hash % 3 !== 0;
-  const sign = hash % 2 === 0 ? 1 : -1;
-  const dx = horizontal ? amplitude * sign : amplitude * 0.35 * sign;
-  const dy = horizontal ? amplitude * 0.22 * (sign * -1) : amplitude * sign;
-  const x = clamp(npc.presence.position.x + dx, 4, 96);
-  const y = clamp(npc.presence.position.y + dy, 4, 96);
-  const direction: WorldCharacterDirection = Math.abs(dx) >= Math.abs(dy) ? (dx >= 0 ? 'east' : 'west') : (dy >= 0 ? 'south' : 'north');
-  return {
-    x,
-    y,
-    direction,
-    active: amplitude > 0,
-    durationSeconds: 5.5 + (hash % 5),
-    delaySeconds: -(hash % 7)
-  };
-}
-
-function stableHash(value: string) {
-  let hash = 2166136261;
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-  return hash >>> 0;
-}
-
-function clamp(value: number, min: number, max: number) { return Math.max(min, Math.min(max, value)); }
 
 function relationWord(value: number, locale: 'bg' | 'en') {
   if (locale === 'bg') return value >= 50 ? 'познат човек' : value >= 25 ? 'разпознава те' : value >= 10 ? 'помни те' : 'почти непознат';
