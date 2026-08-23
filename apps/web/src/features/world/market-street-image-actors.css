@@ -34,7 +34,7 @@
 .market-image-actor-vehicle {
   z-index: 8;
   width: clamp(78px, 8.9vw, 132px);
-  height: auto;
+  height: clamp(42px, 4.8vw, 72px);
   transform: translate(-50%, -50%);
 }
 
