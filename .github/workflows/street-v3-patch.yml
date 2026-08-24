@@ -1,0 +1,105 @@
+name: Street V3 Patch
+
+on:
+  push:
+    branches: ["codex/procedural-street-v2"]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ !contains(github.event.head_commit.message, '[street-v3-patched]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/procedural-street-v2
+      - name: Patch Pixi V3 lifecycle and overlap handling
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('apps/web/src/features/world/ProceduralStreetBackdrop.tsx')
+          text = path.read_text()
+
+          old = '''export function ProceduralStreetBackdrop({ alerted }: { alerted: boolean }) {
+            const hostRef = useStreetPixiLayer('background', alerted);
+            return <div ref={hostRef} className="street-backdrop street-backdrop-pixi" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }} aria-hidden="true" />;
+          }
+
+          export function ProceduralStreetForeground() {
+            const hostRef = useStreetPixiLayer('foreground', false);
+            return <div ref={hostRef} className="street-backdrop street-backdrop-pixi-foreground" style={{ position: 'absolute', inset: 0, zIndex: 18, overflow: 'hidden', pointerEvents: 'none' }} aria-hidden="true" />;
+          }
+          '''
+          new = '''export function ProceduralStreetBackdrop({ alerted }: { alerted: boolean }) {
+            const backgroundRef = useStreetPixiLayer('background', alerted);
+            const foregroundRef = useStreetPixiLayer('foreground', false);
+            return <>
+              <div ref={backgroundRef} className="street-backdrop street-backdrop-pixi" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }} aria-hidden="true" />
+              <div ref={foregroundRef} className="street-backdrop street-backdrop-pixi-foreground" style={{ position: 'absolute', inset: 0, zIndex: 18, overflow: 'hidden', pointerEvents: 'none' }} aria-hidden="true" />
+            </>;
+          }
+          '''
+          if old not in text:
+              raise SystemExit('component block not found')
+          text = text.replace(old, new)
+
+          text = text.replace("    const host = hostRef.current;\n    if (!host) return;", "    const hostElement = hostRef.current;\n    if (!hostElement) return;")
+          text = text.replace("        host.replaceChildren(canvas);", "        hostElement.replaceChildren(canvas);")
+          text = text.replace("        if (!disposed) host.dataset.streetRendererError = 'true';", "        if (!disposed) hostElement.dataset.streetRendererError = 'true';")
+          text = text.replace("      host.replaceChildren();", "      hostElement.replaceChildren();")
+
+          old_tree = '''  for (const tree of scene.trees) {
+            if (foregroundOnly !== tree.occludes) continue;
+            if (roadClearance([tree.x, tree.y], scene.roads) < tree.radius + 3 || scene.buildings.some(building => pointInPolygon([tree.x, tree.y], building.footprint))) {
+              console.warn(`[street-v3] skipped tree at ${tree.x},${tree.y}: invalid placement`);
+              continue;
+            }
+            if (foregroundOnly) drawTreeCrown(stage, tree, palette, scene.seed);
+            else drawTree(stage, tree, palette, scene.seed);
+          }
+          '''
+          new_tree = '''  for (const tree of scene.trees) {
+            if (foregroundOnly && !tree.occludes) continue;
+            if (roadClearance([tree.x, tree.y], scene.roads) < tree.radius + 3 || scene.buildings.some(building => pointInPolygon([tree.x, tree.y], building.footprint))) {
+              console.warn(`[street-v3] skipped tree at ${tree.x},${tree.y}: invalid placement`);
+              continue;
+            }
+            if (foregroundOnly) drawTreeCrown(stage, tree, palette, scene.seed);
+            else drawTree(stage, tree, palette, scene.seed);
+          }
+          '''
+          if old_tree not in text:
+              raise SystemExit('tree block not found')
+          text = text.replace(old_tree, new_tree)
+
+          start = text.index('function polygonClearOfRoads(')
+          end_marker = "const overlapSignal = new Error('overlap');\n\n"
+          end = text.index(end_marker, start) + len(end_marker)
+          replacement = '''function polygonClearOfRoads(points: Point[], roads: RoadDefinition[], clearance: number) {
+            for (const road of roads) {
+              const required = road.width / 2 + clearance;
+              for (const point of points) if (distancePointToPolyline(point, road.centerline) < required) return false;
+              for (let edgeIndex = 0; edgeIndex < points.length; edgeIndex += 1) {
+                const a = points[edgeIndex]!;
+                const b = points[(edgeIndex + 1) % points.length]!;
+                for (let segmentIndex = 0; segmentIndex < road.centerline.length - 1; segmentIndex += 1) {
+                  if (segmentsIntersect(a, b, road.centerline[segmentIndex]!, road.centerline[segmentIndex + 1]!)) return false;
+                }
+              }
+            }
+            return true;
+          }
+
+          '''
+          text = text[:start] + replacement + text[end:]
+          path.write_text(text)
+          PY
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/web/src/features/world/ProceduralStreetBackdrop.tsx
+          git commit -m "fix(world): stabilize Pixi V3 lifecycle and occlusion [street-v3-patched]"
+          git push origin HEAD:codex/procedural-street-v2
