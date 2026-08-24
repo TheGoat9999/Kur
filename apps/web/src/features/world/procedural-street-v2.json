@@ -1,0 +1,211 @@
+{
+  "version": 2,
+  "canvas": { "width": 1200, "height": 700 },
+  "scene": {
+    "id": "market_block_3_procedural_v2",
+    "seed": 88421,
+    "palette": {
+      "concrete": "#565750",
+      "concreteLight": "#686961",
+      "concreteDark": "#42443f",
+      "asphalt": "#242a2d",
+      "asphaltLight": "#30373a",
+      "asphaltDark": "#171d20",
+      "curb": "#77756d",
+      "laneWhite": "#d0cec3",
+      "laneYellow": "#c0a552",
+      "glass": "#35565d",
+      "glassLight": "#6f8c8e",
+      "metal": "#485255",
+      "shadow": "#071012",
+      "foliage": "#3f6043",
+      "foliageLight": "#64805a",
+      "foliageDark": "#263c2d"
+    },
+    "roads": [
+      {
+        "id": "market_boulevard",
+        "class": "arterial",
+        "width": 138,
+        "centerline": [[-80, 382], [1280, 382]],
+        "markings": [
+          { "kind": "double-yellow", "from": [-40,382], "to": [621,382] },
+          { "kind": "double-yellow", "from": [783,382], "to": [1240,382] },
+          { "kind": "dash-white", "from": [-30,347], "to": [618,347] },
+          { "kind": "dash-white", "from": [-30,417], "to": [618,417] },
+          { "kind": "dash-white", "from": [786,347], "to": [1240,347] },
+          { "kind": "dash-white", "from": [786,417], "to": [1240,417] }
+        ]
+      },
+      {
+        "id": "dorado_avenue",
+        "class": "avenue",
+        "width": 108,
+        "centerline": [[704,-80], [704,780]],
+        "markings": [
+          { "kind": "dash-white", "from": [704,-30], "to": [704,304] },
+          { "kind": "dash-white", "from": [704,460], "to": [704,750] }
+        ]
+      },
+      {
+        "id": "cortez_diagonal",
+        "class": "collector",
+        "width": 78,
+        "centerline": [[-70,710], [318,554], [565,430], [637,397]],
+        "markings": [
+          { "kind": "dash-white", "from": [-30,694], "to": [300,561] },
+          { "kind": "dash-white", "from": [338,543], "to": [582,420] }
+        ]
+      },
+      {
+        "id": "cypress_diagonal",
+        "class": "collector",
+        "width": 74,
+        "centerline": [[1260,78], [1060,171], [900,278], [774,365]],
+        "markings": [
+          { "kind": "dash-white", "from": [1230,92], "to": [1075,164] },
+          { "kind": "dash-white", "from": [1045,181], "to": [910,271] }
+        ]
+      },
+      {
+        "id": "mira_service",
+        "class": "local",
+        "width": 54,
+        "centerline": [[1090,468], [1090,760]],
+        "markings": []
+      }
+    ],
+    "intersectionPatches": [
+      { "x": 623, "y": 305, "width": 164, "height": 158, "radius": 16 },
+      { "x": 555, "y": 340, "width": 116, "height": 100, "radius": 18 },
+      { "x": 748, "y": 330, "width": 112, "height": 100, "radius": 18 }
+    ],
+    "crosswalks": [
+      { "center": [648, 316], "length": 78, "span": 25, "angle": 0, "stripes": 7 },
+      { "center": [760, 448], "length": 78, "span": 25, "angle": 0, "stripes": 7 },
+      { "center": [636, 382], "length": 62, "span": 24, "angle": 90, "stripes": 6 },
+      { "center": [772, 382], "length": 62, "span": 24, "angle": 90, "stripes": 6 }
+    ],
+    "lots": [
+      { "id": "nw_corner", "points": [[18,18],[276,18],[276,252],[18,252]], "tone": "warm" },
+      { "id": "north_mid", "points": [[300,18],[604,18],[604,244],[300,252]], "tone": "cool" },
+      { "id": "north_east", "points": [[817,18],[1190,18],[1190,232],[1002,232],[864,281],[817,270]], "tone": "warm" },
+      { "id": "south_west", "points": [[18,504],[286,504],[286,682],[18,682]], "tone": "warm" },
+      { "id": "south_mid", "points": [[352,512],[617,472],[617,682],[332,682]], "tone": "cool" },
+      { "id": "south_east", "points": [[804,486],[1190,486],[1190,682],[804,682]], "tone": "neutral" }
+    ],
+    "buildings": [
+      {
+        "id": "el_camino",
+        "lot": "nw_corner",
+        "footprint": [[48,46],[250,46],[250,185],[48,185]],
+        "floors": 3,
+        "style": "terracotta",
+        "frontageEdge": 2,
+        "storefronts": 3,
+        "roofUnits": 3,
+        "awning": true
+      },
+      {
+        "id": "cypress_apartments",
+        "lot": "north_mid",
+        "footprint": [[325,38],[565,38],[565,188],[325,205]],
+        "floors": 5,
+        "style": "concrete",
+        "frontageEdge": 2,
+        "storefronts": 2,
+        "roofUnits": 4,
+        "awning": false
+      },
+      {
+        "id": "corner_store",
+        "lot": "north_east",
+        "footprint": [[858,50],[1034,36],[1100,112],[1040,190],[862,203],[830,146]],
+        "floors": 2,
+        "style": "brick",
+        "frontageEdge": 3,
+        "storefronts": 4,
+        "roofUnits": 2,
+        "awning": true
+      },
+      {
+        "id": "lavanderia",
+        "lot": "south_west",
+        "footprint": [[42,548],[240,522],[258,672],[42,672]],
+        "floors": 2,
+        "style": "stucco",
+        "frontageEdge": 1,
+        "storefronts": 3,
+        "roofUnits": 2,
+        "awning": true
+      },
+      {
+        "id": "dorado_offices",
+        "lot": "south_mid",
+        "footprint": [[390,548],[575,516],[595,672],[370,672]],
+        "floors": 4,
+        "style": "concrete",
+        "frontageEdge": 0,
+        "storefronts": 0,
+        "roofUnits": 4,
+        "awning": false
+      },
+      {
+        "id": "palmas_market",
+        "lot": "south_east",
+        "footprint": [[935,535],[1048,523],[1050,672],[925,672]],
+        "floors": 2,
+        "style": "terracotta",
+        "frontageEdge": 0,
+        "storefronts": 2,
+        "roofUnits": 2,
+        "awning": true
+      },
+      {
+        "id": "service_block",
+        "lot": "south_east",
+        "footprint": [[1128,520],[1174,518],[1174,672],[1128,672]],
+        "floors": 3,
+        "style": "industrial",
+        "frontageEdge": 0,
+        "storefronts": 0,
+        "roofUnits": 1,
+        "awning": false
+      }
+    ],
+    "parking": [
+      {
+        "id": "dorado_lot",
+        "points": [[812,530],[902,526],[906,666],[806,666]],
+        "spaces": 5,
+        "orientation": "vertical"
+      }
+    ],
+    "trees": [
+      { "x": 95, "y": 278, "radius": 15 },
+      { "x": 286, "y": 279, "radius": 14 },
+      { "x": 360, "y": 278, "radius": 14 },
+      { "x": 835, "y": 276, "radius": 14 },
+      { "x": 1165, "y": 262, "radius": 15 },
+      { "x": 306, "y": 493, "radius": 15 },
+      { "x": 625, "y": 500, "radius": 14 },
+      { "x": 925, "y": 494, "radius": 14 },
+      { "x": 1168, "y": 468, "radius": 14 }
+    ],
+    "props": [
+      { "kind": "lamp", "x": 124, "y": 289 },
+      { "kind": "lamp", "x": 345, "y": 291 },
+      { "kind": "lamp", "x": 830, "y": 290 },
+      { "kind": "lamp", "x": 1142, "y": 278 },
+      { "kind": "lamp", "x": 274, "y": 482 },
+      { "kind": "lamp", "x": 624, "y": 491 },
+      { "kind": "lamp", "x": 954, "y": 481 },
+      { "kind": "hydrant", "x": 335, "y": 303 },
+      { "kind": "hydrant", "x": 1005, "y": 477 },
+      { "kind": "drain", "x": 180, "y": 310 },
+      { "kind": "drain", "x": 845, "y": 455 },
+      { "kind": "drain", "x": 1145, "y": 453 },
+      { "kind": "dumpster", "x": 1068, "y": 575 }
+    ]
+  }
+}
