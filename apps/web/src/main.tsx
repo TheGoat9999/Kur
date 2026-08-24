@@ -10,9 +10,9 @@ import './features/world/street-navigation.css';
 import './features/world/world-visual.css';
 import './features/world/street-refinement.css';
 import './hud.css';
-import './hud-v2.css';
-import './hud-v3.css';
-import './hud-v4.css';
+import './game-navigation-rail.css';
+import './game-chrome-layout.css';
+import './game-chrome-refinements.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
