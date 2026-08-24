@@ -1,0 +1,165 @@
+/* Generated directional vehicle sprites are the single runtime car visual source. */
+.generated-vehicle-sprite {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transform-origin: center;
+}
+
+.generated-vehicle-sprite > img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform-origin: center;
+  image-rendering: auto;
+  user-select: none;
+  pointer-events: none;
+  filter: drop-shadow(0 5px 4px rgb(0 0 0 / .42));
+}
+
+.generated-vehicle-mirrored > img { transform: scaleX(-1); }
+
+/* The side-view source is now alpha-cropped so the visible car fills the runtime box. */
+.generated-vehicle-direction-east,
+.generated-vehicle-direction-west {
+  transform-origin: center;
+}
+
+/* Wheel-rim overlay. The base sprite remains static; only the rim layer rotates. */
+.generated-vehicle-wheel {
+  position: absolute;
+  z-index: 2;
+  top: 69.5%;
+  width: 10.5%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: url('/assets/vehicles/generated/wheel-rim-east.webp?v=20260824-generated-car-v2') center/contain no-repeat;
+  opacity: 0;
+  transform-origin: 50% 50%;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.generated-vehicle-wheel-rear { left: 15.8%; }
+.generated-vehicle-wheel-front { left: 75%; }
+
+.street-vehicle-actor-moving .generated-vehicle-wheel,
+.market-image-actor-moving .generated-vehicle-wheel {
+  opacity: .96;
+  animation: generated-vehicle-wheel-spin .42s linear infinite;
+}
+
+.street-vehicle-actor-moving .generated-vehicle-direction-west .generated-vehicle-wheel,
+.market-image-actor-moving .generated-vehicle-direction-west .generated-vehicle-wheel {
+  animation-direction: reverse;
+}
+
+@keyframes generated-vehicle-wheel-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Ownership/dealership artwork uses the same in-world sprite family instead of photos or 3D. */
+.vehicle-artwork-generated .generated-vehicle-sprite {
+  position: absolute;
+  inset: 6%;
+  width: 88%;
+  height: 88%;
+  z-index: 1;
+}
+
+.vehicle-artwork-generated .generated-vehicle-sprite > img {
+  object-fit: contain !important;
+  filter: drop-shadow(0 10px 12px rgb(0 0 0 / .42)) !important;
+}
+
+.vehicle-artwork-generated .vehicle-artwork-vignette { z-index: 2; }
+
+/* Street-owned vehicles must be pure transparent sprites. */
+.street-scene .street-world-vehicle .vehicle-artwork.vehicle-artwork-generated {
+  display: block !important;
+  width: 100%;
+  height: 100%;
+  margin: 0 !important;
+  overflow: visible !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.street-scene .street-world-vehicle .vehicle-artwork-generated .vehicle-artwork-vignette {
+  display: none !important;
+}
+
+.street-scene .street-world-vehicle::before,
+.street-scene .street-world-vehicle.locked::before {
+  content: none !important;
+  background: none !important;
+}
+
+.street-world-vehicle .vehicle-artwork-generated .generated-vehicle-sprite {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Alpha-cropped east frame: this produces ~120px visible length while the
+     interaction/collision envelope stays unchanged. */
+  transform: scale(1.42);
+}
+
+/* Ambient world traffic keeps the existing gameplay lane envelope. */
+.world-screen .street-vehicle-actor {
+  height: clamp(27px, 5.1%, 40px);
+  min-width: 62px;
+  max-width: 118px;
+}
+
+.world-vehicle-sprite {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Non-side frames still use their original square padding compensation. */
+.world-vehicle-sprite > .generated-vehicle-sprite {
+  transform: scale(1.55);
+}
+
+/* East/west frames are cropped and therefore need much less compensation. */
+.world-vehicle-sprite > .generated-vehicle-direction-east,
+.world-vehicle-sprite > .generated-vehicle-direction-west {
+  transform: scale(1.28);
+}
+
+.world-vehicle-service-label {
+  top: 72%;
+  font-size: 4px;
+}
+
+.world-screen .street-vehicle-actor-moving { overflow: visible; }
+
+.market-generated-vehicle {
+  width: 100%;
+  height: 100%;
+  transform: scale(1.22);
+}
+
+@media (max-width: 760px) {
+  .world-screen .street-vehicle-actor {
+    height: clamp(24px, 5.1%, 32px);
+    min-width: 54px;
+    max-width: 88px;
+  }
+
+  .street-world-vehicle .vehicle-artwork-generated .generated-vehicle-sprite {
+    transform: scale(1.32);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .generated-vehicle-wheel { animation: none !important; opacity: 0 !important; }
+}
