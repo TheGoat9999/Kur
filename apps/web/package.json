@@ -12,6 +12,7 @@
     "@radix-ui/react-select": "^2.3.7",
     "@sol-dorado/contracts": "0.1.0",
     "@tailwindcss/vite": "^4.3.3",
+    "pixi.js": "^8.18.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tailwindcss": "^4.3.3"
