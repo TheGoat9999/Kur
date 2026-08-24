@@ -67,30 +67,16 @@ export const STREET_SPATIAL: Record<StreetSpatialSegmentId, StreetSpatialDefinit
       travel_cypress_corner: same(4, 55, 9), travel_mira_alley: same(96, 55, 9)
     },
     navigation: {
-      snapRadius: 13,
+      snapRadius: 14,
       nodes: [
         nav('north_west', 8, 42), nav('el_camino', 20, 42, 'entrance'), nav('north_mid', 35, 42), nav('apartments_crossing', 50, 42, 'crossing'), nav('north_east_mid', 65, 42), nav('mercado', 80, 42, 'entrance'), nav('north_east', 92, 42),
         nav('south_west', 8, 67), nav('south_mid_west', 28, 67), nav('crossing_south', 50, 67, 'crossing'), nav('south_mid_east', 72, 67), nav('south_east', 92, 67),
-        nav('west_exit', 4, 55, 'exit'), nav('east_exit', 96, 55, 'exit'), nav('service_alley', 90, 73, 'entrance'), nav('service_south', 91, 96, 'exit'),
-
-        nav('dorado_north', 59, 4, 'exit'), nav('dorado_upper', 59, 22), nav('dorado_north_cross', 59, 42, 'crossing'), nav('dorado_south_cross', 59, 67, 'crossing'), nav('dorado_lower', 59, 82), nav('dorado_south', 59, 96, 'exit'),
-
-        nav('cortez_southwest', 4, 94, 'exit'), nav('cortez_lower', 24, 78), nav('cortez_market_south', 39, 64, 'crossing'), nav('cortez_market_north', 45, 47, 'crossing'), nav('cortez_upper', 56, 28), nav('cortez_northeast', 66, 5, 'exit'),
-
-        nav('cypress_northeast', 96, 18, 'exit'), nav('cypress_upper', 84, 34), nav('cypress_market_north', 77, 47, 'crossing'), nav('cypress_market_south', 70, 64, 'crossing'), nav('cypress_lower', 66, 82), nav('cypress_south', 64, 96, 'exit')
+        nav('west_exit', 4, 55, 'exit'), nav('east_exit', 96, 55, 'exit'), nav('service_alley', 90, 73, 'entrance')
       ],
       edges: [
-        edge('north_west', 'el_camino'), edge('el_camino', 'north_mid'), edge('north_mid', 'apartments_crossing'), edge('apartments_crossing', 'dorado_north_cross'), edge('dorado_north_cross', 'north_east_mid'), edge('north_east_mid', 'mercado'), edge('mercado', 'north_east'),
-        edge('south_west', 'south_mid_west'), edge('south_mid_west', 'cortez_market_south'), edge('cortez_market_south', 'crossing_south'), edge('crossing_south', 'dorado_south_cross'), edge('dorado_south_cross', 'cypress_market_south'), edge('cypress_market_south', 'south_mid_east'), edge('south_mid_east', 'south_east'),
-        edge('apartments_crossing', 'crossing_south'), edge('west_exit', 'north_west'), edge('west_exit', 'south_west'), edge('east_exit', 'north_east'), edge('east_exit', 'south_east'), edge('south_east', 'service_alley'), edge('service_alley', 'service_south'),
-
-        edge('dorado_north', 'dorado_upper'), edge('dorado_upper', 'dorado_north_cross'), edge('dorado_north_cross', 'dorado_south_cross'), edge('dorado_south_cross', 'dorado_lower'), edge('dorado_lower', 'dorado_south'),
-
-        edge('cortez_southwest', 'cortez_lower'), edge('cortez_lower', 'cortez_market_south'), edge('cortez_market_south', 'cortez_market_north'), edge('cortez_market_north', 'cortez_upper'), edge('cortez_upper', 'cortez_northeast'),
-        edge('cortez_market_north', 'north_mid'), edge('cortez_market_north', 'apartments_crossing'), edge('cortez_market_south', 'south_mid_west'),
-
-        edge('cypress_northeast', 'cypress_upper'), edge('cypress_upper', 'cypress_market_north'), edge('cypress_market_north', 'cypress_market_south'), edge('cypress_market_south', 'cypress_lower'), edge('cypress_lower', 'cypress_south'),
-        edge('cypress_market_north', 'mercado'), edge('cypress_market_north', 'north_east_mid'), edge('cypress_market_south', 'south_mid_east')
+        edge('north_west', 'el_camino'), edge('el_camino', 'north_mid'), edge('north_mid', 'apartments_crossing'), edge('apartments_crossing', 'north_east_mid'), edge('north_east_mid', 'mercado'), edge('mercado', 'north_east'),
+        edge('south_west', 'south_mid_west'), edge('south_mid_west', 'crossing_south'), edge('crossing_south', 'south_mid_east'), edge('south_mid_east', 'south_east'),
+        edge('apartments_crossing', 'crossing_south'), edge('west_exit', 'north_west'), edge('west_exit', 'south_west'), edge('east_exit', 'north_east'), edge('east_exit', 'south_east'), edge('south_east', 'service_alley')
       ]
     }
   },
