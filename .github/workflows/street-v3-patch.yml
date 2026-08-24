@@ -15,10 +15,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: codex/procedural-street-v2
-      - name: Patch Pixi V3 lifecycle and overlap handling
+      - name: Patch reviewed Pixi V3 implementation
         run: |
           python - <<'PY'
           from pathlib import Path
+
           path = Path('apps/web/src/features/world/ProceduralStreetBackdrop.tsx')
           text = path.read_text()
 
@@ -34,21 +35,40 @@ jobs:
           '''
           new = '''export function ProceduralStreetBackdrop({ alerted }: { alerted: boolean }) {
             const backgroundRef = useStreetPixiLayer('background', alerted);
-            const foregroundRef = useStreetPixiLayer('foreground', false);
+            const foregroundRef = useStreetPixiLayer('foreground', alerted);
             return <>
               <div ref={backgroundRef} className="street-backdrop street-backdrop-pixi" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }} aria-hidden="true" />
               <div ref={foregroundRef} className="street-backdrop street-backdrop-pixi-foreground" style={{ position: 'absolute', inset: 0, zIndex: 18, overflow: 'hidden', pointerEvents: 'none' }} aria-hidden="true" />
             </>;
           }
           '''
-          if old not in text:
-              raise SystemExit('component block not found')
+          if old not in text: raise SystemExit('component block not found')
           text = text.replace(old, new)
 
-          text = text.replace("    const host = hostRef.current;\n    if (!host) return;", "    const hostElement = hostRef.current;\n    if (!hostElement) return;")
+          text = text.replace(
+            "    const host = hostRef.current;\n    if (!host) return;",
+            "    if (hostRef.current === null) return;\n    const hostElement: HTMLDivElement = hostRef.current;"
+          )
           text = text.replace("        host.replaceChildren(canvas);", "        hostElement.replaceChildren(canvas);")
           text = text.replace("        if (!disposed) host.dataset.streetRendererError = 'true';", "        if (!disposed) hostElement.dataset.streetRendererError = 'true';")
           text = text.replace("      host.replaceChildren();", "      hostElement.replaceChildren();")
+
+          text = text.replace(
+            "        else renderForeground(app.stage, source.scene);",
+            "        else renderForeground(app.stage, source.scene, alerted);"
+          )
+          text = text.replace(
+            "function renderForeground(stage: Container, scene: SceneDefinition) {\n  stage.removeChildren();\n  const palette = paletteNumbers(scene.palette);\n  drawForegroundAwnings(stage, scene, palette);",
+            "function renderForeground(stage: Container, scene: SceneDefinition, alerted: boolean) {\n  stage.removeChildren();\n  const palette = paletteNumbers(scene.palette);\n  drawForegroundAwnings(stage, scene, palette, alerted);"
+          )
+          text = text.replace(
+            "function drawForegroundAwnings(stage: Container, scene: SceneDefinition, palette: Record<string, number>) {",
+            "function drawForegroundAwnings(stage: Container, scene: SceneDefinition, palette: Record<string, number>, alerted: boolean) {"
+          )
+          text = text.replace(
+            "    const style = buildingStyle(building.style, false);",
+            "    const style = buildingStyle(building.style, alerted && building.id === 'corner_store');"
+          )
 
           old_tree = '''  for (const tree of scene.trees) {
             if (foregroundOnly !== tree.occludes) continue;
@@ -70,8 +90,7 @@ jobs:
             else drawTree(stage, tree, palette, scene.seed);
           }
           '''
-          if old_tree not in text:
-              raise SystemExit('tree block not found')
+          if old_tree not in text: raise SystemExit('tree block not found')
           text = text.replace(old_tree, new_tree)
 
           start = text.index('function polygonClearOfRoads(')
@@ -95,11 +114,16 @@ jobs:
           '''
           text = text[:start] + replacement + text[end:]
           path.write_text(text)
+
+          scene_path = Path('apps/web/src/features/world/procedural-street-v2.json')
+          scene = scene_path.read_text()
+          scene = scene.replace('{ "x": 640, "y": 500, "radius": 14, "occludes": false }', '{ "x": 445, "y": 580, "radius": 14, "occludes": false }')
+          scene_path.write_text(scene)
           PY
-      - name: Commit patch
+      - name: Commit reviewed patch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/features/world/ProceduralStreetBackdrop.tsx
-          git commit -m "fix(world): stabilize Pixi V3 lifecycle and occlusion [street-v3-patched]"
+          git add apps/web/src/features/world/ProceduralStreetBackdrop.tsx apps/web/src/features/world/procedural-street-v2.json
+          git commit -m "fix(world): stabilize reviewed Pixi V3 renderer [street-v3-patched]"
           git push origin HEAD:codex/procedural-street-v2
