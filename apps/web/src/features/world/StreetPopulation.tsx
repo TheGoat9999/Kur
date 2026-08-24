@@ -86,7 +86,9 @@ export function StreetPopulation({ segmentId, visibleObjectIds, playerPosition, 
         <div className="street-population-layer" aria-hidden="true">
           {definition.vehicles.map(vehicle => {
             const moving = vehicle.toX !== undefined;
-            const laneY = moving ? TRAFFIC_LANE_Y[vehicle.heading] : vehicle.y;
+            const laneY = moving && (vehicle.heading === 'east' || vehicle.heading === 'west')
+              ? TRAFFIC_LANE_Y[vehicle.heading]
+              : vehicle.y;
             const style = {
               '--vehicle-x': `${vehicle.x}%`, '--vehicle-y': `${laneY}%`, '--vehicle-to-x': `${vehicle.toX ?? vehicle.x}%`,
               '--vehicle-duration': `${vehicle.durationSeconds ?? 0}s`, '--vehicle-delay': `${vehicle.delaySeconds ?? 0}s`, '--vehicle-width': `${vehicle.widthPercent ?? 9.6}%`
