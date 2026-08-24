@@ -59,7 +59,7 @@
       { "x": 96, "y": 278, "radius": 15, "occludes": false }, { "x": 286, "y": 279, "radius": 14, "occludes": true },
       { "x": 362, "y": 278, "radius": 14, "occludes": false }, { "x": 818, "y": 248, "radius": 14, "occludes": true },
       { "x": 1164, "y": 262, "radius": 15, "occludes": false }, { "x": 296, "y": 488, "radius": 15, "occludes": true },
-      { "x": 640, "y": 500, "radius": 14, "occludes": false }, { "x": 922, "y": 492, "radius": 14, "occludes": true },
+      { "x": 445, "y": 580, "radius": 14, "occludes": false }, { "x": 922, "y": 492, "radius": 14, "occludes": true },
       { "x": 1170, "y": 470, "radius": 14, "occludes": false }
     ],
     "props": [
