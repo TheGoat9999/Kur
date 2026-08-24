@@ -5,6 +5,7 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
+  transform-origin: center;
 }
 
 .generated-vehicle-sprite > img {
@@ -37,12 +38,23 @@
 
 .vehicle-artwork-generated .vehicle-artwork-vignette { z-index: 2; }
 
-/* v0.3 used a hard-coded FBX raster pseudo element here. Override it with real artwork. */
+/*
+ * Street-owned vehicles must be pure transparent sprites. The old photo artwork
+ * styles apply a #071318 figure background + vignette, which is the dark rectangle
+ * that was visible around the player's car.
+ */
 .street-scene .street-world-vehicle .vehicle-artwork.vehicle-artwork-generated {
   display: block !important;
   width: 100%;
   height: 100%;
-  background: transparent;
+  margin: 0 !important;
+  overflow: visible !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.street-scene .street-world-vehicle .vehicle-artwork-generated .vehicle-artwork-vignette {
+  display: none !important;
 }
 
 .street-scene .street-world-vehicle::before,
@@ -55,9 +67,13 @@
   inset: 0;
   width: 100%;
   height: 100%;
+  /* Source frames are square with transparent top/bottom padding. Scale the
+     visual only so the car fills its gameplay envelope without changing hitboxes. */
+  transform: scale(1.82);
 }
 
-/* Ambient world traffic retains the existing actor envelope, but all visuals resolve here. */
+/* Ambient world traffic retains the existing actor envelope, but the generated
+   source frames need the same transparent-padding compensation. */
 .world-screen .street-vehicle-actor {
   height: clamp(27px, 5.1%, 40px);
   min-width: 62px;
@@ -72,6 +88,10 @@
   pointer-events: none;
 }
 
+.world-vehicle-sprite > .generated-vehicle-sprite {
+  transform: scale(1.55);
+}
+
 .world-vehicle-service-label {
   top: 72%;
   font-size: 4px;
@@ -82,6 +102,7 @@
 .market-generated-vehicle {
   width: 100%;
   height: 100%;
+  transform: scale(1.55);
 }
 
 @media (max-width: 760px) {
@@ -89,5 +110,9 @@
     height: clamp(24px, 5.1%, 32px);
     min-width: 54px;
     max-width: 88px;
+  }
+
+  .street-world-vehicle .vehicle-artwork-generated .generated-vehicle-sprite {
+    transform: scale(1.7);
   }
 }
