@@ -10,7 +10,7 @@ export type GeneratedVehicleDirection =
 
 type CanonicalDirection = 'north' | 'north-east' | 'east' | 'south-east' | 'south';
 
-const ASSET_VERSION = '20260824-generated-car-v1';
+const ASSET_VERSION = '20260824-generated-car-v2';
 const ASSET_BASE = '/assets/vehicles/generated';
 
 const FRAME_BY_DIRECTION: Record<CanonicalDirection, string> = {
@@ -44,6 +44,7 @@ export function GeneratedVehicleSprite({
   eager?: boolean;
 }) {
   const resolved = DIRECTION_FRAME[direction];
+  const sideView = direction === 'east' || direction === 'west';
 
   return (
     <span
@@ -58,6 +59,12 @@ export function GeneratedVehicleSprite({
         decoding="async"
         loading={eager ? 'eager' : 'lazy'}
       />
+      {sideView && (
+        <>
+          <span className="generated-vehicle-wheel generated-vehicle-wheel-rear" aria-hidden="true" />
+          <span className="generated-vehicle-wheel generated-vehicle-wheel-front" aria-hidden="true" />
+        </>
+      )}
     </span>
   );
 }

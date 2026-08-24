@@ -1,15 +1,23 @@
 {
-  "id": "generated-coupe-v1",
+  "id": "generated-coupe-v2",
   "source": "user-provided generated multi-angle vehicle sprite sheet",
   "processedAt": "2026-08-24",
   "format": "webp",
-  "canvas": { "width": 256, "height": 256 },
   "canonicalFrames": {
     "north": "car-north.webp",
     "north-east": "car-northeast.webp",
     "east": "car-east.webp",
     "south-east": "car-southeast.webp",
     "south": "car-south.webp"
+  },
+  "sideFrameProcessing": {
+    "east": { "alphaCropped": true, "width": 256, "height": 127 },
+    "west": { "source": "east", "transform": "mirror-x" }
+  },
+  "wheelOverlay": {
+    "file": "wheel-rim-east.webp",
+    "appliesTo": ["east", "west"],
+    "animation": "runtime rim rotation while vehicle actor is moving"
   },
   "mirroredDirections": {
     "north-west": "north-east",

@@ -9,6 +9,8 @@
 }
 
 .generated-vehicle-sprite > img {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
   height: 100%;
@@ -21,6 +23,45 @@
 }
 
 .generated-vehicle-mirrored > img { transform: scaleX(-1); }
+
+/* The side-view source is now alpha-cropped so the visible car fills the runtime box. */
+.generated-vehicle-direction-east,
+.generated-vehicle-direction-west {
+  transform-origin: center;
+}
+
+/* Wheel-rim overlay. The base sprite remains static; only the rim layer rotates. */
+.generated-vehicle-wheel {
+  position: absolute;
+  z-index: 2;
+  top: 69.5%;
+  width: 10.5%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: url('/assets/vehicles/generated/wheel-rim-east.webp?v=20260824-generated-car-v2') center/contain no-repeat;
+  opacity: 0;
+  transform-origin: 50% 50%;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.generated-vehicle-wheel-rear { left: 15.8%; }
+.generated-vehicle-wheel-front { left: 75%; }
+
+.street-vehicle-actor-moving .generated-vehicle-wheel,
+.market-image-actor-moving .generated-vehicle-wheel {
+  opacity: .96;
+  animation: generated-vehicle-wheel-spin .42s linear infinite;
+}
+
+.street-vehicle-actor-moving .generated-vehicle-direction-west .generated-vehicle-wheel,
+.market-image-actor-moving .generated-vehicle-direction-west .generated-vehicle-wheel {
+  animation-direction: reverse;
+}
+
+@keyframes generated-vehicle-wheel-spin {
+  to { transform: rotate(360deg); }
+}
 
 /* Ownership/dealership artwork uses the same in-world sprite family instead of photos or 3D. */
 .vehicle-artwork-generated .generated-vehicle-sprite {
@@ -38,11 +79,7 @@
 
 .vehicle-artwork-generated .vehicle-artwork-vignette { z-index: 2; }
 
-/*
- * Street-owned vehicles must be pure transparent sprites. The old photo artwork
- * styles apply a #071318 figure background + vignette, which is the dark rectangle
- * that was visible around the player's car.
- */
+/* Street-owned vehicles must be pure transparent sprites. */
 .street-scene .street-world-vehicle .vehicle-artwork.vehicle-artwork-generated {
   display: block !important;
   width: 100%;
@@ -67,13 +104,12 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  /* Source frames are square with transparent top/bottom padding. Scale the
-     visual only so the car fills its gameplay envelope without changing hitboxes. */
-  transform: scale(1.82);
+  /* Alpha-cropped east frame: this produces ~120px visible length while the
+     interaction/collision envelope stays unchanged. */
+  transform: scale(1.42);
 }
 
-/* Ambient world traffic retains the existing actor envelope, but the generated
-   source frames need the same transparent-padding compensation. */
+/* Ambient world traffic keeps the existing gameplay lane envelope. */
 .world-screen .street-vehicle-actor {
   height: clamp(27px, 5.1%, 40px);
   min-width: 62px;
@@ -88,8 +124,15 @@
   pointer-events: none;
 }
 
+/* Non-side frames still use their original square padding compensation. */
 .world-vehicle-sprite > .generated-vehicle-sprite {
   transform: scale(1.55);
+}
+
+/* East/west frames are cropped and therefore need much less compensation. */
+.world-vehicle-sprite > .generated-vehicle-direction-east,
+.world-vehicle-sprite > .generated-vehicle-direction-west {
+  transform: scale(1.28);
 }
 
 .world-vehicle-service-label {
@@ -102,7 +145,7 @@
 .market-generated-vehicle {
   width: 100%;
   height: 100%;
-  transform: scale(1.55);
+  transform: scale(1.22);
 }
 
 @media (max-width: 760px) {
@@ -113,6 +156,10 @@
   }
 
   .street-world-vehicle .vehicle-artwork-generated .generated-vehicle-sprite {
-    transform: scale(1.7);
+    transform: scale(1.32);
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .generated-vehicle-wheel { animation: none !important; opacity: 0 !important; }
 }
