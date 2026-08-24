@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import './world-vehicle-3d.css';
 
 const THREE_MODULE_URL = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-const MODEL_URL = '/assets/vehicles/meshy/fast-74-world-lod.glb?v=20260824-meshy-visual-fix-1';
+const MODEL_URL = '/assets/vehicles/meshy/fast-74-world-lod.glb?v=20260824-meshy-visual-fix-2';
 const MAX_PIXEL_RATIO = 1.5;
 
 type VehicleHeading = 'east' | 'west';
@@ -15,7 +15,7 @@ type GlbJson = {
 
 type LoadedModel = {
   root: any;
-  material: any;
+  materials: any[];
   geometries: any[];
 };
 
@@ -71,19 +71,19 @@ export function WorldVehicle3D({
         const scene = new THREE.Scene();
         const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 30);
 
-        // The source car's long axis is Z. For street-size rendering the camera
-        // looks across X and down from above, which produces a readable side/top
-        // silhouette instead of the near-flat front view from the first spike.
-        if (compact) camera.position.set(4.6, 3.1, 0.0);
-        else camera.position.set(4.4, 2.8, 5.2);
-        camera.lookAt(0, 0.23, 0);
+        // The Meshy car is authored with its long axis on Z. Street rendering is
+        // intentionally elevated so the roof line, hood and all four wheels read
+        // against the flat 2D road instead of collapsing into a side-on blob.
+        if (compact) camera.position.set(5.2, 4.3, 0.0);
+        else camera.position.set(4.7, 3.6, 5.4);
+        camera.lookAt(0, 0.18, 0);
 
-        scene.add(new THREE.HemisphereLight(0xe9f4f7, 0x263238, 2.15));
-        const key = new THREE.DirectionalLight(0xffffff, 2.7);
-        key.position.set(3.5, 6.5, 4.5);
+        scene.add(new THREE.HemisphereLight(0xeaf3f6, 0x20282c, 1.9));
+        const key = new THREE.DirectionalLight(0xffffff, 2.45);
+        key.position.set(4.5, 7.2, 4.5);
         scene.add(key);
-        const rim = new THREE.DirectionalLight(0x9fc9d2, 1.25);
-        rim.position.set(-4, 3, -5);
+        const rim = new THREE.DirectionalLight(0x9dbfca, 0.95);
+        rim.position.set(-4, 4, -5);
         scene.add(rim);
 
         model = buildModel(THREE, parsed.json, parsed.binary);
@@ -95,7 +95,7 @@ export function WorldVehicle3D({
           const height = Math.max(1, canvas.clientHeight);
           renderer.setSize(width, height, false);
           const aspect = width / height;
-          const halfHeight = compact ? 0.56 : 0.58;
+          const halfHeight = compact ? 0.68 : 0.62;
           camera.left = -halfHeight * aspect;
           camera.right = halfHeight * aspect;
           camera.top = halfHeight;
@@ -111,7 +111,7 @@ export function WorldVehicle3D({
           if (compact) {
             model!.root.rotation.y = headingRef.current === 'east' ? 0 : Math.PI;
           } else {
-            model!.root.rotation.y = -0.16;
+            model!.root.rotation.y = -0.18;
           }
           renderer.render(scene, camera);
           frame = window.requestAnimationFrame(tick);
@@ -130,7 +130,7 @@ export function WorldVehicle3D({
       if (frame) window.cancelAnimationFrame(frame);
       resizeObserver?.disconnect();
       model?.geometries.forEach(geometry => geometry.dispose?.());
-      model?.material?.dispose?.();
+      model?.materials.forEach(material => material.dispose?.());
       renderer?.dispose?.();
     };
   }, [compact]);
@@ -139,7 +139,7 @@ export function WorldVehicle3D({
     <span
       className={`world-vehicle-3d world-vehicle-3d-${status} ${compact ? 'world-vehicle-3d-compact' : 'world-vehicle-3d-showroom'} ${className}`.trim()}
       aria-hidden="true"
-      data-renderer="meshy-glb-spike-v2"
+      data-renderer="meshy-glb-spike-v3"
     >
       <span className="world-vehicle-3d-fallback">{fallback}</span>
       <canvas ref={canvasRef} className="world-vehicle-3d-canvas" />
@@ -177,19 +177,21 @@ function parseGlb(buffer: ArrayBuffer): { json: GlbJson; binary: ArrayBuffer } {
 function buildModel(THREE: ThreeRuntime, gltf: GlbJson, binary: ArrayBuffer): LoadedModel {
   const root = new THREE.Group();
   const geometries: any[] = [];
+  const materials: any[] = [];
   const sourceMesh = gltf.meshes[0];
   if (!sourceMesh) throw new Error('GLB has no mesh');
 
-  // The first spike baked the source atlas into a tiny vertex-color LOD. At this
-  // aggressive reduction the sampled colours read as a cyan blob. For the
-  // visibility test we prefer a neutral lit material so the actual car form,
-  // roof line and wheel arches remain legible at street scale.
-  const material = new THREE.MeshStandardMaterial({
-    color: 0x879399,
-    roughness: 0.42,
-    metalness: 0.48,
+  // The 499-triangle feasibility LOD is deliberately tiny. Keep its body mesh,
+  // but restore the wheel volumes from the known Meshy source coordinates so
+  // the vehicle still reads correctly at street scale while the full-detail
+  // runtime asset is being validated.
+  const bodyMaterial = new THREE.MeshStandardMaterial({
+    color: 0x7f898e,
+    roughness: 0.34,
+    metalness: 0.52,
     side: THREE.DoubleSide
   });
+  materials.push(bodyMaterial);
 
   for (const primitive of sourceMesh.primitives) {
     const geometry = new THREE.BufferGeometry();
@@ -201,13 +203,46 @@ function buildModel(THREE: ThreeRuntime, gltf: GlbJson, binary: ArrayBuffer): Lo
     }
     geometry.computeVertexNormals();
     geometry.computeBoundingBox();
-    const mesh = new THREE.Mesh(geometry, material);
+    const mesh = new THREE.Mesh(geometry, bodyMaterial);
     mesh.frustumCulled = false;
     root.add(mesh);
     geometries.push(geometry);
   }
 
-  return { root, material, geometries };
+  addSourceWheelVolumes(THREE, root, geometries, materials);
+  return { root, materials, geometries };
+}
+
+function addSourceWheelVolumes(THREE: ThreeRuntime, root: any, geometries: any[], materials: any[]) {
+  const tireMaterial = new THREE.MeshStandardMaterial({ color: 0x15191b, roughness: 0.82, metalness: 0.05 });
+  const rimMaterial = new THREE.MeshStandardMaterial({ color: 0xadb5b8, roughness: 0.28, metalness: 0.82 });
+  materials.push(tireMaterial, rimMaterial);
+
+  const tireGeometry = new THREE.CylinderGeometry(0.40, 0.40, 0.30, 18, 1, false);
+  const rimGeometry = new THREE.CylinderGeometry(0.22, 0.22, 0.315, 14, 1, false);
+  geometries.push(tireGeometry, rimGeometry);
+
+  // Coordinates are taken from the uploaded source GLB's four wheel nodes.
+  const wheelPositions = [
+    [0.994, 0.193, 1.509],
+    [-0.981, 0.193, 1.509],
+    [0.994, 0.193, -1.319],
+    [-0.981, 0.193, -1.319]
+  ] as const;
+
+  for (const [x, y, z] of wheelPositions) {
+    const tire = new THREE.Mesh(tireGeometry, tireMaterial);
+    tire.position.set(x, y, z);
+    tire.rotation.z = Math.PI / 2;
+    tire.frustumCulled = false;
+    root.add(tire);
+
+    const rim = new THREE.Mesh(rimGeometry, rimMaterial);
+    rim.position.set(x, y, z);
+    rim.rotation.z = Math.PI / 2;
+    rim.frustumCulled = false;
+    root.add(rim);
+  }
 }
 
 function typedAccessor(gltf: GlbJson, binary: ArrayBuffer, accessorIndex: number) {
@@ -247,13 +282,12 @@ function fitVehicleModel(THREE: ThreeRuntime, root: any) {
   const sourceSize = sourceBox.getSize(new THREE.Vector3());
   const sourceCenter = sourceBox.getCenter(new THREE.Vector3());
   const longest = Math.max(sourceSize.x, sourceSize.z, 0.001);
-  const scale = 1.72 / longest;
+  const scale = 1.68 / longest;
 
   root.scale.setScalar(scale);
-  // Center horizontally and put the lowest point on the virtual ground plane.
   root.position.set(
     -sourceCenter.x * scale,
-    -sourceBox.min.y * scale - 0.20,
+    -sourceBox.min.y * scale - 0.18,
     -sourceCenter.z * scale
   );
 }
