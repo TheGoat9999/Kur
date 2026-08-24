@@ -2,7 +2,7 @@
 
 SOL DORADO is a persistent browser/mobile urban RPG. It is an independent game, not a FiveM, GTA, QBCore or Qbox mod.
 
-This repository is the real MVP implementation. The accepted standalone HTML prototypes are retained under `prototypes/` as product and regression references; production code lives in the workspace packages.
+This repository is the production MVP implementation. React/Node/PostgreSQL code is the runtime source of truth. Historical standalone HTML prototypes were retired from the active tree on 2026-08-24; their names and recovery point are indexed in `docs/historical-prototypes.md` and the files remain available through Git history.
 
 ## Stack
 
@@ -19,8 +19,7 @@ This repository is the real MVP implementation. The accepted standalone HTML pro
 apps/web              React game client
 apps/api              Node.js API and database migrations
 packages/contracts    Shared API schemas and game contracts
-prototypes            Accepted standalone HTML references
-docs                  Architecture and prototype migration map
+docs                  Architecture, conventions and asset provenance
 ```
 
 ## Start locally
@@ -39,9 +38,9 @@ The web client runs at `http://localhost:5173`; the API runs at `http://localhos
 
 ## Canonical branch and development workflow
 
-`main` is the canonical source of truth for SOL DORADO.
+`main` is the only canonical source of truth for SOL DORADO.
 
-New work must use a short-lived feature branch created from the latest `main`:
+Every new task starts from the latest `main` on a short-lived feature branch:
 
 ```text
 main
@@ -54,40 +53,41 @@ CI
   ↓
 merge to main
   ↓
-delete/retire feature branch
+retire the feature branch
 ```
 
-Before opening or merging a PR, sync the feature branch with the latest `main`. Do not use an old feature branch as the base for new work.
+Do not start new work from an old feature branch, an old PR head, `codex/browser-feature-migration`, or another chat's branch. Legacy branches are historical only even when they still exist remotely.
 
-CI is the minimum merge gate and currently runs:
+CI currently runs:
 
 1. `npm ci`
 2. contracts build
 3. API tests
 4. full application build
 
-Previously accepted functionality is regression-protected. Feature work should not silently rewrite unrelated systems while resolving merge conflicts.
+Previously accepted behavior is regression-protected. Conflict resolution must preserve unrelated systems rather than silently replacing them.
 
-`codex/browser-feature-migration` is retained temporarily as a compatibility branch for already-running ChatGPT workstreams. It is kept aligned with `main`; new work should branch from `main` instead.
+## Current production baseline
 
-Active experimental branches, especially character work, must be reconciled against the latest `main` before merge rather than merging an old branch history wholesale.
+The current `main` includes:
 
-## Current MVP integration baseline
+- canonical desktop/mobile shell, persistent HUD and notifications
+- PostgreSQL-backed identity, vitals, cash, location and needs/injury state
+- region → settlement → zone → district → street hierarchy with image-backed world/street presentation
+- server-authoritative walking, routes, street interactions, Hood Walk and persistent consequences
+- canonical living NPCs, ambient population and deterministic relationship state
+- generated directional vehicle sprites, physical parking, ownership, dealership, proximity interaction and authoritative driving
+- 64-slot inventory, canonical item catalog, local item imagery and contextual storage/ground transfer
+- finance accounts, ledger, loans and DoradoX holdings
+- DoradoOS phone with persistent device state and core apps
+- jobs/careers, Police, EMS, Justice/Corrections and Crime/Illegal Economy foundations
+- Real Estate, Businesses/Companies, Hospitality/Supply Chain and Identity/Government foundations
+- development Core/Admin registry and server-authoritative testing controls
 
-The current `main` baseline includes:
+## Repository hygiene
 
-- canonical SOL DORADO desktop/mobile shell and HUD
-- Redis-backed development session and presence
-- PostgreSQL-backed character identity, vitals, cash and location
-- 2.5D Las Palmas world/street navigation with server-authoritative movement
-- contextual POI actions, legal work, petty crime, salvage and persistent consequences
-- PostgreSQL-backed physical inventory containers and item instances
-- 200-item catalog with local item imagery
-- 64-slot / 20 kg player inventory modal over the world, with drag/drop, split, ground transfer and consumable actions
-- PostgreSQL-backed finance accounts, loans, holdings and unified transaction ledger
-- DoradoOS phone foundation with persisted device state, messages, contacts, notifications, tasks and notes
-- vehicle ownership, dealership, physical vehicle location, proximity interaction, map integration and authoritative driving
-- idempotent action requests and persistent action log
-- bootstrap endpoint returning one authoritative player snapshot
-
-Character rendering/creator refinement is still an active isolated workstream and must be integrated only after it is synchronized with the current `main` baseline.
+- Runtime assets must have a live code reference or a clear provenance/documentation purpose.
+- Experimental assets and superseded implementations should not remain in the active tree after a production replacement lands.
+- Stale PRs must be closed rather than left as accidental merge candidates.
+- Historical prototypes belong in Git history, not beside production runtime code.
+- New versioned CSS/files should replace or consolidate older versions instead of accumulating indefinitely when behavior is equivalent.
