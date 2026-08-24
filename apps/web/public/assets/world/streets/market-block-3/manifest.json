@@ -14,9 +14,9 @@
       "runtimeMirroring": true
     },
     "vehicle": {
-      "file": "van-east.webp",
-      "source": "crop derived from user-provided Van.png",
-      "runtimeMirroring": true
+      "spriteFamily": "/assets/vehicles/generated",
+      "source": "user-provided generated multi-angle vehicle sprite sheet",
+      "runtimeDirectionResolver": true
     }
   },
   "foreground": {

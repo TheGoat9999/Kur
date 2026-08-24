@@ -1,29 +1,10 @@
 import type { CSSProperties } from 'react';
+import { GeneratedVehicleSprite, type GeneratedVehicleDirection } from './GeneratedVehicleSprite';
 
 export type WorldVehicleType = 'sedan' | 'hatchback' | 'coupe' | 'suv' | 'pickup' | 'van' | 'truck';
-export type WorldVehicleHeading = 'east' | 'west';
+export type WorldVehicleHeading = GeneratedVehicleDirection;
 export type WorldVehicleService = 'civilian' | 'taxi' | 'police' | 'ems' | 'delivery';
-export type WorldVehicleAsset =
-  | 'normal-car-1'
-  | 'normal-car-2'
-  | 'sports-car-1'
-  | 'sports-car-2'
-  | 'suv'
-  | 'taxi'
-  | 'police';
-
-const VEHICLE_ASSET_BASE = '/assets/vehicles/fbx-derived';
-const VEHICLE_ASSET_VERSION = '20260822-fbx-raster-1';
-const vehicleAssetUrl = (name: WorldVehicleAsset) => `${VEHICLE_ASSET_BASE}/${name}.webp?v=${VEHICLE_ASSET_VERSION}`;
-const VEHICLE_ASSETS: Record<WorldVehicleAsset, string> = {
-  'normal-car-1': vehicleAssetUrl('normal-car-1'),
-  'normal-car-2': vehicleAssetUrl('normal-car-2'),
-  'sports-car-1': vehicleAssetUrl('sports-car-1'),
-  'sports-car-2': vehicleAssetUrl('sports-car-2'),
-  suv: vehicleAssetUrl('suv'),
-  taxi: vehicleAssetUrl('taxi'),
-  police: vehicleAssetUrl('police')
-};
+export type WorldVehicleAsset = 'generated-coupe';
 
 export function WorldVehicle({
   type,
@@ -31,7 +12,7 @@ export function WorldVehicle({
   heading = 'east',
   service = 'civilian',
   serviceLabel,
-  assetSeed = '',
+  assetSeed: _assetSeed = '',
   className = ''
 }: {
   type: WorldVehicleType;
@@ -42,38 +23,23 @@ export function WorldVehicle({
   assetSeed?: string;
   className?: string;
 }) {
-  const asset = selectVehicleAsset(type, service, assetSeed);
   const style = {
     '--vehicle-owner-accent': color
   } as CSSProperties;
 
   return (
     <span
-      className={`world-vehicle world-vehicle-sprite world-vehicle-${type} world-vehicle-${heading} world-vehicle-service-${service} world-vehicle-asset-${asset} ${className}`.trim()}
+      className={`world-vehicle world-vehicle-sprite world-vehicle-${type} world-vehicle-${heading} world-vehicle-service-${service} world-vehicle-asset-generated-coupe ${className}`.trim()}
       style={style}
-      data-vehicle-asset={asset}
-      data-vehicle-render="fbx-raster-v2"
+      data-vehicle-asset="generated-coupe"
+      data-vehicle-render="generated-sprite-v1"
       aria-hidden="true"
     >
-      <img className="world-vehicle-sprite-image" src={VEHICLE_ASSETS[asset]} alt="" draggable={false} decoding="async" />
+      <GeneratedVehicleSprite direction={heading} className="world-vehicle-generated-image" eager />
       {service === 'ems' && <span className="world-vehicle-roof-badge world-vehicle-roof-badge-ems">+</span>}
       {serviceLabel && service !== 'taxi' && service !== 'police' && (
         <span className="world-vehicle-service-label">{serviceLabel}</span>
       )}
     </span>
   );
-}
-
-function selectVehicleAsset(type: WorldVehicleType, service: WorldVehicleService, seed: string): WorldVehicleAsset {
-  if (service === 'taxi') return 'taxi';
-  if (service === 'police') return 'police';
-  if (type === 'suv' || type === 'pickup' || type === 'van' || type === 'truck') return 'suv';
-  if (type === 'coupe') return hashParity(seed) ? 'sports-car-1' : 'sports-car-2';
-  return hashParity(seed) ? 'normal-car-1' : 'normal-car-2';
-}
-
-function hashParity(seed: string) {
-  let hash = 0;
-  for (let index = 0; index < seed.length; index += 1) hash = (hash * 31 + seed.charCodeAt(index)) | 0;
-  return Math.abs(hash) % 2 === 0;
 }

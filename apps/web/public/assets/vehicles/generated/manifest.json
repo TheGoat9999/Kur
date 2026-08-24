@@ -1,0 +1,21 @@
+{
+  "id": "generated-coupe-v1",
+  "source": "user-provided generated multi-angle vehicle sprite sheet",
+  "processedAt": "2026-08-24",
+  "format": "webp",
+  "canvas": { "width": 256, "height": 256 },
+  "canonicalFrames": {
+    "north": "car-north.webp",
+    "north-east": "car-northeast.webp",
+    "east": "car-east.webp",
+    "south-east": "car-southeast.webp",
+    "south": "car-south.webp"
+  },
+  "mirroredDirections": {
+    "north-west": "north-east",
+    "west": "east",
+    "south-west": "south-east"
+  },
+  "rendering": "GeneratedVehicleSprite directional resolver",
+  "gameplayModel": "visual family is independent from vehicle gameplay type and service"
+}
