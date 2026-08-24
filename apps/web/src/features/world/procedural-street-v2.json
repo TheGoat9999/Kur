@@ -48,16 +48,6 @@
         ]
       },
       {
-        "id": "cortez_diagonal",
-        "class": "collector",
-        "width": 78,
-        "centerline": [[-70,710], [318,554], [565,430], [637,397]],
-        "markings": [
-          { "kind": "dash-white", "from": [-30,694], "to": [300,561] },
-          { "kind": "dash-white", "from": [338,543], "to": [582,420] }
-        ]
-      },
-      {
         "id": "cypress_diagonal",
         "class": "collector",
         "width": 74,
@@ -77,7 +67,6 @@
     ],
     "intersectionPatches": [
       { "x": 623, "y": 305, "width": 164, "height": 158, "radius": 16 },
-      { "x": 555, "y": 340, "width": 116, "height": 100, "radius": 18 },
       { "x": 748, "y": 330, "width": 112, "height": 100, "radius": 18 }
     ],
     "crosswalks": [
@@ -91,7 +80,7 @@
       { "id": "north_mid", "points": [[300,18],[604,18],[604,244],[300,252]], "tone": "cool" },
       { "id": "north_east", "points": [[817,18],[1190,18],[1190,232],[1002,232],[864,281],[817,270]], "tone": "warm" },
       { "id": "south_west", "points": [[18,504],[286,504],[286,682],[18,682]], "tone": "warm" },
-      { "id": "south_mid", "points": [[352,512],[617,472],[617,682],[332,682]], "tone": "cool" },
+      { "id": "south_mid", "points": [[332,504],[617,474],[617,682],[332,682]], "tone": "cool" },
       { "id": "south_east", "points": [[804,486],[1190,486],[1190,682],[804,682]], "tone": "neutral" }
     ],
     "buildings": [
@@ -120,10 +109,10 @@
       {
         "id": "corner_store",
         "lot": "north_east",
-        "footprint": [[858,50],[1034,36],[1100,112],[1040,190],[862,203],[830,146]],
+        "footprint": [[828,44],[995,44],[995,140],[950,164],[830,174],[812,118]],
         "floors": 2,
         "style": "brick",
-        "frontageEdge": 3,
+        "frontageEdge": 2,
         "storefronts": 4,
         "roofUnits": 2,
         "awning": true
@@ -185,7 +174,7 @@
       { "x": 95, "y": 278, "radius": 15 },
       { "x": 286, "y": 279, "radius": 14 },
       { "x": 360, "y": 278, "radius": 14 },
-      { "x": 835, "y": 276, "radius": 14 },
+      { "x": 816, "y": 244, "radius": 14 },
       { "x": 1165, "y": 262, "radius": 15 },
       { "x": 306, "y": 493, "radius": 15 },
       { "x": 625, "y": 500, "radius": 14 },
@@ -195,7 +184,7 @@
     "props": [
       { "kind": "lamp", "x": 124, "y": 289 },
       { "kind": "lamp", "x": 345, "y": 291 },
-      { "kind": "lamp", "x": 830, "y": 290 },
+      { "kind": "lamp", "x": 808, "y": 255 },
       { "kind": "lamp", "x": 1142, "y": 278 },
       { "kind": "lamp", "x": 274, "y": 482 },
       { "kind": "lamp", "x": 624, "y": 491 },
@@ -205,7 +194,7 @@
       { "kind": "drain", "x": 180, "y": 310 },
       { "kind": "drain", "x": 845, "y": 455 },
       { "kind": "drain", "x": 1145, "y": 453 },
-      { "kind": "dumpster", "x": 1068, "y": 575 }
+      { "kind": "dumpster", "x": 1062, "y": 575 }
     ]
   }
 }
