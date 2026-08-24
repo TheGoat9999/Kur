@@ -1,3 +1,4 @@
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { I18nProvider } from './i18n';
@@ -14,9 +15,11 @@ import './game-chrome-layout.css';
 import './game-chrome-refinements.css';
 
 createRoot(document.getElementById('root')!).render(
-  <I18nProvider>
-    <NotificationProvider>
-      <App />
-    </NotificationProvider>
-  </I18nProvider>
+  <StrictMode>
+    <I18nProvider>
+      <NotificationProvider>
+        <App />
+      </NotificationProvider>
+    </I18nProvider>
+  </StrictMode>
 );
