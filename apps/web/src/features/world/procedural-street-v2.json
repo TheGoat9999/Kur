@@ -1,0 +1,77 @@
+{
+  "version": 3,
+  "canvas": { "width": 1200, "height": 700 },
+  "scene": {
+    "id": "market_block_3_procedural_v3",
+    "seed": 88421,
+    "sun": { "direction": [0.58, 0.82], "shadowStrength": 0.34 },
+    "palette": {
+      "concrete": "#595a55", "concreteLight": "#70716a", "concreteDark": "#41433f",
+      "sidewalk": "#676860", "sidewalkLight": "#7a7970", "sidewalkDark": "#4d504b",
+      "asphalt": "#22282b", "asphaltLight": "#303639", "asphaltDark": "#151a1d", "patch": "#1b2023",
+      "curb": "#8a877e", "curbDark": "#5e5d58", "laneWhite": "#d3d0c4", "laneYellow": "#bfa654",
+      "glass": "#31545c", "glassLight": "#718f93", "metal": "#495154", "shadow": "#071012",
+      "foliage": "#3b6042", "foliageLight": "#66855f", "foliageDark": "#223a29", "soil": "#554a3b", "rust": "#7c4d3f"
+    },
+    "roads": [
+      { "id": "market_boulevard", "class": "arterial", "width": 138, "sidewalk": 24, "lanes": 4, "centerline": [[-80,382],[1280,382]], "markings": [
+        { "kind": "double-yellow", "from": [-40,382], "to": [620,382] }, { "kind": "double-yellow", "from": [790,382], "to": [1240,382] },
+        { "kind": "dash-white", "from": [-30,347], "to": [610,347] }, { "kind": "dash-white", "from": [-30,417], "to": [610,417] },
+        { "kind": "dash-white", "from": [798,347], "to": [1240,347] }, { "kind": "dash-white", "from": [798,417], "to": [1240,417] }
+      ]},
+      { "id": "dorado_avenue", "class": "avenue", "width": 106, "sidewalk": 22, "lanes": 2, "centerline": [[704,-80],[704,780]], "markings": [
+        { "kind": "dash-white", "from": [704,-30], "to": [704,295] }, { "kind": "dash-white", "from": [704,470], "to": [704,750] }
+      ]},
+      { "id": "cortez_diagonal", "class": "collector", "width": 76, "sidewalk": 18, "lanes": 2, "centerline": [[-60,720],[280,585],[520,458],[635,398]], "markings": [
+        { "kind": "dash-white", "from": [-15,700], "to": [250,595] }, { "kind": "dash-white", "from": [300,575], "to": [560,438] }
+      ]},
+      { "id": "cypress_diagonal", "class": "collector", "width": 72, "sidewalk": 18, "lanes": 2, "centerline": [[1260,78],[1060,171],[900,278],[776,364]], "markings": [
+        { "kind": "dash-white", "from": [1230,92], "to": [1075,164] }, { "kind": "dash-white", "from": [1040,184], "to": [915,267] }
+      ]},
+      { "id": "mira_service", "class": "local", "width": 52, "sidewalk": 14, "lanes": 1, "centerline": [[1090,468],[1090,760]], "markings": [] }
+    ],
+    "junctionHints": [[704,382],[635,398],[776,364],[1090,468]],
+    "crosswalks": [
+      { "center": [648,318], "length": 72, "span": 22, "angle": 0, "stripes": 7 },
+      { "center": [758,447], "length": 72, "span": 22, "angle": 0, "stripes": 7 },
+      { "center": [637,382], "length": 58, "span": 22, "angle": 90, "stripes": 6 },
+      { "center": [772,382], "length": 58, "span": 22, "angle": 90, "stripes": 6 }
+    ],
+    "lots": [
+      { "id": "nw_corner", "points": [[18,18],[276,18],[276,260],[18,260]], "tone": "warm" },
+      { "id": "north_mid", "points": [[300,18],[610,18],[610,252],[300,260]], "tone": "cool" },
+      { "id": "north_east", "points": [[810,18],[1190,18],[1190,236],[1004,236],[866,288],[810,270]], "tone": "warm" },
+      { "id": "south_west", "points": [[18,492],[240,492],[240,682],[18,682]], "tone": "warm" },
+      { "id": "south_mid", "points": [[438,492],[632,462],[632,682],[438,682]], "tone": "cool" },
+      { "id": "south_east", "points": [[788,488],[1190,488],[1190,682],[788,682]], "tone": "neutral" }
+    ],
+    "buildings": [
+      { "id": "el_camino", "lot": "nw_corner", "footprint": [[52,72],[246,72],[246,214],[52,214]], "floors": 3, "style": "terracotta", "frontageEdge": 2, "storefronts": 3, "roofUnits": 3, "awning": true, "windowColumns": 5, "balconyEvery": 0, "fireEscape": false, "roofType": "flat" },
+      { "id": "cypress_apartments", "lot": "north_mid", "footprint": [[325,76],[565,76],[565,202],[330,220]], "floors": 5, "style": "concrete", "frontageEdge": 2, "storefronts": 2, "roofUnits": 4, "awning": false, "windowColumns": 7, "balconyEvery": 3, "fireEscape": true, "roofType": "flat" },
+      { "id": "corner_store", "lot": "north_east", "footprint": [[840,64],[1008,64],[1032,104],[980,164],[848,178],[818,118]], "floors": 2, "style": "brick", "frontageEdge": 2, "storefronts": 4, "roofUnits": 2, "awning": true, "windowColumns": 4, "balconyEvery": 0, "fireEscape": false, "roofType": "flat" },
+      { "id": "lavanderia", "lot": "south_west", "footprint": [[32,505],[165,505],[165,554],[32,554]], "floors": 2, "style": "stucco", "frontageEdge": 2, "storefronts": 3, "roofUnits": 2, "awning": true, "windowColumns": 4, "balconyEvery": 0, "fireEscape": false, "roofType": "flat" },
+      { "id": "dorado_offices", "lot": "south_mid", "footprint": [[486,536],[610,518],[620,672],[474,672]], "floors": 4, "style": "concrete", "frontageEdge": 0, "storefronts": 0, "roofUnits": 4, "awning": false, "windowColumns": 5, "balconyEvery": 0, "fireEscape": false, "roofType": "mechanical" },
+      { "id": "palmas_market", "lot": "south_east", "footprint": [[900,542],[1000,530],[1000,672],[892,672]], "floors": 2, "style": "terracotta", "frontageEdge": 0, "storefronts": 2, "roofUnits": 2, "awning": true, "windowColumns": 3, "balconyEvery": 0, "fireEscape": false, "roofType": "flat" },
+      { "id": "service_block", "lot": "south_east", "footprint": [[1144,526],[1184,524],[1184,672],[1144,672]], "floors": 3, "style": "industrial", "frontageEdge": 0, "storefronts": 0, "roofUnits": 1, "awning": false, "windowColumns": 2, "balconyEvery": 0, "fireEscape": true, "roofType": "mechanical" }
+    ],
+    "parking": [{ "id": "dorado_lot", "points": [[798,532],[875,526],[882,666],[790,666]], "spaces": 5, "orientation": "vertical" }],
+    "trees": [
+      { "x": 96, "y": 278, "radius": 15, "occludes": false }, { "x": 286, "y": 279, "radius": 14, "occludes": true },
+      { "x": 362, "y": 278, "radius": 14, "occludes": false }, { "x": 818, "y": 248, "radius": 14, "occludes": true },
+      { "x": 1164, "y": 262, "radius": 15, "occludes": false }, { "x": 296, "y": 488, "radius": 15, "occludes": true },
+      { "x": 445, "y": 580, "radius": 14, "occludes": false }, { "x": 922, "y": 492, "radius": 14, "occludes": true },
+      { "x": 1170, "y": 470, "radius": 14, "occludes": false }
+    ],
+    "props": [
+      { "kind": "lamp", "x": 124, "y": 289 }, { "kind": "lamp", "x": 346, "y": 291 }, { "kind": "lamp", "x": 820, "y": 272 }, { "kind": "lamp", "x": 1142, "y": 278 },
+      { "kind": "lamp", "x": 272, "y": 482 }, { "kind": "lamp", "x": 632, "y": 490 }, { "kind": "lamp", "x": 958, "y": 482 },
+      { "kind": "hydrant", "x": 336, "y": 302 }, { "kind": "hydrant", "x": 1008, "y": 478 },
+      { "kind": "drain", "x": 180, "y": 311 }, { "kind": "drain", "x": 840, "y": 455 }, { "kind": "drain", "x": 1142, "y": 454 },
+      { "kind": "dumpster", "x": 1040, "y": 585 }, { "kind": "bench", "x": 208, "y": 286 }, { "kind": "bench", "x": 938, "y": 286 },
+      { "kind": "bollard", "x": 810, "y": 288 }, { "kind": "bollard", "x": 824, "y": 286 }, { "kind": "utility", "x": 1038, "y": 500 },
+      { "kind": "planter", "x": 410, "y": 282 }, { "kind": "planter", "x": 1116, "y": 285 },
+      { "kind": "meter", "x": 252, "y": 300 }, { "kind": "meter", "x": 535, "y": 300 }, { "kind": "meter", "x": 900, "y": 300 },
+      { "kind": "trash", "x": 452, "y": 292 }, { "kind": "trash", "x": 970, "y": 292 }
+    ]
+  }
+}

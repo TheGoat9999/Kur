@@ -14,6 +14,7 @@ import { WorldCharacter, visualFromCharacterRecipe, type WorldCharacterDirection
 import { useI18n } from '../../i18n';
 import { VehicleArtwork } from '../vehicles/VehicleArtwork';
 import { InteractionPanel } from './InteractionPanel';
+import { ProceduralStreetBackdrop } from './ProceduralStreetBackdrop';
 import { StreetBackdrop } from './StreetBackdrop';
 import { StreetObject } from './StreetObject';
 import { StreetPopulation } from './StreetPopulation';
@@ -130,7 +131,9 @@ export function StreetScene({ street, position, moving, activeRoute, characterRe
   return (
     <div className="street-scene-shell">
       <div className={`street-scene street-scene-${scene.theme} ${moving ? 'street-scene-moving' : ''} ${preview?.blocked ? 'street-scene-route-blocked' : ''}`} aria-label={t('world.sceneLabel', { street: t(scene.nameKey) })} onClick={moveFromScene} onPointerMove={updateMovementPreview} onPointerLeave={clearPreview}>
-        <StreetBackdrop theme={scene.theme} alerted={street.flags.cornerStoreAlerted} />
+        {street.currentSegmentId === 'market_block_3'
+          ? <ProceduralStreetBackdrop alerted={street.flags.cornerStoreAlerted} />
+          : <StreetBackdrop theme={scene.theme} alerted={street.flags.cornerStoreAlerted} />}
         <StreetPopulation
           segmentId={street.currentSegmentId}
           visibleObjectIds={street.visibleObjectIds}
@@ -220,23 +223,21 @@ function directionForRoute(position: StreetPosition, route: StreetPosition[] | n
   if (!next) return 'south';
   const dx = next.x - position.x;
   const dy = next.y - position.y;
-  if (Math.abs(dx) >= Math.abs(dy)) return dx >= 0 ? 'east' : 'west';
-  return dy >= 0 ? 'south' : 'north';
+  if (Math.abs(dx) > Math.abs(dy)) return dx > 0 ? 'east' : 'west';
+  return dy > 0 ? 'south' : 'north';
 }
 
 function clamp(value: number, min: number, max: number) { return Math.max(min, Math.min(max, value)); }
 
 const enVehicleCopy = {
-  active: 'ACTIVE VEHICLE', ownedVehicle: 'OWNED VEHICLE', fuel: 'Fuel', condition: 'Condition', security: 'Security',
-  locked: 'Locked', unlocked: 'Unlocked', makeActive: 'Make active', enter: 'Enter', exit: 'Exit', lock: 'Lock', unlock: 'Unlock',
-  withinReach: 'Within reach', approach: 'Approach to interact', inRangeTitle: 'You are beside the car', inRangeDetail: 'Vehicle controls are available.',
-  tooFarTitle: 'Car found on this street', tooFarDetail: 'Walk up to the parked vehicle before using its controls.', approachVehicle: 'Approach vehicle', approaching: 'Approaching…',
-  driveHint: 'You are inside. Open the map and choose a destination to drive.', approachHint: 'Move next to the car first.', unlockHint: 'Unlock the car before entering.', enterHint: 'Enter the vehicle to enable driving from the map.'
+  ownedVehicle: 'OWNED VEHICLE', active: 'ACTIVE VEHICLE', locked: 'Locked', unlocked: 'Unlocked', withinReach: 'Within reach', approach: 'Approach',
+  inRangeTitle: 'Vehicle within reach', inRangeDetail: 'You can interact with this vehicle.', tooFarTitle: 'Vehicle is too far away', tooFarDetail: 'Approach the vehicle before using it.',
+  fuel: 'Fuel', condition: 'Condition', security: 'Security', makeActive: 'Make active', exit: 'Exit vehicle', enter: 'Enter vehicle', unlock: 'Unlock', lock: 'Lock',
+  approachVehicle: 'Approach vehicle', approaching: 'Approaching…', driveHint: 'You are inside this vehicle.', approachHint: 'Move closer to interact.', unlockHint: 'Unlock the vehicle before entering.', enterHint: 'Vehicle is ready to enter.'
 };
 const bgVehicleCopy: typeof enVehicleCopy = {
-  active: 'АКТИВЕН АВТОМОБИЛ', ownedVehicle: 'ТВОЙ АВТОМОБИЛ', fuel: 'Гориво', condition: 'Състояние', security: 'Сигурност',
-  locked: 'Заключена', unlocked: 'Отключена', makeActive: 'Направи активна', enter: 'Влез', exit: 'Излез', lock: 'Заключи', unlock: 'Отключи',
-  withinReach: 'До теб', approach: 'Приближи се за взаимодействие', inRangeTitle: 'Вече си до колата', inRangeDetail: 'Контролите на автомобила са достъпни.',
-  tooFarTitle: 'Колата е намерена на тази улица', tooFarDetail: 'Приближи се физически до паркирания автомобил, преди да използваш контролите.', approachVehicle: 'Приближи се до колата', approaching: 'Приближаване…',
-  driveHint: 'Вътре си. Отвори картата и избери дестинация, до която да караш.', approachHint: 'Първо се приближи до автомобила.', unlockHint: 'Отключи колата, преди да влезеш.', enterHint: 'Влез в автомобила, за да активираш пътуването с кола от картата.'
+  ownedVehicle: 'СОБСТВЕН АВТОМОБИЛ', active: 'АКТИВЕН АВТОМОБИЛ', locked: 'Заключен', unlocked: 'Отключен', withinReach: 'В обсег', approach: 'Приближи се',
+  inRangeTitle: 'Автомобилът е в обсег', inRangeDetail: 'Можеш да взаимодействаш с автомобила.', tooFarTitle: 'Автомобилът е твърде далеч', tooFarDetail: 'Приближи се до автомобила, за да го използваш.',
+  fuel: 'Гориво', condition: 'Състояние', security: 'Заключване', makeActive: 'Направи активен', exit: 'Излез', enter: 'Влез', unlock: 'Отключи', lock: 'Заключи',
+  approachVehicle: 'Приближи се', approaching: 'Приближаваш…', driveHint: 'В момента си в този автомобил.', approachHint: 'Приближи се, за да взаимодействаш.', unlockHint: 'Отключи автомобила, преди да влезеш.', enterHint: 'Автомобилът е готов за използване.'
 };
